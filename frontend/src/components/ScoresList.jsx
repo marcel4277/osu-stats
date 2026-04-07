@@ -39,7 +39,7 @@ export default function ScoresList({ scores, username }) {
       setSortDir(d => d === 'desc' ? 'asc' : 'desc');
     } else {
       setSortKey(key);
-      setSortDir('desc');
+      setSortDir('asc');
     }
   };
 
