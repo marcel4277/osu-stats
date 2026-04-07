@@ -22,6 +22,27 @@ function sortScores(scores, key, direction) {
   });
 }
 
+// Smooth HSL color based on accuracy: red (low) → orange → yellow → green → pink (100%)
+function accuracyColor(accuracy) {
+  const acc = parseFloat(accuracy);
+  if (acc >= 100) return '#f472b6'; // pink
+  if (acc >= 99)  return '#4ade80'; // green
+  if (acc >= 97)  return '#86efac'; // light green
+  if (acc >= 95)  return '#facc15'; // yellow
+  if (acc >= 90)  return '#fb923c'; // orange
+  return '#f87171';                 // red
+}
+
+const DAY = 86400000;
+function dateStyle(dateStr) {
+  const age = Date.now() - new Date(dateStr).getTime();
+  if (age <= 7   * DAY) return { color: '#4ade80', title: 'Within the last 7 days'  };
+  if (age <= 30  * DAY) return { color: '#22d3ee', title: 'Within the last 30 days' };
+  if (age <= 90  * DAY) return { color: '#facc15', title: 'Within the last 90 days' };
+  if (age <= 365 * DAY) return { color: '#9ca3af', title: null };
+  return                       { color: '#4b5563', title: 'Over a year ago'          };
+}
+
 export default function ScoresList({ scores, username }) {
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState('desc');
@@ -75,52 +96,60 @@ export default function ScoresList({ scores, username }) {
             </tr>
           </thead>
           <tbody>
-            {sorted.map((score, index) => (
-              <tr
-                key={score.id}
-                className="border-b border-gray-700 transition hover:bg-gray-700 cursor-pointer"
-                onClick={() => handleRowClick(score.id)}
-                title="View score on osu!"
-              >
-                <td className="px-4 py-3 text-gray-400">{index + 1}</td>
-                <td className="px-4 py-3">
-                  <div>
-                    <p className="text-white font-semibold">{score.title}</p>
-                    <p className="text-sm text-gray-400">{score.artist}</p>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <span className="bg-osu-purple bg-opacity-20 text-osu-pink px-3 py-1 rounded text-sm font-semibold">
-                    {score.accuracy}%
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-center text-white font-semibold">
-                  {score.score === 0
-                    ? <span className="relative group inline-block bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-40 px-2 py-0.5 rounded text-xs font-semibold tracking-wide cursor-default">
-                        lazer
-                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20 pointer-events-none">
-                          <span className="block bg-gray-900 border border-gray-600 text-gray-300 text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl">
-                            osu! Lazer uses a different scoring system — legacy score not available
+            {sorted.map((score, index) => {
+              const ds = dateStyle(score.date);
+              return (
+                <tr
+                  key={score.id}
+                  className="border-b border-gray-700 transition hover:bg-gray-700 cursor-pointer"
+                  onClick={() => handleRowClick(score.id)}
+                  title="View score on osu!"
+                >
+                  <td className="px-4 py-3 text-gray-400">{index + 1}</td>
+                  <td className="px-4 py-3">
+                    <div>
+                      <p className="text-white font-semibold">{score.title}</p>
+                      <p className="text-sm text-gray-400">{score.artist}</p>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span
+                      className="px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
+                      style={{ color: accuracyColor(score.accuracy) }}
+                    >
+                      {score.accuracy}%
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center text-white font-semibold">
+                    {score.score === 0
+                      ? <span className="relative group inline-block bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-40 px-2 py-0.5 rounded text-xs font-semibold tracking-wide cursor-default">
+                          lazer
+                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20 pointer-events-none">
+                            <span className="block bg-gray-900 border border-gray-600 text-gray-300 text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl">
+                              osu! Lazer uses a different scoring system — legacy score not available
+                            </span>
                           </span>
                         </span>
-                      </span>
-                    : score.score.toLocaleString()
-                  }
-                </td>
-                <td className="px-4 py-3 text-center text-gray-400">
-                  {score.combo}x
-                </td>
-                <td className="px-4 py-3 text-center">
-                  {score.pp != null
-                    ? <span className="text-osu-cyan font-semibold">{score.pp.toLocaleString()}<span className="text-gray-500 text-xs font-normal">pp</span></span>
-                    : <span className="text-gray-600">—</span>
-                  }
-                </td>
-                <td className="px-4 py-3 text-center text-gray-400 text-sm">
-                  {new Date(score.date).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
+                      : score.score.toLocaleString()
+                    }
+                  </td>
+                  <td className="px-4 py-3 text-center text-gray-400">
+                    {score.combo}x
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {score.pp != null
+                      ? <span className="text-osu-cyan font-semibold">{score.pp.toLocaleString()}<span className="text-gray-500 text-xs font-normal">pp</span></span>
+                      : <span className="text-gray-600">—</span>
+                    }
+                  </td>
+                  <td className="px-4 py-3 text-center text-sm" title={ds.title ?? undefined}>
+                    <span style={{ color: ds.color }}>
+                      {new Date(score.date).toLocaleDateString()}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
