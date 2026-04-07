@@ -33,15 +33,6 @@ function accuracyColor(accuracy) {
   return '#f87171';                 // red
 }
 
-const DAY = 86400000;
-function dateStyle(dateStr) {
-  const age = Date.now() - new Date(dateStr).getTime();
-  if (age <= 7   * DAY) return { color: '#4ade80', title: 'Within the last 7 days'  };
-  if (age <= 30  * DAY) return { color: '#22d3ee', title: 'Within the last 30 days' };
-  if (age <= 90  * DAY) return { color: '#facc15', title: 'Within the last 90 days' };
-  if (age <= 365 * DAY) return { color: '#9ca3af', title: null };
-  return                       { color: '#4b5563', title: 'Over a year ago'          };
-}
 
 export default function ScoresList({ scores, username }) {
   const [sortKey, setSortKey] = useState(null);
@@ -96,9 +87,7 @@ export default function ScoresList({ scores, username }) {
             </tr>
           </thead>
           <tbody>
-            {sorted.map((score, index) => {
-              const ds = dateStyle(score.date);
-              return (
+            {sorted.map((score, index) => (
                 <tr
                   key={score.id}
                   className="border-b border-gray-700 transition hover:bg-gray-700 cursor-pointer"
@@ -142,14 +131,11 @@ export default function ScoresList({ scores, username }) {
                       : <span className="text-gray-600">—</span>
                     }
                   </td>
-                  <td className="px-4 py-3 text-center text-sm" title={ds.title ?? undefined}>
-                    <span style={{ color: ds.color }}>
-                      {new Date(score.date).toLocaleDateString()}
-                    </span>
+                  <td className="px-4 py-3 text-center text-sm text-gray-400">
+                    {new Date(score.date).toLocaleDateString()}
                   </td>
                 </tr>
-              );
-            })}
+            ))}
           </tbody>
         </table>
       </div>
