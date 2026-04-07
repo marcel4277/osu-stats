@@ -96,7 +96,14 @@ export default function ScoresList({ scores, username }) {
                 </td>
                 <td className="px-4 py-3 text-center text-white font-semibold">
                   {score.score === 0
-                    ? <span title="osu! Lazer uses a different scoring system — the legacy score value is not available" className="bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-40 px-2 py-0.5 rounded text-xs font-semibold tracking-wide cursor-help">lazer</span>
+                    ? <span className="relative group inline-block bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-40 px-2 py-0.5 rounded text-xs font-semibold tracking-wide cursor-default">
+                        lazer
+                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20 pointer-events-none">
+                          <span className="block bg-gray-900 border border-gray-600 text-gray-300 text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl">
+                            osu! Lazer uses a different scoring system — legacy score not available
+                          </span>
+                        </span>
+                      </span>
                     : score.score.toLocaleString()
                   }
                 </td>
