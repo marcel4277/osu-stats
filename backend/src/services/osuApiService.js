@@ -83,6 +83,7 @@ export class OsuApiService {
       pp: score.pp ? Math.round(score.pp) : null,
       accuracy: (score.accuracy * 100).toFixed(2),
       score: score.score,
+      is_lazer: score.legacy_score_id == null,
       combo: score.max_combo,
       mods: score.mods || [],
       date: score.created_at,

@@ -95,7 +95,10 @@ export default function ScoresList({ scores, username }) {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center text-white font-semibold">
-                  {score.score.toLocaleString()}
+                  {score.is_lazer
+                    ? <span className="bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-40 px-2 py-0.5 rounded text-xs font-semibold tracking-wide">lazer</span>
+                    : score.score.toLocaleString()
+                  }
                 </td>
                 <td className="px-4 py-3 text-center text-gray-400">
                   {score.combo}x
