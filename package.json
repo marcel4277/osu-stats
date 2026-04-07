@@ -1,0 +1,11 @@
+{
+  "name": "osu-analyzer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\" --names \"backend,frontend\" --prefix-colors \"cyan,magenta\" --prefix name"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}

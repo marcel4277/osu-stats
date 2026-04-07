@@ -1,0 +1,123 @@
+📋 QUICK REFERENCE - osu! Gameplay Analyzer Backend
+====================================================
+
+🚀 QUICK START (Copy-Paste to PowerShell)
+==========================================
+
+1. CREATE .ENV FILE
+   - In VS Code: Create file named ".env" in backend/ folder
+   - Paste this content:
+
+   NODE_ENV=development
+   PORT=5000
+   FRONTEND_URL=http://localhost:5173
+   OSU_API_ID=your_client_id_here
+   OSU_API_SECRET=your_client_secret_here
+   OSU_API_TOKEN=unused_for_server_to_server
+
+   ⚠️  Replace "your_client_id_here" and "your_client_secret_here"
+   Get from: https://osu.ppy.sh/home/account/edit → OAuth Applications
+
+
+2. INSTALL DEPENDENCIES
+   npm install
+
+
+3. START SERVER
+   npm run dev
+
+   Expected:
+   ╔════════════════════════════════════════╗
+   ║  osu! Gameplay Analyzer Backend        ║
+   ║  Running on http://localhost:5000      ║
+   ║  Environment: development              ║
+   ╚════════════════════════════════════════╝
+
+
+🔍 TEST ENDPOINTS (Copy-Paste to PowerShell)
+==================================================
+
+Health Check:
+curl http://localhost:5000/health
+
+Get User Profile:
+curl http://localhost:5000/api/user/fieryrage
+
+Get User Best Scores:
+curl "http://localhost:5000/api/user/fieryrage/scores?type=best&limit=5"
+
+Get User Recent Scores:
+curl "http://localhost:5000/api/user/fieryrage/scores?type=recent&limit=5"
+
+Analyze Replay (Mock):
+$json = @{ username="fieryrage"; score_id=1234567 } | ConvertTo-Json
+curl -Method POST -Uri http://localhost:5000/api/analyze -ContentType "application/json" -Body $json
+
+
+📊 API ENDPOINTS
+=================
+
+GET /health                              → Server status
+GET /api/health                          → API status
+GET /api/user/:username                  → User profile
+GET /api/user/:username/scores           → User scores (best/recent)
+POST /api/analyze                        → Analyze replay
+
+Query Parameters:
+  ?type=best|recent                      → Score type (default: best)
+  ?limit=1-100                           → Number of scores (default: 50)
+
+
+🔐 GETTING osu! API CREDENTIALS
+================================
+
+1. Go to: https://osu.ppy.sh/home/account/edit
+2. Scroll to: "OAuth Applications"
+3. Click: "New OAuth Application"
+4. Fill in:
+   - Application Name: osu-gameplay-analyzer
+   - Application Redirect URIs: http://localhost:5000/callback
+5. Click: "Register"
+6. Copy Client ID and Client Secret
+7. Paste into .env:
+   OSU_API_ID=<Client ID>
+   OSU_API_SECRET=<Client Secret>
+
+
+🚨 TROUBLESHOOTING
+===================
+
+Port 5000 already in use?
+  → Change PORT in .env to 5001 (or any free port)
+
+"Cannot find module 'express'"?
+  → Run: npm install
+
+"User not found" error?
+  → Try these usernames: fieryrage, cookiezi, hvick225, - GN
+
+Cannot connect to osu.ppy.sh?
+  → Check internet connection
+  → Verify OAuth credentials in .env
+  → Restart server after editing .env
+
+
+📂 PROJECT STRUCTURE
+====================
+
+backend/
+├── src/
+│   ├── config/env.js              ← Environment config
+│   ├── routes/api.js              ← API endpoints
+│   ├── services/
+│   │   ├── osuApiService.js       ← ✅ osu API integration
+│   │   ├── replayService.js       ← TODO: Replay download
+│   │   ├── parserService.js       ← TODO: .osr parsing
+│   │   └── analysisService.js     ← TODO: Analysis logic
+│   └── server.js                  ← Express app
+├── .env                           ← ← ← CREATE THIS FILE
+├── package.json
+└── README.md
+
+
+✅ ALL SET! Ready to build the frontend!
