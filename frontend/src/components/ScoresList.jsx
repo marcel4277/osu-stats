@@ -1,4 +1,31 @@
+import { useState } from 'react';
+
+const COLUMNS = [
+  { key: 'accuracy', label: 'Accuracy' },
+  { key: 'score',    label: 'Score'    },
+  { key: 'combo',    label: 'Combo'    },
+  { key: 'pp',       label: 'PP'       },
+  { key: 'date',     label: 'Date'     },
+];
+
+function SortIcon({ direction }) {
+  if (!direction) return <span className="ml-1 text-gray-600">⇅</span>;
+  return <span className="ml-1 text-osu-pink">{direction === 'asc' ? '↑' : '↓'}</span>;
+}
+
+function sortScores(scores, key, direction) {
+  if (!key) return scores;
+  return [...scores].sort((a, b) => {
+    let av = key === 'date' ? new Date(a.date).getTime() : Number(a[key] ?? -Infinity);
+    let bv = key === 'date' ? new Date(b.date).getTime() : Number(b[key] ?? -Infinity);
+    return direction === 'asc' ? av - bv : bv - av;
+  });
+}
+
 export default function ScoresList({ scores, username }) {
+  const [sortKey, setSortKey] = useState(null);
+  const [sortDir, setSortDir] = useState('desc');
+
   if (!scores || scores.length === 0) {
     return (
       <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center text-gray-400">
@@ -6,6 +33,17 @@ export default function ScoresList({ scores, username }) {
       </div>
     );
   }
+
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir(d => d === 'desc' ? 'asc' : 'desc');
+    } else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
+  };
+
+  const sorted = sortScores(scores, sortKey, sortDir);
 
   const handleRowClick = (beatmapset_id) => {
     window.open(`https://osu.ppy.sh/beatmapsets/${beatmapset_id}`, '_blank', 'noopener,noreferrer');
@@ -25,15 +63,19 @@ export default function ScoresList({ scores, username }) {
             <tr className="bg-gray-900 border-b border-gray-700">
               <th className="px-4 py-3 text-left text-gray-400 font-semibold">#</th>
               <th className="px-4 py-3 text-left text-gray-400 font-semibold">Beatmap</th>
-              <th className="px-4 py-3 text-center text-gray-400 font-semibold">Accuracy</th>
-              <th className="px-4 py-3 text-center text-gray-400 font-semibold">Score</th>
-              <th className="px-4 py-3 text-center text-gray-400 font-semibold">Combo</th>
-              <th className="px-4 py-3 text-center text-gray-400 font-semibold">PP</th>
-              <th className="px-4 py-3 text-center text-gray-400 font-semibold">Date</th>
+              {COLUMNS.map(col => (
+                <th
+                  key={col.key}
+                  onClick={() => handleSort(col.key)}
+                  className="px-4 py-3 text-center text-gray-400 font-semibold cursor-pointer select-none hover:text-white transition"
+                >
+                  {col.label}<SortIcon direction={sortKey === col.key ? sortDir : null} />
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {scores.map((score, index) => (
+            {sorted.map((score, index) => (
               <tr
                 key={score.id}
                 className="border-b border-gray-700 transition hover:bg-gray-700 cursor-pointer"
