@@ -22,6 +22,17 @@ function sortScores(scores, key, direction) {
   });
 }
 
+function timeAgo(dateStr) {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60)                    return 'Just now';
+  if (seconds < 3600)                  return `${Math.floor(seconds / 60)} minutes ago`;
+  if (seconds < 86400)                 return `${Math.floor(seconds / 3600)} hours ago`;
+  if (seconds < 86400 * 30)           return `${Math.floor(seconds / 86400)} days ago`;
+  if (seconds < 86400 * 365)          return `${Math.floor(seconds / (86400 * 30))} months ago`;
+  const years = Math.floor(seconds / (86400 * 365));
+  return `${years} year${years > 1 ? 's' : ''} ago`;
+}
+
 // Smooth HSL color based on accuracy: red (low) → orange → yellow → green → pink (100%)
 function accuracyColor(accuracy) {
   const acc = parseFloat(accuracy);
@@ -131,8 +142,13 @@ export default function ScoresList({ scores, username }) {
                       : <span className="text-gray-600">—</span>
                     }
                   </td>
-                  <td className="px-4 py-3 text-center text-sm text-gray-400">
+                  <td className="px-4 py-3 text-center text-sm text-gray-400 relative group cursor-default">
                     {new Date(score.date).toLocaleDateString()}
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20 pointer-events-none">
+                      <span className="block bg-gray-900 border border-gray-600 text-gray-300 text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl">
+                        {timeAgo(score.date)}
+                      </span>
+                    </span>
                   </td>
                 </tr>
             ))}
