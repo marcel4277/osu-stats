@@ -1,7 +1,7 @@
 {
-  "name": "osu-analyzer-backend",
+  "name": "osustats-backend",
   "version": "1.0.0",
-  "description": "Backend API for osu! Gameplay Analyzer",
+  "description": "Backend API for osustats.app",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
@@ -10,8 +10,7 @@
   },
   "keywords": [
     "osu",
-    "replay",
-    "analysis"
+    "stats"
   ],
   "author": "",
   "license": "MIT",
