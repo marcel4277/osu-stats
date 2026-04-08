@@ -68,8 +68,12 @@ export default function ScoresList({ scores, username }) {
 
   const sorted = sortScores(scores, sortKey, sortDir);
 
+  const isLazer = (score) => score.score === 0;
+
   const handleRowClick = (score) => {
-    const id = score.best_id || score.id;
+    if (isLazer(score)) return;
+    const id = score.best_id;
+    if (!id) return;
     const mode = typeof score.mode === 'number'
       ? ['osu', 'taiko', 'fruits', 'mania'][score.mode] ?? 'osu'
       : score.mode || 'osu';
@@ -105,9 +109,9 @@ export default function ScoresList({ scores, username }) {
             {sorted.map((score, index) => (
                 <tr
                   key={score.id}
-                  className="border-b border-gray-700 transition hover:bg-gray-700 cursor-pointer"
+                  className={`border-b border-gray-700 transition ${isLazer(score) ? 'cursor-default' : 'hover:bg-gray-700 cursor-pointer'}`}
                   onClick={() => handleRowClick(score)}
-                  title="View score on osu!"
+                  title={isLazer(score) ? undefined : 'View score on osu!'}
                 >
                   <td className="px-4 py-3 text-gray-400">{index + 1}</td>
                   <td className="px-4 py-3">
