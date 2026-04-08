@@ -43,7 +43,7 @@ export default function UserProfile({ user }) {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-gray-900 rounded p-3">
-            <p className="text-gray-400 text-sm">Global Rank</p>
+            <p className="text-gray-400 text-sm">Global Rank <span className="text-gray-600 text-xs font-normal">90d</span></p>
             <p className="text-osu-cyan text-xl font-bold flex items-center">
               #{user.stats.global_rank ? user.stats.global_rank.toLocaleString() : 'N/A'}
               <RankDelta history={user.rank_history} currentRank={user.stats.global_rank} />
