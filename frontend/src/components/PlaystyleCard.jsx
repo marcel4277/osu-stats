@@ -12,155 +12,247 @@ function Icon({ children, className = '' }) {
   );
 }
 
-const ICONS = {
-  hdhrPurist:      <Icon><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></Icon>,
-  precisionReader: <Icon><circle cx="12" cy="12" r="5"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></Icon>,
-  aimPlayer:       <Icon><path d="M5 19L19 5M19 5H9M19 5v10"/></Icon>,
-  speedDemon:      <Icon><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></Icon>,
-  hybridSpeed:     <Icon><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></Icon>,
-  neatNomod:       <Icon><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></Icon>,
-  techWizard:      <Icon><path d="M12 2l8.66 5v10L12 22l-8.66-5V7z"/></Icon>,
-  consistency:     <Icon><path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41L13.7 2.71a2.41 2.41 0 0 0-3.41 0z"/></Icon>,
-  allrounder:      <Icon><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></Icon>,
+// One icon per mod family, shared across tiers
+const FAMILY_ICONS = {
+  nm:         <Icon><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></Icon>,
+  hr:         <Icon><circle cx="12" cy="12" r="5"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></Icon>,
+  dt:         <Icon><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></Icon>,
+  hd:         <Icon><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"/></Icon>,
+  gimmick:    <Icon><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></Icon>,
+  allrounder: <Icon><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></Icon>,
 };
+
+function archetypeIcon(key) {
+  if (key.startsWith('nm'))   return FAMILY_ICONS.nm;
+  if (key.startsWith('hr'))   return FAMILY_ICONS.hr;
+  if (key.startsWith('dt'))   return FAMILY_ICONS.dt;
+  if (key.startsWith('hd'))   return FAMILY_ICONS.hd;
+  if (key === 'gimmick')      return FAMILY_ICONS.gimmick;
+  return FAMILY_ICONS.allrounder;
+}
 
 // ─── Archetypes ───────────────────────────────────────────────────────────────
 
 const ARCHETYPES = {
-  hdhrPurist: {
-    label: 'HDHR Purist',
-    desc: 'Almost exclusively plays HD+HR. Extreme reading skill and precision.',
-    criteria: 'HD on 55%+ of scores AND HDHR on 40%+ of scores',
-    from: 'from-rose-700', to: 'to-pink-400',
-    text: 'text-rose-300', border: 'border-rose-500',
+  // NM family
+  nmPlayer: {
+    label: 'NM Player',
+    desc: 'Prefers to play clean, without mods. Comfortable across a wide range of maps.',
+    criteria: 'NM on 70%+ of scores',
+    from: 'from-sky-700', to: 'to-cyan-500',
+    text: 'text-cyan-300', border: 'border-cyan-600',
   },
-  precisionReader: {
-    label: 'Precision Reader',
-    desc: 'High-accuracy HR player. Reads hard approach rates without losing accuracy.',
-    criteria: 'HR on 45%+ of scores AND avg accuracy ≥ 98%',
-    from: 'from-rose-600', to: 'to-fuchsia-400',
-    text: 'text-fuchsia-300', border: 'border-fuchsia-500',
-  },
-  aimPlayer: {
-    label: 'Aim Player',
-    desc: 'Jump-heavy maps and HR reading. Values cursor control above all.',
-    criteria: 'HR on 25%+ of scores',
-    from: 'from-pink-600', to: 'to-purple-400',
-    text: 'text-pink-300', border: 'border-pink-500',
-  },
-  speedDemon: {
-    label: 'Speed Demon',
-    desc: 'Double Time is the default. Lives for fast maps and high BPM.',
-    criteria: 'DT on 55%+ of scores',
-    from: 'from-yellow-500', to: 'to-orange-400',
-    text: 'text-yellow-200', border: 'border-yellow-500',
-  },
-  hybridSpeed: {
-    label: 'Hybrid Speedaimer',
-    desc: 'Splits time between DT speed runs and clean NM aim maps. Versatile.',
-    criteria: 'DT on 20%+ of scores AND NM on 35%+ of scores',
-    from: 'from-orange-500', to: 'to-yellow-300',
-    text: 'text-orange-200', border: 'border-orange-400',
-  },
-  neatNomod: {
-    label: 'Nomod Specialist',
-    desc: 'Plays raw, no crutch mods. High accuracy on NM maps. Technically clean.',
-    criteria: 'NM on 75%+ of scores AND avg accuracy ≥ 97%',
+  nmSpecialist: {
+    label: 'NM Specialist',
+    desc: 'Almost exclusively plays nomod. A dedicated raw player with a strong preference for clean maps.',
+    criteria: 'NM on 90%+ of scores',
     from: 'from-sky-600', to: 'to-cyan-400',
-    text: 'text-sky-200', border: 'border-sky-400',
+    text: 'text-cyan-200', border: 'border-cyan-500',
   },
-  techWizard: {
-    label: 'Tech Wizard',
-    desc: 'Complex patterns and awkward rhythms. Accuracy suffers, skill compensates.',
-    criteria: 'NM on 65%+ of scores AND avg accuracy < 97%',
-    from: 'from-blue-700', to: 'to-indigo-400',
-    text: 'text-blue-200', border: 'border-blue-500',
+  nmParagon: {
+    label: 'NM Paragon',
+    desc: 'Plays almost entirely nomod and does it with exceptional accuracy. The gold standard of clean play.',
+    criteria: 'NM on 90%+ of scores AND avg accuracy ≥ 99%',
+    from: 'from-cyan-500', to: 'to-teal-300',
+    text: 'text-teal-100', border: 'border-teal-400',
   },
-  consistency: {
-    label: 'Consistency King',
-    desc: 'Relentlessly high accuracy across a mixed mod pool.',
-    criteria: 'Avg accuracy ≥ 98% (mixed mod pool)',
-    from: 'from-emerald-600', to: 'to-teal-400',
-    text: 'text-emerald-200', border: 'border-emerald-500',
+
+  // HR family
+  hrPlayer: {
+    label: 'HR Player',
+    desc: 'Hard Rock is a regular part of the mod pool. Comfortable reading tighter approach rates.',
+    criteria: 'HR on 40%+ of scores',
+    from: 'from-rose-800', to: 'to-red-500',
+    text: 'text-rose-300', border: 'border-rose-600',
   },
+  hrSpecialist: {
+    label: 'HR Specialist',
+    desc: 'Hard Rock is the go-to mod. Consistently challenges high approach rates across their top plays.',
+    criteria: 'HR on 60%+ of scores',
+    from: 'from-rose-700', to: 'to-pink-500',
+    text: 'text-rose-200', border: 'border-rose-500',
+  },
+  hrParagon: {
+    label: 'HR Paragon',
+    desc: 'Plays HR at a high rate and maintains elite accuracy doing it. Reading and precision at their peak.',
+    criteria: 'HR on 60%+ of scores AND avg accuracy ≥ 97%',
+    from: 'from-rose-600', to: 'to-fuchsia-400',
+    text: 'text-fuchsia-100', border: 'border-fuchsia-500',
+  },
+
+  // DT family
+  dtPlayer: {
+    label: 'DT Player',
+    desc: 'Double Time features heavily in their top plays. Comfortable at elevated BPM.',
+    criteria: 'DT on 50%+ of scores',
+    from: 'from-yellow-700', to: 'to-orange-500',
+    text: 'text-yellow-200', border: 'border-yellow-600',
+  },
+  dtSpecialist: {
+    label: 'DT Specialist',
+    desc: 'Speed is the main focus. The majority of top plays are set under Double Time.',
+    criteria: 'DT on 70%+ of scores',
+    from: 'from-yellow-600', to: 'to-amber-400',
+    text: 'text-yellow-100', border: 'border-amber-500',
+  },
+  dtParagon: {
+    label: 'DT Paragon',
+    desc: 'Plays DT at high volume and keeps accuracy in check. Speed and precision combined.',
+    criteria: 'DT on 70%+ of scores AND avg accuracy ≥ 97%',
+    from: 'from-amber-500', to: 'to-yellow-300',
+    text: 'text-amber-100', border: 'border-yellow-400',
+  },
+
+  // HD family
+  hdPlayer: {
+    label: 'HD Player',
+    desc: 'Hidden is their mod of choice without stacking HR or DT. A reading-focused playstyle.',
+    criteria: 'Pure HD on 50%+ of scores',
+    from: 'from-indigo-800', to: 'to-purple-500',
+    text: 'text-indigo-200', border: 'border-indigo-600',
+  },
+  hdSpecialist: {
+    label: 'HD Specialist',
+    desc: 'Almost all top plays are under Hidden. Reads approach circles purely from memory and flow.',
+    criteria: 'Pure HD on 70%+ of scores',
+    from: 'from-indigo-700', to: 'to-violet-400',
+    text: 'text-violet-200', border: 'border-violet-500',
+  },
+  hdParagon: {
+    label: 'HD Paragon',
+    desc: 'Plays Hidden at an elite level with exceptional accuracy. Mastery of reading under pressure.',
+    criteria: 'Pure HD on 70%+ of scores AND avg accuracy ≥ 98%',
+    from: 'from-violet-600', to: 'to-indigo-300',
+    text: 'text-violet-100', border: 'border-violet-400',
+  },
+
+  // Gimmick
+  gimmick: {
+    label: 'Gimmick Player',
+    desc: 'A significant portion of top plays use non-standard mods like EZ, HT, or FL. Unconventional but effective.',
+    criteria: 'EZ / HT / FL or unknown mods on 10%+ of scores',
+    from: 'from-green-700', to: 'to-teal-400',
+    text: 'text-green-200', border: 'border-green-600',
+  },
+
+  // Fallback
   allrounder: {
     label: 'All-Rounder',
-    desc: 'No clear mod preference or dominant skill. Comfortable across styles.',
-    criteria: 'Does not meet any specific archetype threshold',
-    from: 'from-violet-600', to: 'to-cyan-400',
-    text: 'text-violet-200', border: 'border-violet-400',
+    desc: 'No single mod dominates the top plays. Comfortable across multiple playstyles without a clear specialisation.',
+    criteria: 'No single mod exceeds its Player threshold',
+    from: 'from-slate-700', to: 'to-violet-500',
+    text: 'text-slate-200', border: 'border-slate-500',
   },
 };
 
 // ─── Trait badges ─────────────────────────────────────────────────────────────
 
 const TRAITS = {
-  hidden:     { label: 'HD Player',      title: 'Uses Hidden on the majority of plays',         criteria: 'HD on 50%+ of scores',             style: 'bg-slate-700   text-slate-200'   },
-  hrReader:   { label: 'HR Reader',      title: 'Regularly reads Hard Rock approach rates',     criteria: 'HR on 25%+ of scores',             style: 'bg-rose-900    text-rose-300'    },
-  dtLover:    { label: 'DT Enjoyer',     title: 'Frequently uses Double Time',                  criteria: 'DT on 20%+ of scores',             style: 'bg-yellow-900  text-yellow-300'  },
-  purist:     { label: 'Nomod Purist',   title: 'Plays almost exclusively without mods',        criteria: 'NM on 75%+ of scores',             style: 'bg-sky-900     text-sky-300'     },
-  accMachine: { label: 'Acc Machine',    title: 'Maintains unusually high average accuracy',    criteria: 'Avg accuracy > 98.5%',             style: 'bg-emerald-900 text-emerald-300' },
-  modStacker: { label: 'Mod Stacker',    title: 'Frequently combines multiple difficulty mods', criteria: 'HDHR on 30%+ of scores',           style: 'bg-purple-900  text-purple-300'  },
-  bareHands:  { label: 'No Mods At All', title: 'Rarely if ever touches HD, HR, or DT',        criteria: 'Truly no mods on 70%+ of scores',  style: 'bg-gray-700    text-gray-300'    },
+  accMachine:   { label: 'Acc Machine',    title: 'Exceptionally high average accuracy',            criteria: 'Avg accuracy ≥ 99% (non-Paragon)',      style: 'bg-emerald-900 text-emerald-300' },
+  hdStacker:    { label: 'HD Stacker',     title: 'Regularly adds Hidden on top of other mods',     criteria: 'HD on 30%+ of scores (not primary mod)', style: 'bg-indigo-900  text-indigo-300'  },
+  hdhrStacker:  { label: 'HDHR Stacker',   title: 'Frequently combines Hidden and Hard Rock',       criteria: 'HDHR on 20%+ of scores',                style: 'bg-fuchsia-900 text-fuchsia-300' },
+  hddtStacker:  { label: 'HDDT Stacker',   title: 'Frequently combines Hidden and Double Time',     criteria: 'HDDT on 20%+ of scores',                style: 'bg-amber-900   text-amber-300'   },
+  modMixer:     { label: 'Mod Mixer',      title: 'No single mod dominates — plays a varied pool',  criteria: 'No mod above 50% (All-Rounder only)',    style: 'bg-slate-700   text-slate-300'   },
+  gimmickTouch: { label: 'Gimmick Touch',  title: 'Occasionally dips into non-standard mods',      criteria: 'EZ / HT / FL on 5–10% of scores',       style: 'bg-green-900   text-green-300'   },
 };
 
 // ─── Analyse ──────────────────────────────────────────────────────────────────
 
+const GIMMICK_MODS  = new Set(['EZ', 'HT', 'FL']);
+const STANDARD_MODS = new Set(['NF', 'HD', 'HR', 'DT', 'NC', 'SD', 'PF', 'SO', 'TD', 'MR']);
+
 function analyse(scores) {
   const total = scores.length;
-  const hasDT   = s => s.mods.includes('DT') || s.mods.includes('NC');
-  const hasHR   = s => s.mods.includes('HR');
-  const hasHD   = s => s.mods.includes('HD');
-  const hasHDHR = s => hasHD(s) && hasHR(s);
-  const isNomod = s => !hasDT(s) && !hasHR(s);
 
-  const dtCount   = scores.filter(hasDT).length;
-  const hrCount   = scores.filter(hasHR).length;
-  const hdCount   = scores.filter(hasHD).length;
-  const hdhrCount = scores.filter(hasHDHR).length;
-  const nmCount   = scores.filter(isNomod).length;
-  const bareCount = scores.filter(s => s.mods.length === 0).length;
+  const hasDT      = s => s.mods.some(m => m === 'DT' || m === 'NC');
+  const hasHR      = s => s.mods.includes('HR');
+  const hasHD      = s => s.mods.includes('HD');
+  const hasGimmick = s => s.mods.some(m => GIMMICK_MODS.has(m) || (!STANDARD_MODS.has(m) && m !== 'NM' && m !== ''));
 
-  const dtR   = dtCount   / total;
-  const hrR   = hrCount   / total;
-  const hdR   = hdCount   / total;
-  const hdhrR = hdhrCount / total;
-  const nmR   = nmCount   / total;
-  const bareR = bareCount / total;
+  // NM: no HR, DT, HD, or gimmick mods
+  const isNM     = s => !hasDT(s) && !hasHR(s) && !hasHD(s) && !hasGimmick(s);
+  // Pure HD: HD without HR or DT stacked (HDHR counts as HR, HDDT counts as DT)
+  const isPureHD = s => hasHD(s) && !hasHR(s) && !hasDT(s);
+
+  const nmCount      = scores.filter(isNM).length;
+  const hrCount      = scores.filter(hasHR).length;
+  const dtCount      = scores.filter(hasDT).length;
+  const pureHDCount  = scores.filter(isPureHD).length;
+  const allHDCount   = scores.filter(hasHD).length;
+  const hdhrCount    = scores.filter(s => hasHD(s) && hasHR(s)).length;
+  const hddtCount    = scores.filter(s => hasHD(s) && hasDT(s)).length;
+  const gimmickCount = scores.filter(hasGimmick).length;
+
+  const nmR      = nmCount      / total;
+  const hrR      = hrCount      / total;
+  const dtR      = dtCount      / total;
+  const pureHDR  = pureHDCount  / total;
+  const allHDR   = allHDCount   / total;
+  const hdhrR    = hdhrCount    / total;
+  const hddtR    = hddtCount    / total;
+  const gimmickR = gimmickCount / total;
 
   const avgAcc = scores.reduce((sum, s) => sum + parseFloat(s.accuracy), 0) / total;
 
+  // Gimmick archetype takes priority if significant
   let key;
-  if      (hdR  >= 0.55 && hdhrR >= 0.40)  key = 'hdhrPurist';
-  else if (hrR  >= 0.45 && avgAcc >= 98.0) key = 'precisionReader';
-  else if (hrR  >= 0.25)                   key = 'aimPlayer';
-  else if (dtR  >= 0.55)                   key = 'speedDemon';
-  else if (dtR  >= 0.20 && nmR >= 0.35)    key = 'hybridSpeed';
-  else if (nmR  >= 0.75 && avgAcc >= 97.0) key = 'neatNomod';
-  else if (nmR  >= 0.65 && avgAcc < 97.0)  key = 'techWizard';
-  else if (avgAcc >= 98.0)                 key = 'consistency';
-  else                                     key = 'allrounder';
+  if (gimmickR >= 0.10) {
+    key = 'gimmick';
+  } else {
+    // Each mod with its player/specialist thresholds and paragon acc requirement
+    const candidates = [
+      { prefix: 'nm', rate: nmR,     playerT: 0.70, specialistT: 0.90, paragonAcc: 99.0 },
+      { prefix: 'hr', rate: hrR,     playerT: 0.40, specialistT: 0.60, paragonAcc: 97.0 },
+      { prefix: 'dt', rate: dtR,     playerT: 0.50, specialistT: 0.70, paragonAcc: 97.0 },
+      { prefix: 'hd', rate: pureHDR, playerT: 0.50, specialistT: 0.70, paragonAcc: 98.0 },
+    ];
 
+    // Sort by rate descending, pick the dominant mod that meets its Player threshold
+    const sorted = [...candidates].sort((a, b) => b.rate - a.rate);
+    const match  = sorted.find(c => c.rate >= c.playerT);
+
+    if (!match) {
+      key = 'allrounder';
+    } else if (match.rate >= match.specialistT && avgAcc >= match.paragonAcc) {
+      key = `${match.prefix}Paragon`;
+    } else if (match.rate >= match.specialistT) {
+      key = `${match.prefix}Specialist`;
+    } else {
+      key = `${match.prefix}Player`;
+    }
+  }
+
+  // Trait badges
   const traits = [];
-  if (hdR   > 0.50 && key !== 'hdhrPurist')                                                         traits.push('hidden');
-  if (hrR   > 0.25 && !['hdhrPurist','precisionReader','aimPlayer'].includes(key))                  traits.push('hrReader');
-  if (dtR   > 0.20 && !['speedDemon','hybridSpeed'].includes(key))                                  traits.push('dtLover');
-  if (nmR   > 0.75 && !['neatNomod','techWizard'].includes(key))                                    traits.push('purist');
-  if (avgAcc > 98.5 && !['hdhrPurist','precisionReader','consistency'].includes(key))               traits.push('accMachine');
-  if (hdhrR > 0.30 && key !== 'hdhrPurist')                                                         traits.push('modStacker');
-  if (bareR > 0.70 && hdR < 0.15)                                                                   traits.push('bareHands');
+  const isParagon = key.endsWith('Paragon');
+  const isHDarch  = key.startsWith('hd');
+
+  if (avgAcc >= 99.0 && !isParagon)                      traits.push('accMachine');
+  if (allHDR >= 0.30 && !isHDarch)                       traits.push('hdStacker');
+  if (hdhrR  >= 0.20)                                    traits.push('hdhrStacker');
+  if (hddtR  >= 0.20)                                    traits.push('hddtStacker');
+  if (key === 'allrounder' && Math.max(nmR, hrR, dtR, pureHDR) < 0.50) traits.push('modMixer');
+  if (gimmickR >= 0.05 && gimmickR < 0.10)               traits.push('gimmickTouch');
 
   const breakdown = [
-    { mod: 'NM', count: nmCount, color: 'bg-gray-400'   },
-    { mod: 'HR', count: hrCount, color: 'bg-rose-400'   },
-    { mod: 'DT', count: dtCount, color: 'bg-yellow-400' },
-    { mod: 'HD', count: hdCount, color: 'bg-indigo-400' },
+    { mod: 'NM', count: nmCount,    color: 'bg-gray-400'   },
+    { mod: 'HR', count: hrCount,    color: 'bg-rose-400'   },
+    { mod: 'DT', count: dtCount,    color: 'bg-yellow-400' },
+    { mod: 'HD', count: allHDCount, color: 'bg-indigo-400' },
   ].filter(b => b.count > 0);
 
   return { key, traits, breakdown, total, avgAcc };
 }
 
 // ─── Archetypes modal ─────────────────────────────────────────────────────────
+
+const MOD_GROUPS = [
+  { label: 'Nomod',       keys: ['nmPlayer', 'nmSpecialist', 'nmParagon'] },
+  { label: 'Hard Rock',   keys: ['hrPlayer', 'hrSpecialist', 'hrParagon'] },
+  { label: 'Double Time', keys: ['dtPlayer', 'dtSpecialist', 'dtParagon'] },
+  { label: 'Hidden',      keys: ['hdPlayer', 'hdSpecialist', 'hdParagon'] },
+  { label: 'Other',       keys: ['gimmick', 'allrounder'] },
+];
 
 function ArchetypesModal({ onClose }) {
   return (
@@ -178,21 +270,32 @@ function ArchetypesModal({ onClose }) {
         </div>
 
         <div className="p-6 space-y-6">
-          <div>
-            <p className="text-gray-500 text-xs uppercase tracking-widest mb-3">Primary Archetypes</p>
-            <div className="space-y-2">
-              {Object.entries(ARCHETYPES).map(([k, a]) => (
-                <div key={k} className={`flex items-start gap-3 rounded-lg p-3 border ${a.border} bg-gray-800`}>
-                  <div className={`shrink-0 mt-0.5 ${a.text}`}>{ICONS[k]}</div>
-                  <div className="min-w-0">
-                    <p className={`font-semibold text-sm ${a.text}`}>{a.label}</p>
-                    <p className="text-gray-300 text-xs mt-0.5">{a.desc}</p>
-                    <p className="text-gray-500 text-xs mt-1 font-mono">{a.criteria}</p>
-                  </div>
-                </div>
-              ))}
+          <p className="text-gray-400 text-sm">
+            Archetypes are based on your most-played mod across your top scores.
+            The highest tier you qualify for within that mod is shown.
+            Paragon tiers add an accuracy requirement on top.
+          </p>
+
+          {MOD_GROUPS.map(group => (
+            <div key={group.label}>
+              <p className="text-gray-500 text-xs uppercase tracking-widest mb-3">{group.label}</p>
+              <div className="space-y-2">
+                {group.keys.map(k => {
+                  const a = ARCHETYPES[k];
+                  return (
+                    <div key={k} className={`flex items-start gap-3 rounded-lg p-3 border ${a.border} bg-gray-800`}>
+                      <div className={`shrink-0 mt-0.5 ${a.text}`}>{archetypeIcon(k)}</div>
+                      <div className="min-w-0">
+                        <p className={`font-semibold text-sm ${a.text}`}>{a.label}</p>
+                        <p className="text-gray-300 text-xs mt-0.5">{a.desc}</p>
+                        <p className="text-gray-500 text-xs mt-1 font-mono">{a.criteria}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          ))}
 
           <div>
             <p className="text-gray-500 text-xs uppercase tracking-widest mb-3">Secondary Traits</p>
@@ -209,7 +312,9 @@ function ArchetypesModal({ onClose }) {
             </div>
           </div>
 
-          <p className="text-gray-500 text-xs text-center">Archetypes are evaluated in priority order — first match wins.</p>
+          <p className="text-gray-500 text-xs text-center">
+            HDHR scores count toward HR. HDDT scores count toward DT. Pure HD is tracked separately.
+          </p>
         </div>
       </div>
     </div>
@@ -237,7 +342,7 @@ export default function PlaystyleCard({ scores }) {
 
         <div className={`bg-gradient-to-r ${a.from} ${a.to} px-5 py-4 flex items-center justify-between`}>
           <div className="flex items-center gap-3">
-            <div className="text-white/90">{ICONS[key]}</div>
+            <div className="text-white/90">{archetypeIcon(key)}</div>
             <div>
               <p className="text-xs text-white/60 uppercase tracking-widest font-medium">Playstyle</p>
               <h3 className="text-xl font-bold text-white leading-tight">{a.label}</h3>
