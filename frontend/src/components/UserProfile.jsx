@@ -44,7 +44,7 @@ export default function UserProfile({ user }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-gray-900 rounded p-3">
             <p className="text-gray-400 text-sm">Global Rank</p>
-            <div className="flex items-baseline gap-2">
+            <div className="flex items-center gap-2">
               <p className="text-osu-cyan text-xl font-bold">
                 #{user.stats.global_rank ? user.stats.global_rank.toLocaleString() : 'N/A'}
               </p>
