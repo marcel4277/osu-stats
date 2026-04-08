@@ -48,8 +48,10 @@ export default function UserProfile({ user }) {
               <p className="text-osu-cyan text-xl font-bold">
                 #{user.stats.global_rank ? user.stats.global_rank.toLocaleString() : 'N/A'}
               </p>
-              <RankDelta history={user.rank_history} currentRank={user.stats.global_rank} />
-              <span className="text-gray-600 text-xs">90d</span>
+              <div className="flex flex-col items-start">
+                <RankDelta history={user.rank_history} currentRank={user.stats.global_rank} />
+                <span className="text-gray-600 text-xs">90d</span>
+              </div>
             </div>
           </div>
           <div className="bg-gray-900 rounded p-3">
