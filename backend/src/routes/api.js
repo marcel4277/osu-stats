@@ -1,4 +1,5 @@
 import express from 'express';
+import axios from 'axios';
 import config from '../config/env.js';
 import OsuApiService from '../services/osuApiService.js';
 import { getCacheEntry, setCacheEntry, acquireFetchLock, releaseFetchLock } from '../services/scoreCache.js';
@@ -12,11 +13,10 @@ const REDIS_TOKEN = config.UPSTASH_REDIS_TOKEN;
 async function redisCommand(command) {
   if (!REDIS_URL || !REDIS_TOKEN) return null;
   try {
-    const res = await fetch(`${REDIS_URL}/${command}`, {
+    const res = await axios.get(`${REDIS_URL}/${command}`, {
       headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
     });
-    const data = await res.json();
-    return data.result;
+    return res.data.result;
   } catch {
     return null;
   }
