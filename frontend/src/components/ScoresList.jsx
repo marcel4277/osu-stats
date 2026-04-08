@@ -8,6 +8,14 @@ const COLUMNS = [
   { key: 'date',     label: 'Date'     },
 ];
 
+const TIME_FILTERS = [
+  { label: 'All',      days: null },
+  { label: '1M',       days: 30   },
+  { label: '3M',       days: 90   },
+  { label: '6M',       days: 180  },
+  { label: '1Y',       days: 365  },
+];
+
 function SortIcon({ direction }) {
   if (!direction) return <span className="ml-1 text-gray-600">⇅</span>;
   return <span className="ml-1 text-osu-pink">{direction === 'asc' ? '↑' : '↓'}</span>;
@@ -24,30 +32,29 @@ function sortScores(scores, key, direction) {
 
 function timeAgo(dateStr) {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (seconds < 60)                    return 'Just now';
-  if (seconds < 3600)                  return `${Math.floor(seconds / 60)} minutes ago`;
-  if (seconds < 86400)                 return `${Math.floor(seconds / 3600)} hours ago`;
-  if (seconds < 86400 * 30)           return `${Math.floor(seconds / 86400)} days ago`;
-  if (seconds < 86400 * 365)          return `${Math.floor(seconds / (86400 * 30))} months ago`;
+  if (seconds < 60)                  return 'Just now';
+  if (seconds < 3600)                return `${Math.floor(seconds / 60)} minutes ago`;
+  if (seconds < 86400)               return `${Math.floor(seconds / 3600)} hours ago`;
+  if (seconds < 86400 * 30)         return `${Math.floor(seconds / 86400)} days ago`;
+  if (seconds < 86400 * 365)        return `${Math.floor(seconds / (86400 * 30))} months ago`;
   const years = Math.floor(seconds / (86400 * 365));
   return `${years} year${years > 1 ? 's' : ''} ago`;
 }
 
-// Smooth HSL color based on accuracy: red (low) → orange → yellow → green → pink (100%)
 function accuracyColor(accuracy) {
   const acc = parseFloat(accuracy);
-  if (acc >= 100) return '#f472b6'; // pink
-  if (acc >= 99)  return '#4ade80'; // green
-  if (acc >= 97)  return '#86efac'; // light green
-  if (acc >= 95)  return '#facc15'; // yellow
-  if (acc >= 90)  return '#fb923c'; // orange
-  return '#f87171';                 // red
+  if (acc >= 100) return '#f472b6';
+  if (acc >= 99)  return '#4ade80';
+  if (acc >= 97)  return '#86efac';
+  if (acc >= 95)  return '#facc15';
+  if (acc >= 90)  return '#fb923c';
+  return '#f87171';
 }
-
 
 export default function ScoresList({ scores, username }) {
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState('desc');
+  const [filterDays, setFilterDays] = useState(null);
 
   if (!scores || scores.length === 0) {
     return (
@@ -70,6 +77,12 @@ export default function ScoresList({ scores, username }) {
 
   const isLazer = (score) => score.score === 0;
 
+  const isInRange = (score) => {
+    if (!filterDays) return true;
+    const cutoff = Date.now() - filterDays * 86400 * 1000;
+    return new Date(score.date).getTime() >= cutoff;
+  };
+
   const handleRowClick = (score) => {
     if (isLazer(score)) return;
     const id = score.best_id;
@@ -80,12 +93,36 @@ export default function ScoresList({ scores, username }) {
     window.open(`https://osu.ppy.sh/scores/${mode}/${id}`, '_blank', 'noopener,noreferrer');
   };
 
+  const matchCount = filterDays ? sorted.filter(isInRange).length : null;
+
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-      <div className="p-4 border-b border-gray-700">
+      <div className="p-4 border-b border-gray-700 flex items-center justify-between gap-4 flex-wrap">
         <h3 className="text-xl font-bold text-white">
           Best Scores for {username}
         </h3>
+        <div className="flex items-center gap-2">
+          {filterDays && (
+            <span className="text-xs text-gray-500 mr-1">
+              {matchCount} score{matchCount !== 1 ? 's' : ''}
+            </span>
+          )}
+          <div className="flex rounded-lg overflow-hidden border border-gray-600">
+            {TIME_FILTERS.map(f => (
+              <button
+                key={f.label}
+                onClick={() => setFilterDays(f.days)}
+                className={`px-3 py-1 text-xs font-semibold transition ${
+                  filterDays === f.days
+                    ? 'bg-osu-pink text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -106,12 +143,17 @@ export default function ScoresList({ scores, username }) {
             </tr>
           </thead>
           <tbody>
-            {sorted.map((score, index) => (
+            {sorted.map((score, index) => {
+              const inRange = isInRange(score);
+              const lazer = isLazer(score);
+              return (
                 <tr
                   key={score.id}
-                  className={`border-b border-gray-700 transition ${isLazer(score) ? 'cursor-default' : 'hover:bg-gray-700 cursor-pointer'}`}
+                  className={`border-b border-gray-700 transition ${
+                    !inRange ? 'opacity-25' : lazer ? 'cursor-default' : 'hover:bg-gray-700 cursor-pointer'
+                  }`}
                   onClick={() => handleRowClick(score)}
-                  title={isLazer(score) ? undefined : 'View score on osu!'}
+                  title={lazer ? undefined : inRange ? 'View score on osu!' : undefined}
                 >
                   <td className="px-4 py-3 text-gray-400">{index + 1}</td>
                   <td className="px-4 py-3">
@@ -159,7 +201,8 @@ export default function ScoresList({ scores, username }) {
                     </span>
                   </td>
                 </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
