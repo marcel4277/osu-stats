@@ -1,3 +1,17 @@
+function RankDelta({ history, currentRank }) {
+  if (!history || history.length < 2 || !currentRank) return null;
+  const earliest = history.find(v => v > 0);
+  if (!earliest) return null;
+  const delta = earliest - currentRank; // positive = improved (rank number went down)
+  if (delta === 0) return null;
+  const improved = delta > 0;
+  return (
+    <span className={`text-sm font-semibold ml-2 ${improved ? 'text-green-400' : 'text-red-400'}`}>
+      {improved ? '▲' : '▼'}{Math.abs(delta).toLocaleString()}
+    </span>
+  );
+}
+
 export default function UserProfile({ user }) {
   if (!user) return null;
 
@@ -30,8 +44,9 @@ export default function UserProfile({ user }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-gray-900 rounded p-3">
             <p className="text-gray-400 text-sm">Global Rank</p>
-            <p className="text-osu-cyan text-xl font-bold">
+            <p className="text-osu-cyan text-xl font-bold flex items-center">
               #{user.stats.global_rank ? user.stats.global_rank.toLocaleString() : 'N/A'}
+              <RankDelta history={user.rank_history} currentRank={user.stats.global_rank} />
             </p>
           </div>
           <div className="bg-gray-900 rounded p-3">

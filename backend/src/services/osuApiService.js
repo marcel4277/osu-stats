@@ -105,6 +105,7 @@ export class OsuApiService {
         pp: data.statistics?.pp || 0,
         accuracy: (data.statistics?.hit_accuracy || 0).toFixed(2),
       },
+      rank_history: data.rank_history?.data || [],
     };
   }
 
