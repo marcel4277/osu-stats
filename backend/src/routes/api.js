@@ -6,17 +6,32 @@ import { getCacheEntry, setCacheEntry, acquireFetchLock, releaseFetchLock } from
 const router = express.Router();
 const osuApi = new OsuApiService(config.OSU_API_ID, config.OSU_API_SECRET);
 
-let visitorCount = 0;
+const REDIS_URL = config.UPSTASH_REDIS_URL;
+const REDIS_TOKEN = config.UPSTASH_REDIS_TOKEN;
+
+async function redisCommand(command) {
+  if (!REDIS_URL || !REDIS_TOKEN) return null;
+  try {
+    const res = await fetch(`${REDIS_URL}/${command}`, {
+      headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
+    });
+    const data = await res.json();
+    return data.result;
+  } catch {
+    return null;
+  }
+}
 
 // GET /api/visits — return current count
-router.get('/visits', (_req, res) => {
-  res.json({ count: visitorCount });
+router.get('/visits', async (_req, res) => {
+  const count = await redisCommand('get/visits') ?? 0;
+  res.json({ count: Number(count) });
 });
 
 // POST /api/visits — increment and return new count
-router.post('/visits', (_req, res) => {
-  visitorCount += 1;
-  res.json({ count: visitorCount });
+router.post('/visits', async (_req, res) => {
+  const count = await redisCommand('incr/visits') ?? 0;
+  res.json({ count: Number(count) });
 });
 
 const MAX_USERNAME_LEN = 64;

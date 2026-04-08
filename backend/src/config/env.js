@@ -18,6 +18,10 @@ export const config = {
   // osu! API
   OSU_API_ID: process.env.OSU_API_ID,
   OSU_API_SECRET: process.env.OSU_API_SECRET,
+
+  // Upstash Redis
+  UPSTASH_REDIS_URL: process.env.UPSTASH_REDIS_URL,
+  UPSTASH_REDIS_TOKEN: process.env.UPSTASH_REDIS_TOKEN,
 };
 
 // Validate required env vars in production
