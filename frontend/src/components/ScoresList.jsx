@@ -68,8 +68,12 @@ export default function ScoresList({ scores, username }) {
 
   const sorted = sortScores(scores, sortKey, sortDir);
 
-  const handleRowClick = (scoreId) => {
-    window.open(`https://osu.ppy.sh/scores/${scoreId}`, '_blank', 'noopener,noreferrer');
+  const handleRowClick = (score) => {
+    const id = score.best_id || score.id;
+    const mode = typeof score.mode === 'number'
+      ? ['osu', 'taiko', 'fruits', 'mania'][score.mode] ?? 'osu'
+      : score.mode || 'osu';
+    window.open(`https://osu.ppy.sh/scores/${mode}/${id}`, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -102,7 +106,7 @@ export default function ScoresList({ scores, username }) {
                 <tr
                   key={score.id}
                   className="border-b border-gray-700 transition hover:bg-gray-700 cursor-pointer"
-                  onClick={() => handleRowClick(score.best_id || score.id)}
+                  onClick={() => handleRowClick(score)}
                   title="View score on osu!"
                 >
                   <td className="px-4 py-3 text-gray-400">{index + 1}</td>

@@ -77,6 +77,7 @@ export class OsuApiService {
     return {
       id: score.id,
       best_id: score.best_id,
+      mode: score.ruleset_id ?? score.mode ?? 'osu',
       beatmap_id: score.beatmap?.id,
       beatmapset_id: score.beatmapset?.id,
       title: score.beatmapset?.title || 'Unknown',
