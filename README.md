@@ -12,7 +12,7 @@ A player stats site for osu! — look up any player by username and get a clean 
 - **Profile overview** — rank, accuracy, play count, country
 - **Top scores** — sortable table with accuracy color scaling, time-ago tooltips, and direct links to score pages
 - **Time range filter** — filter scores by 1M / 3M / 6M / 1Y to see recent activity
-- **Playstyle archetypes** — classifies players into categories (Speed Demon, Aim Player, Tech Wizard, etc.) based on their stats
+- **Playstyle archetypes** — classifies players into mod-based tiers (Player, Specialist, Paragon) across NM, HR, DT, and HD
 - **Improvement velocity** — tracks how a player's PP has changed over time
 - **osu! Lazer support** — Lazer scores are detected and badged separately
 - **Visitor counter** — global site visit tracking
@@ -71,3 +71,9 @@ FRONTEND_URL=http://localhost:5174
 ```
 VITE_API_URL=http://localhost:5000
 ```
+
+---
+
+## Thanks
+
+[orangduskcat](https://osu.ppy.sh/users/18742144) — for ideas, feedback, and feature suggestions throughout development.
