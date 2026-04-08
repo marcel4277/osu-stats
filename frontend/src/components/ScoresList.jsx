@@ -102,7 +102,7 @@ export default function ScoresList({ scores, username }) {
                 <tr
                   key={score.id}
                   className="border-b border-gray-700 transition hover:bg-gray-700 cursor-pointer"
-                  onClick={() => handleRowClick(score.id)}
+                  onClick={() => handleRowClick(score.best_id || score.id)}
                   title="View score on osu!"
                 >
                   <td className="px-4 py-3 text-gray-400">{index + 1}</td>

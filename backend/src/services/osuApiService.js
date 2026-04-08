@@ -76,6 +76,7 @@ export class OsuApiService {
   _mapScore(score) {
     return {
       id: score.id,
+      best_id: score.best_id,
       beatmap_id: score.beatmap?.id,
       beatmapset_id: score.beatmapset?.id,
       title: score.beatmapset?.title || 'Unknown',
