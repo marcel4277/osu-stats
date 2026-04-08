@@ -6,7 +6,7 @@ function RankDelta({ history, currentRank }) {
   if (delta === 0) return null;
   const improved = delta > 0;
   return (
-    <span className={`text-sm font-semibold ml-2 ${improved ? 'text-green-400' : 'text-red-400'}`}>
+    <span className={`text-sm font-semibold ${improved ? 'text-green-400' : 'text-red-400'}`}>
       {improved ? '▲' : '▼'}{Math.abs(delta).toLocaleString()}
     </span>
   );
