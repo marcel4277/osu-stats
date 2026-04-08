@@ -186,8 +186,8 @@ function ArchetypesModal({ onClose }) {
                   <div className={`shrink-0 mt-0.5 ${a.text}`}>{ICONS[k]}</div>
                   <div className="min-w-0">
                     <p className={`font-semibold text-sm ${a.text}`}>{a.label}</p>
-                    <p className="text-gray-400 text-xs mt-0.5">{a.desc}</p>
-                    <p className="text-gray-600 text-xs mt-1 font-mono">{a.criteria}</p>
+                    <p className="text-gray-300 text-xs mt-0.5">{a.desc}</p>
+                    <p className="text-gray-500 text-xs mt-1 font-mono">{a.criteria}</p>
                   </div>
                 </div>
               ))}
@@ -201,15 +201,15 @@ function ArchetypesModal({ onClose }) {
                 <div key={t.label} className="flex items-start gap-3 rounded-lg p-3 bg-gray-800 border border-gray-700">
                   <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 mt-0.5 ${t.style}`}>{t.label}</span>
                   <div className="min-w-0">
-                    <p className="text-gray-400 text-xs">{t.title}</p>
-                    <p className="text-gray-600 text-xs mt-0.5 font-mono">{t.criteria}</p>
+                    <p className="text-gray-300 text-xs">{t.title}</p>
+                    <p className="text-gray-500 text-xs mt-0.5 font-mono">{t.criteria}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <p className="text-gray-600 text-xs text-center">Archetypes are evaluated in priority order — first match wins.</p>
+          <p className="text-gray-500 text-xs text-center">Archetypes are evaluated in priority order — first match wins.</p>
         </div>
       </div>
     </div>

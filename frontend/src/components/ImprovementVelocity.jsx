@@ -117,13 +117,13 @@ export default function ImprovementVelocity({ scores }) {
             <div key={label} className="bg-gray-900 rounded-lg p-3 text-center">
               <p className="text-gray-500 text-xs mb-1">{label}</p>
               <p className={`font-bold text-sm ${accent}`}>{value}</p>
-              {sub && <p className="text-gray-600 text-xs mt-0.5">{sub}</p>}
+              {sub && <p className="text-gray-500 text-xs mt-0.5">{sub}</p>}
             </div>
           ))}
         </div>
 
         {/* Chart */}
-        <p className="text-gray-600 text-xs mb-3 uppercase tracking-widest">Activity · last 18 months</p>
+        <p className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Activity · last 18 months</p>
 
         <div className="relative">
           {/* Subtle grid lines */}
@@ -171,7 +171,7 @@ export default function ImprovementVelocity({ scores }) {
           {buckets.map((b, i) => (
             <div key={b.key} className="flex-1 text-center">
               {i % 3 === 0 && (
-                <span className="text-gray-600 text-xs">{b.label.split(' ')[0]}</span>
+                <span className="text-gray-500 text-xs">{b.label.split(' ')[0]}</span>
               )}
             </div>
           ))}
@@ -179,7 +179,7 @@ export default function ImprovementVelocity({ scores }) {
 
         {/* Insight */}
         <div className="mt-5 flex items-start gap-2 border-t border-gray-700 pt-4">
-          <span className="text-gray-600 text-xs mt-0.5">◆</span>
+          <span className="text-gray-500 text-xs mt-0.5">◆</span>
           <p className="text-xs text-gray-400 leading-relaxed">{insightText}</p>
         </div>
       </div>
