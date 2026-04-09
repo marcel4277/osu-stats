@@ -66,15 +66,33 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
-      {/* Player 1 search */}
-      <div className="mb-8 flex justify-center">
+      {/* Search area */}
+      <div className="flex flex-col items-center gap-3">
         <UsernameInput onSearch={handleSearch} isLoading={isLoading} />
+
+        {/* Compare row — appears once player 1 is loaded */}
+        {user && (
+          <div className="flex items-center gap-3 w-full max-w-md">
+            <div className="flex-1 border-t border-gray-700" />
+            <span className="text-gray-600 text-xs uppercase tracking-widest">vs</span>
+            <div className="flex-1 border-t border-gray-700" />
+          </div>
+        )}
+        {user && (
+          <UsernameInput onSearch={handleSearch2} isLoading={isLoading2} placeholder="Compare with..." />
+        )}
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-500 bg-opacity-20 border border-red-500 rounded-lg text-red-300">
+        <div className="p-4 bg-red-500 bg-opacity-20 border border-red-500 rounded-lg text-red-300">
           <p className="font-semibold">Error</p>
           <p>{error}</p>
+        </div>
+      )}
+      {error2 && (
+        <div className="p-4 bg-red-500 bg-opacity-20 border border-red-500 rounded-lg text-red-300">
+          <p className="font-semibold">Error</p>
+          <p>{error2}</p>
         </div>
       )}
 
@@ -103,38 +121,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Compare search — shown after player 1 loaded, before player 2 */}
-      {user && !isComparing && (
-        <div className="border-t border-gray-700 pt-6">
-          <p className="text-center text-gray-500 text-sm mb-4">Compare with another player</p>
-          <div className="flex justify-center">
-            <UsernameInput onSearch={handleSearch2} isLoading={isLoading2} />
-          </div>
-          {error2 && (
-            <div className="mt-4 p-4 bg-red-500 bg-opacity-20 border border-red-500 rounded-lg text-red-300">
-              <p className="font-semibold">Error</p>
-              <p>{error2}</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Compare search while comparing — allow swapping player 2 */}
-      {isComparing && (
-        <div className="border-t border-gray-700 pt-6">
-          <p className="text-center text-gray-500 text-sm mb-4">Change comparison player</p>
-          <div className="flex justify-center">
-            <UsernameInput onSearch={handleSearch2} isLoading={isLoading2} />
-          </div>
-          {error2 && (
-            <div className="mt-4 p-4 bg-red-500 bg-opacity-20 border border-red-500 rounded-lg text-red-300">
-              <p className="font-semibold">Error</p>
-              <p>{error2}</p>
-            </div>
-          )}
-        </div>
-      )}
-
       {!user && !isLoading && (
         <div className="text-center py-12">
           <p className="text-gray-400 mb-4">Search for an osu! player to get started</p>
@@ -151,12 +137,12 @@ export default function HomePage() {
         </div>
       )}
 
-      {isLoading2 && (
+      {isLoading2 && !user2 && (
         <div className="text-center py-4">
           <div className="inline-block">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-osu-purple"></div>
           </div>
-          <p className="text-gray-400 mt-2 text-sm">Loading player 2...</p>
+          <p className="text-gray-400 mt-2 text-sm">Loading...</p>
         </div>
       )}
     </div>

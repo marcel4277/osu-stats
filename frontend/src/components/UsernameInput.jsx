@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function UsernameInput({ onSearch, isLoading }) {
+export default function UsernameInput({ onSearch, isLoading, placeholder = 'Enter osu! username...' }) {
   const [username, setUsername] = useState('');
 
   const handleSubmit = (e) => {
@@ -17,7 +17,7 @@ export default function UsernameInput({ onSearch, isLoading }) {
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="Enter osu! username..."
+          placeholder={placeholder}
           className="flex-1 px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-osu-purple focus:outline-none transition"
           disabled={isLoading}
         />
