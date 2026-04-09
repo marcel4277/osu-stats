@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage.jsx';
 import osuAPI from './services/api.js';
 import './App.css';
@@ -39,7 +40,11 @@ export default function App() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        <HomePage />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/:username" element={<HomePage />} />
+          <Route path="/:username/vs/:username2" element={<HomePage />} />
+        </Routes>
       </main>
 
       <footer className="border-t border-gray-700 mt-12 py-6 text-center text-gray-500 text-sm">
