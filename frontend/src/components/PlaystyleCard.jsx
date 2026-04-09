@@ -338,24 +338,24 @@ export default function PlaystyleCard({ scores }) {
 
   return (
     <>
-      <div className={`bg-gray-800 rounded-lg border ${a.border} overflow-hidden`}>
+      <div className={`bg-gray-800 rounded-lg border border-gray-700 overflow-hidden`}>
 
-        <div className={`bg-gradient-to-r ${a.from} ${a.to} px-5 py-4 flex items-center justify-between`}>
+        <div className={`border-l-4 ${a.border} bg-gray-900 px-5 py-4 flex items-center justify-between`}>
           <div className="flex items-center gap-3">
-            <div className="text-white/90">{archetypeIcon(key)}</div>
+            <div className={a.text}>{archetypeIcon(key)}</div>
             <div>
-              <p className="text-xs text-white/60 uppercase tracking-widest font-medium">Playstyle</p>
-              <h3 className="text-xl font-bold text-white leading-tight">{a.label}</h3>
+              <p className="text-xs text-gray-500 uppercase tracking-widest font-medium">Playstyle</p>
+              <h3 className={`text-xl font-bold leading-tight ${a.text}`}>{a.label}</h3>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <div className="text-right">
-              <p className="text-white/60 text-xs">Avg accuracy</p>
+              <p className="text-gray-500 text-xs">Avg accuracy</p>
               <p className="text-white font-bold text-lg">{avgAcc.toFixed(1)}%</p>
             </div>
             <button
               onClick={() => setShowModal(true)}
-              className="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 transition text-white text-xs font-bold leading-none flex items-center justify-center shrink-0 mt-0.5"
+              className="w-6 h-6 rounded-full bg-gray-700 hover:bg-gray-600 transition text-gray-400 hover:text-white text-xs font-bold leading-none flex items-center justify-center shrink-0 mt-0.5"
               title="View all archetypes"
             >
               ?
