@@ -43,7 +43,7 @@ export default function App() {
       </main>
 
       <footer className="border-t border-gray-700 mt-12 py-6 text-center text-gray-500 text-sm">
-        <p>Built with React, Vite, and Tailwind CSS</p>
+        <p>Built with React, Vite, and Tailwind CSS &mdash; <a href="https://github.com/marcel4277/osu-stats" target="_blank" rel="noopener noreferrer" className="hover:text-gray-300 transition underline underline-offset-2">source on GitHub</a></p>
       </footer>
     </div>
   );
