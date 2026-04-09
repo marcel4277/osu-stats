@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import osuAPI from '../services/api.js';
 import UsernameInput from '../components/UsernameInput.jsx';
 import UserProfile from '../components/UserProfile.jsx';
@@ -6,53 +6,13 @@ import ScoresList from '../components/ScoresList.jsx';
 import ImprovementVelocity from '../components/ImprovementVelocity.jsx';
 import PlaystyleCard from '../components/PlaystyleCard.jsx';
 
-const POLL_INTERVAL = 3000;
-const MAX_POLLS = 6;
-
 export default function HomePage() {
   const [user, setUser] = useState(null);
   const [scores, setScores] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const pollRef = useRef({ timer: null, username: null, userData: null });
-
-  const stopPolling = () => {
-    clearTimeout(pollRef.current.timer);
-    pollRef.current = { timer: null, username: null, userData: null };
-  };
-
-  const reveal = (userData, scoreList) => {
-    setUser(userData);
-    setScores(scoreList);
-    setIsLoading(false);
-  };
-
-  const pollForCompletion = (username, attempts = 0) => {
-    pollRef.current.timer = setTimeout(async () => {
-      if (pollRef.current.username !== username) return;
-
-      if (attempts >= MAX_POLLS) {
-        reveal(pollRef.current.userData, []);
-        return;
-      }
-
-      try {
-        const data = await osuAPI.getUserScores(username, 'best');
-        if (pollRef.current.username !== username) return;
-
-        if (data.complete) {
-          reveal(pollRef.current.userData, data.scores);
-        } else {
-          pollForCompletion(username, attempts + 1);
-        }
-      } catch {
-        reveal(pollRef.current.userData, []);
-      }
-    }, POLL_INTERVAL);
-  };
 
   const handleSearch = async (username) => {
-    stopPolling();
     setIsLoading(true);
     setError(null);
     setUser(null);
@@ -64,15 +24,11 @@ export default function HomePage() {
         osuAPI.getUserScores(username, 'best'),
       ]);
 
-      if (scoresData.complete) {
-        reveal(userData, scoresData.scores);
-      } else {
-        pollRef.current.username = username;
-        pollRef.current.userData = userData;
-        pollForCompletion(username);
-      }
+      setUser(userData);
+      setScores(scoresData.scores);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to fetch data');
+    } finally {
       setIsLoading(false);
     }
   };

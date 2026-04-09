@@ -2,7 +2,7 @@ import express from 'express';
 import axios from 'axios';
 import config from '../config/env.js';
 import OsuApiService from '../services/osuApiService.js';
-import { getCacheEntry, setCacheEntry, acquireFetchLock, releaseFetchLock } from '../services/scoreCache.js';
+import { getCacheEntry, setCacheEntry } from '../services/scoreCache.js';
 
 const router = express.Router();
 const osuApi = new OsuApiService(config.OSU_API_ID, config.OSU_API_SECRET);
@@ -71,14 +71,8 @@ router.get('/user/:username', async (req, res) => {
 // GET /api/user/:username/scores
 // Query: type ('best'|'recent', default 'best')
 //
-// Cache-miss flow:
-//   1. Fetch first 50 scores, write to cache (complete: false), respond immediately
-//   2. Acquire fetch lock and background-fetch offsets 50/100/150 in parallel
-//   3. Merge into cache (complete: true), release lock
-//
-// Cache-hit flow:
-//   - complete: true  → return full scores
-//   - complete: false → return { complete: false } only (background fetch still running)
+// Cache-hit  → return immediately
+// Cache-miss → fetch all pages in parallel, cache, respond (always complete: true)
 router.get('/user/:username/scores', async (req, res) => {
   const { username } = req.params;
   const validationError = validateUsername(username);
@@ -96,45 +90,26 @@ router.get('/user/:username/scores', async (req, res) => {
 
     // --- Cache hit ---
     if (cached) {
-      if (!cached.complete) {
-        return res.json({ username: user.username, user_id: user.id, type, complete: false });
-      }
       return res.json({ username: user.username, user_id: user.id, type, scores: cached.scores, complete: true });
     }
 
-    // --- Cache miss: fetch first 50 and respond immediately ---
-    const initialScores = type === 'recent'
-      ? await osuApi.getUserRecentScores(user.id, 50)
-      : await osuApi.getUserBestScoresPage(user.id, 50, 0);
-
-    const complete = type === 'recent';
-    setCacheEntry(cacheKey, initialScores, complete);
-
-    res.json({ username: user.username, user_id: user.id, type, scores: initialScores, complete });
-
-    // --- Background fetch remaining 150 best scores ---
-    // acquireFetchLock returns false if a fetch is already in progress,
-    // which prevents a race if two requests land simultaneously on a cold cache.
-    if (type === 'best' && acquireFetchLock(cacheKey)) {
-      (async () => {
-        try {
-          const pages = await Promise.all([
-            osuApi.getUserBestScoresPage(user.id, 50, 50),
-            osuApi.getUserBestScoresPage(user.id, 50, 100),
-            osuApi.getUserBestScoresPage(user.id, 50, 150),
-          ]);
-
-          const allScores = [...initialScores, ...pages.flat()];
-          setCacheEntry(cacheKey, allScores, true);
-          console.log(`[cache] ${username}: ${allScores.length} scores cached`);
-        } catch (err) {
-          console.error(`[cache] Background fetch failed for ${username}:`, err.message);
-          setCacheEntry(cacheKey, initialScores, true);
-        } finally {
-          releaseFetchLock(cacheKey);
-        }
-      })();
+    // --- Cache miss: fetch all pages in parallel ---
+    let allScores;
+    if (type === 'recent') {
+      allScores = await osuApi.getUserRecentScores(user.id, 50);
+    } else {
+      const pages = await Promise.all([
+        osuApi.getUserBestScoresPage(user.id, 50, 0),
+        osuApi.getUserBestScoresPage(user.id, 50, 50),
+        osuApi.getUserBestScoresPage(user.id, 50, 100),
+        osuApi.getUserBestScoresPage(user.id, 50, 150),
+      ]);
+      allScores = pages.flat();
     }
+
+    setCacheEntry(cacheKey, allScores, true);
+    console.log(`[cache] ${username}: ${allScores.length} scores cached`);
+    res.json({ username: user.username, user_id: user.id, type, scores: allScores, complete: true });
   } catch (error) {
     if (error.message.includes('Not found')) {
       return res.status(404).json({ error: 'User not found', message: `"${username}" does not exist on osu!` });
