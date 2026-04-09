@@ -80,7 +80,7 @@ export default function ImprovementVelocity({ scores }) {
     : `No top scores in the last 90 days.${daysSinceLast > 365 ? ' This player may have stepped back from competing.' : ' A return could mean new peaks soon.'}`;
 
   return (
-    <div className={`relative bg-gray-800 rounded-lg border border-gray-700 overflow-hidden shadow-lg ${verdict.glow}`}>
+    <div className={`relative bg-gray-800 rounded-lg border border-gray-700 overflow-hidden`}>
 
       {/* Coloured top accent bar */}
       <div className={`h-1 w-full ${verdict.dot}`} />
