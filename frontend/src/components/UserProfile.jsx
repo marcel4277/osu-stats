@@ -12,7 +12,7 @@ function RankDelta({ history, currentRank }) {
   );
 }
 
-export default function UserProfile({ user }) {
+export default function UserProfile({ user, compact = false }) {
   if (!user) return null;
 
   return (
@@ -28,20 +28,20 @@ export default function UserProfile({ user }) {
           <img
             src={user.avatar_url}
             alt={user.username}
-            className="w-24 h-24 rounded-full border-2 border-osu-purple hover:border-osu-pink transition cursor-pointer"
+            className={`rounded-full border-2 border-osu-purple hover:border-osu-pink transition cursor-pointer ${compact ? 'w-16 h-16' : 'w-24 h-24'}`}
           />
         </a>
       </div>
 
       {/* User Info */}
-      <div className="flex-1">
-        <h2 className="text-3xl font-bold text-white mb-2">{user.username}</h2>
-        <p className="text-gray-400 mb-4">
+      <div className="flex-1 min-w-0">
+        <h2 className={`font-bold text-white mb-1 truncate ${compact ? 'text-xl' : 'text-3xl mb-2'}`}>{user.username}</h2>
+        <p className="text-gray-400 mb-3 text-sm truncate">
           {user.country} • {user.playcount.toLocaleString()} plays
         </p>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className={`grid grid-cols-2 gap-2 ${compact ? '' : 'md:grid-cols-4 gap-4'}`}>
           <div className="bg-gray-900 rounded p-3">
             <p className="text-gray-400 text-sm">Global Rank</p>
             <div className="flex items-center gap-2">

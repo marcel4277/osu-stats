@@ -16,6 +16,7 @@ export const osuAPI = {
   getUserScores: async (username, type = 'best') => {
     const response = await api.get(`/user/${encodeURIComponent(username)}/scores`, {
       params: { type },
+      timeout: 30000,
     });
     return response.data;
   },
