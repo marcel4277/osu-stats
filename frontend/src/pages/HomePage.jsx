@@ -13,13 +13,18 @@ export default function HomePage() {
   const [user, setUser] = useState(null);
   const [scores, setScores] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState(null);
-  const pollRef = useRef({ timer: null, username: null });
+  const pollRef = useRef({ timer: null, username: null, userData: null });
 
   const stopPolling = () => {
     clearTimeout(pollRef.current.timer);
-    pollRef.current = { timer: null, username: null };
+    pollRef.current = { timer: null, username: null, userData: null };
+  };
+
+  const reveal = (userData, scoreList) => {
+    setUser(userData);
+    setScores(scoreList);
+    setIsLoading(false);
   };
 
   const pollForCompletion = (username, attempts = 0) => {
@@ -27,7 +32,7 @@ export default function HomePage() {
       if (pollRef.current.username !== username) return;
 
       if (attempts >= MAX_POLLS) {
-        setIsLoadingMore(false);
+        reveal(pollRef.current.userData, []);
         return;
       }
 
@@ -36,13 +41,12 @@ export default function HomePage() {
         if (pollRef.current.username !== username) return;
 
         if (data.complete) {
-          setScores(data.scores);
-          setIsLoadingMore(false);
+          reveal(pollRef.current.userData, data.scores);
         } else {
           pollForCompletion(username, attempts + 1);
         }
       } catch {
-        setIsLoadingMore(false);
+        reveal(pollRef.current.userData, []);
       }
     }, POLL_INTERVAL);
   };
@@ -53,7 +57,6 @@ export default function HomePage() {
     setError(null);
     setUser(null);
     setScores(null);
-    setIsLoadingMore(false);
 
     try {
       const [userData, scoresData] = await Promise.all([
@@ -61,17 +64,15 @@ export default function HomePage() {
         osuAPI.getUserScores(username, 'best'),
       ]);
 
-      setUser(userData);
-      setScores(scoresData.scores);
-
-      if (!scoresData.complete) {
-        setIsLoadingMore(true);
+      if (scoresData.complete) {
+        reveal(userData, scoresData.scores);
+      } else {
         pollRef.current.username = username;
+        pollRef.current.userData = userData;
         pollForCompletion(username);
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to fetch data');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -92,20 +93,10 @@ export default function HomePage() {
       {user && (
         <div className="space-y-6">
           <UserProfile user={user} />
-
           <ImprovementVelocity scores={scores} />
-
           <PlaystyleCard scores={scores} />
-
           {Array.isArray(scores) && scores.length > 0 ? (
-            <div>
-              <ScoresList scores={scores} username={user.username} />
-              {isLoadingMore && (
-                <p className="mt-3 text-center text-sm text-gray-500">
-                  Loading more scores...
-                </p>
-              )}
-            </div>
+            <ScoresList scores={scores} username={user.username} />
           ) : (
             <div className="rounded-3xl border border-gray-700 bg-gray-900 p-6 text-center text-gray-400">
               <p className="font-semibold text-white">No scores found</p>
