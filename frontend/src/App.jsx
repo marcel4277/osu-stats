@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import HomePage from './pages/HomePage.jsx';
 import osuAPI from './services/api.js';
 import './App.css';
@@ -22,9 +22,11 @@ export default function App() {
       <header className="border-b border-gray-700 py-6 px-6">
         <div className="max-w-6xl mx-auto flex items-start justify-between">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-osu-purple to-osu-cyan bg-clip-text text-transparent mb-2">
-              osu! Stats
-            </h1>
+            <Link to="/" className="block">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-osu-purple to-osu-cyan bg-clip-text text-transparent mb-2">
+                osu! Stats
+              </h1>
+            </Link>
             <p className="text-gray-400">Search osu! users and view their stats</p>
           </div>
 
