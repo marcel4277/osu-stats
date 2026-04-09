@@ -77,3 +77,9 @@ VITE_API_URL=http://localhost:5000
 ## Thanks
 
 [orangduskcat](https://osu.ppy.sh/users/18742144) — for ideas, feedback, and feature suggestions throughout development.
+
+---
+
+## A note on AI
+
+AI tooling was used during development as an assistant — for boilerplate, lookups, and implementation speed. All logic, feature decisions, design direction, and code were reviewed, tested, and shaped by a human. Nothing was blindly generated and shipped.
