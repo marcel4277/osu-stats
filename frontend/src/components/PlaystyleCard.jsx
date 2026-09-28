@@ -340,26 +340,34 @@ export default function PlaystyleCard({ scores }) {
     <>
       <div className={`bg-gray-800 rounded-lg border border-gray-700 overflow-hidden`}>
 
-        <div className={`border-l-4 ${a.border} bg-gray-900 px-5 py-4 flex items-center justify-between`}>
-          <div className="flex items-center gap-3">
-            <div className={a.text}>{archetypeIcon(key)}</div>
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-widest font-medium">Playstyle</p>
-              <h3 className={`text-xl font-bold leading-tight ${a.text}`}>{a.label}</h3>
+        <div className="relative bg-gray-900 px-5 py-5 overflow-hidden">
+          {/* archetype colour wash */}
+          <div className={`absolute inset-0 bg-gradient-to-br ${a.from} ${a.to} opacity-25`} />
+          <div className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b ${a.from} ${a.to}`} />
+          <div className="relative flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className={`shrink-0 w-14 h-14 rounded-full border ${a.border} bg-gray-900/70 flex items-center justify-center ${a.text}`}>
+                {archetypeIcon(key)}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-gray-400 uppercase tracking-widest font-medium">Playstyle</p>
+                <h3 className={`text-3xl font-extrabold leading-tight ${a.text}`}>{a.label}</h3>
+                <p className="text-xs text-gray-400 mt-0.5 font-mono">{a.criteria}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="text-right">
-              <p className="text-gray-500 text-xs">Avg accuracy</p>
-              <p className="text-white font-bold text-lg">{avgAcc.toFixed(1)}%</p>
+            <div className="flex items-start gap-3 shrink-0">
+              <div className="text-right">
+                <p className="text-gray-400 text-xs">Avg accuracy</p>
+                <p className="text-white font-bold text-lg">{avgAcc.toFixed(1)}%</p>
+              </div>
+              <button
+                onClick={() => setShowModal(true)}
+                className="w-6 h-6 rounded-full bg-gray-700 hover:bg-gray-600 transition text-gray-400 hover:text-white text-xs font-bold leading-none flex items-center justify-center shrink-0 mt-0.5"
+                title="View all archetypes"
+              >
+                ?
+              </button>
             </div>
-            <button
-              onClick={() => setShowModal(true)}
-              className="w-6 h-6 rounded-full bg-gray-700 hover:bg-gray-600 transition text-gray-400 hover:text-white text-xs font-bold leading-none flex items-center justify-center shrink-0 mt-0.5"
-              title="View all archetypes"
-            >
-              ?
-            </button>
           </div>
         </div>
 

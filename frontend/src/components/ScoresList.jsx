@@ -41,6 +41,25 @@ function timeAgo(dateStr) {
   return `${years} year${years > 1 ? 's' : ''} ago`;
 }
 
+const MOD_STYLE = {
+  HD: 'bg-indigo-900 text-indigo-300', HR: 'bg-rose-900 text-rose-300',
+  DT: 'bg-yellow-900 text-yellow-300', NC: 'bg-yellow-900 text-yellow-300',
+  EZ: 'bg-green-900 text-green-300',   HT: 'bg-green-900 text-green-300',
+  FL: 'bg-slate-600 text-slate-200',
+};
+
+function ModBadges({ mods }) {
+  const shown = (mods || []).filter(m => m !== 'NF' && m !== 'CL');
+  if (shown.length === 0) return <span className="text-gray-600 text-xs font-semibold">NM</span>;
+  return (
+    <div className="flex flex-wrap justify-center gap-1">
+      {shown.map(m => (
+        <span key={m} className={`px-1.5 py-0.5 rounded text-xs font-bold ${MOD_STYLE[m] || 'bg-gray-700 text-gray-300'}`}>{m}</span>
+      ))}
+    </div>
+  );
+}
+
 function accuracyColor(accuracy) {
   const acc = parseFloat(accuracy);
   if (acc >= 100) return '#f472b6';
@@ -131,6 +150,7 @@ export default function ScoresList({ scores, username }) {
             <tr className="bg-gray-900 border-b border-gray-700">
               <th className="px-4 py-3 text-left text-gray-400 font-semibold">#</th>
               <th className="px-4 py-3 text-left text-gray-400 font-semibold">Beatmap</th>
+              <th className="px-4 py-3 text-center text-gray-400 font-semibold">Mods</th>
               {COLUMNS.map(col => (
                 <th
                   key={col.key}
@@ -162,6 +182,7 @@ export default function ScoresList({ scores, username }) {
                       <p className="text-sm text-gray-400">{score.artist}</p>
                     </div>
                   </td>
+                  <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} /></td>
                   <td className="px-4 py-3 text-center">
                     <span
                       className="px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
