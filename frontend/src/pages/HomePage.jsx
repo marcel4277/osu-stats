@@ -72,7 +72,7 @@ export default function HomePage() {
         {player1 && (
           <div className="flex items-center gap-3 w-full max-w-md">
             <div className="flex-1 border-t border-gray-700" />
-            <span className="text-gray-600 text-xs uppercase tracking-widest">vs</span>
+            <span className="text-gray-400 text-xs uppercase tracking-widest">vs</span>
             <div className="flex-1 border-t border-gray-700" />
           </div>
         )}
@@ -113,7 +113,7 @@ export default function HomePage() {
           ) : (
             <div className="rounded-3xl border border-gray-700 bg-gray-900 p-6 text-center text-gray-400">
               <p className="font-semibold text-white">No scores found</p>
-              <p className="mt-2 text-sm text-gray-500">This user has no scores or they are not public.</p>
+              <p className="mt-2 text-sm text-gray-400">This user has no scores or they are not public.</p>
             </div>
           )}
         </div>
@@ -122,7 +122,7 @@ export default function HomePage() {
       {!username && !loading1 && (
         <div className="text-center py-12">
           <p className="text-gray-400 mb-4">Search for an osu! player to get started</p>
-          <p className="text-sm text-gray-500">Try: fieryrage, cookiezi, hvick225</p>
+          <p className="text-sm text-gray-400">Try: fieryrage, cookiezi, hvick225</p>
         </div>
       )}
 
