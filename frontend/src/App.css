@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Scale the whole UI up on big monitors: 16px up to 1440px wide, 20px at 2560px+ */
+html {
+  font-size: clamp(16px, calc(16px + (100vw - 1440px) * 0.0036), 20px);
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
