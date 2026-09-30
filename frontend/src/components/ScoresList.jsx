@@ -17,7 +17,7 @@ const TIME_FILTERS = [
 ];
 
 function SortIcon({ direction }) {
-  if (!direction) return <span className="ml-1 text-gray-600">⇅</span>;
+  if (!direction) return <span className="ml-1 text-gray-500">⇅</span>;
   return <span className="ml-1 text-osu-pink">{direction === 'asc' ? '↑' : '↓'}</span>;
 }
 
@@ -41,23 +41,64 @@ function timeAgo(dateStr) {
   return `${years} year${years > 1 ? 's' : ''} ago`;
 }
 
+// Soft tinted badges: light text on a faint tint of the same hue, thin border.
+const BADGE_BASE = 'px-1.5 py-0.5 rounded text-xs font-bold border';
+const AMBER = 'bg-amber-400/10 text-amber-200 border-amber-300/30';
+const GREEN = 'bg-emerald-400/10 text-emerald-300 border-emerald-400/30';
 const MOD_STYLE = {
-  HD: 'bg-indigo-900 text-indigo-300', HR: 'bg-rose-900 text-rose-300',
-  DT: 'bg-yellow-900 text-yellow-300', NC: 'bg-yellow-900 text-yellow-300',
-  EZ: 'bg-green-900 text-green-300',   HT: 'bg-green-900 text-green-300',
-  FL: 'bg-slate-600 text-slate-200',
+  NM: 'bg-sky-400/10 text-sky-300 border-sky-400/30',
+  HD: 'bg-indigo-400/10 text-indigo-300 border-indigo-400/30',
+  HR: 'bg-rose-400/10 text-rose-300 border-rose-400/30',
+  DT: AMBER, NC: AMBER,
+  EZ: GREEN, HT: GREEN,
+  FL: 'bg-slate-400/10 text-slate-300 border-slate-400/30',
+};
+const MOD_UNKNOWN = 'bg-gray-400/10 text-gray-300 border-gray-400/30';
+
+// Same colours for the filter chips when selected (a bit stronger tint)
+const CHIP_ACTIVE = {
+  all:   'bg-gray-600 text-white',
+  NM:    'bg-sky-400/25 text-sky-200',
+  HR:    'bg-rose-400/25 text-rose-200',
+  DT:    'bg-amber-400/25 text-amber-100',
+  HD:    'bg-indigo-400/25 text-indigo-200',
+  OTHER: 'bg-emerald-400/25 text-emerald-200',
 };
 
 function ModBadges({ mods }) {
   const shown = (mods || []).filter(m => m !== 'NF' && m !== 'CL');
-  if (shown.length === 0) return <span className="text-gray-600 text-xs font-semibold">NM</span>;
+  const list = shown.length === 0 ? ['NM'] : shown;
   return (
     <div className="flex flex-wrap justify-center gap-1">
-      {shown.map(m => (
-        <span key={m} className={`px-1.5 py-0.5 rounded text-xs font-bold ${MOD_STYLE[m] || 'bg-gray-700 text-gray-300'}`}>{m}</span>
+      {list.map(m => (
+        <span key={m} className={`${BADGE_BASE} ${MOD_STYLE[m] || MOD_UNKNOWN}`}>{m}</span>
       ))}
     </div>
   );
+}
+
+const MOD_FILTERS = [
+  { key: 'all',   label: 'All' },
+  { key: 'NM',    label: 'NM' },
+  { key: 'HR',    label: 'HR' },
+  { key: 'DT',    label: 'DT' },
+  { key: 'HD',    label: 'HD' },
+  { key: 'OTHER', label: 'Other' },
+];
+
+const IGNORED_FOR_NM = ['NF', 'CL', 'SO', 'PF', 'SD', 'TD', 'MR'];
+
+// Same idea as the playstyle card: HDHR counts as HR, HDDT/NC counts as DT.
+function modMatches(score, key) {
+  const m = score.mods || [];
+  switch (key) {
+    case 'HR':    return m.includes('HR');
+    case 'DT':    return m.includes('DT') || m.includes('NC');
+    case 'HD':    return m.includes('HD');
+    case 'OTHER': return m.some(x => ['EZ', 'HT', 'FL', 'DC'].includes(x));
+    case 'NM':    return !m.some(x => !IGNORED_FOR_NM.includes(x));
+    default:      return true;
+  }
 }
 
 function accuracyColor(accuracy) {
@@ -74,6 +115,7 @@ export default function ScoresList({ scores, username }) {
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState('desc');
   const [filterDays, setFilterDays] = useState(null);
+  const [modFilter, setModFilter] = useState('all');
 
   if (!scores || scores.length === 0) {
     return (
@@ -93,6 +135,12 @@ export default function ScoresList({ scores, username }) {
   };
 
   const sorted = sortScores(scores, sortKey, sortDir);
+  const visible = sorted.filter(sc => modMatches(sc, modFilter));
+  const rankOf = new Map(scores.map((sc, i) => [sc.id, i + 1])); // true top-200 position
+  const modChips = MOD_FILTERS
+    .map(f => ({ ...f, count: f.key === 'all' ? scores.length : scores.filter(sc => modMatches(sc, f.key)).length }))
+    .filter(f => f.key === 'all' || f.count > 0);
+  const showModChips = modChips.length > 2; // "All" + at least two real options
 
   const isLazer = (score) => score.score === 0;
 
@@ -112,7 +160,7 @@ export default function ScoresList({ scores, username }) {
     window.open(`https://osu.ppy.sh/scores/${mode}/${id}`, '_blank', 'noopener,noreferrer');
   };
 
-  const matchCount = filterDays ? sorted.filter(isInRange).length : null;
+  const matchCount = (filterDays || modFilter !== 'all') ? visible.filter(isInRange).length : null;
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
@@ -120,9 +168,27 @@ export default function ScoresList({ scores, username }) {
         <h3 className="text-xl font-bold text-white">
           Best Scores for {username}
         </h3>
-        <div className="flex items-center gap-2">
-          {filterDays && (
-            <span className="text-xs text-gray-500 mr-1">
+        <div className="flex items-center gap-3 flex-wrap">
+          {showModChips && (
+            <div className="flex rounded-lg overflow-hidden border border-gray-600">
+              {modChips.map(f => (
+                <button
+                  key={f.key}
+                  onClick={() => setModFilter(f.key)}
+                  title={f.key === 'all' ? 'Show all scores' : `Only ${f.label} scores (${f.count})`}
+                  className={`px-3 py-1 text-sm font-semibold transition ${
+                    modFilter === f.key
+                      ? CHIP_ACTIVE[f.key]
+                      : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  }`}
+                >
+                  {f.label}{f.key !== 'all' && <span className="ml-1 text-xs opacity-80">{f.count}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+          {matchCount !== null && (
+            <span className="text-xs text-gray-400 mr-1">
               {matchCount} score{matchCount !== 1 ? 's' : ''}
             </span>
           )}
@@ -163,7 +229,7 @@ export default function ScoresList({ scores, username }) {
             </tr>
           </thead>
           <tbody>
-            {sorted.map((score, index) => {
+            {visible.map((score) => {
               const inRange = isInRange(score);
               const lazer = isLazer(score);
               return (
@@ -175,7 +241,7 @@ export default function ScoresList({ scores, username }) {
                   onClick={() => handleRowClick(score)}
                   title={lazer ? undefined : inRange ? 'View score on osu!' : undefined}
                 >
-                  <td className="px-4 py-3 text-gray-400">{index + 1}</td>
+                  <td className="px-4 py-3 text-gray-400">{rankOf.get(score.id)}</td>
                   <td className="px-4 py-3">
                     <div>
                       <p className="text-white font-semibold">{score.title}</p>
@@ -209,8 +275,8 @@ export default function ScoresList({ scores, username }) {
                   </td>
                   <td className="px-4 py-3 text-center">
                     {score.pp != null
-                      ? <span className="text-osu-cyan font-semibold">{score.pp.toLocaleString()}<span className="text-gray-500 text-xs font-normal">pp</span></span>
-                      : <span className="text-gray-600">—</span>
+                      ? <span className="text-osu-cyan font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
+                      : <span className="text-gray-400">—</span>
                     }
                   </td>
                   <td className="px-4 py-3 text-center text-sm text-gray-400 relative group cursor-default">

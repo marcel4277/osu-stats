@@ -266,7 +266,7 @@ function ArchetypesModal({ onClose }) {
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700 sticky top-0 bg-gray-900 z-10">
           <h2 className="text-white font-bold text-lg">All Playstyle Archetypes</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">✕</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition text-xl leading-none">✕</button>
         </div>
 
         <div className="p-6 space-y-6">
@@ -278,7 +278,7 @@ function ArchetypesModal({ onClose }) {
 
           {MOD_GROUPS.map(group => (
             <div key={group.label}>
-              <p className="text-gray-500 text-xs uppercase tracking-widest mb-3">{group.label}</p>
+              <p className="text-gray-400 text-xs uppercase tracking-widest mb-3">{group.label}</p>
               <div className="space-y-2">
                 {group.keys.map(k => {
                   const a = ARCHETYPES[k];
@@ -288,7 +288,7 @@ function ArchetypesModal({ onClose }) {
                       <div className="min-w-0">
                         <p className={`font-semibold text-sm ${a.text}`}>{a.label}</p>
                         <p className="text-gray-300 text-xs mt-0.5">{a.desc}</p>
-                        <p className="text-gray-500 text-xs mt-1 font-mono">{a.criteria}</p>
+                        <p className="text-gray-400 text-xs mt-1 font-mono">{a.criteria}</p>
                       </div>
                     </div>
                   );
@@ -298,21 +298,21 @@ function ArchetypesModal({ onClose }) {
           ))}
 
           <div>
-            <p className="text-gray-500 text-xs uppercase tracking-widest mb-3">Secondary Traits</p>
+            <p className="text-gray-400 text-xs uppercase tracking-widest mb-3">Secondary Traits</p>
             <div className="space-y-2">
               {Object.values(TRAITS).map(t => (
                 <div key={t.label} className="flex items-start gap-3 rounded-lg p-3 bg-gray-800 border border-gray-700">
                   <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 mt-0.5 ${t.style}`}>{t.label}</span>
                   <div className="min-w-0">
                     <p className="text-gray-300 text-xs">{t.title}</p>
-                    <p className="text-gray-500 text-xs mt-0.5 font-mono">{t.criteria}</p>
+                    <p className="text-gray-400 text-xs mt-0.5 font-mono">{t.criteria}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <p className="text-gray-500 text-xs text-center">
+          <p className="text-gray-400 text-xs text-center">
             HDHR scores count toward HR. HDDT scores count toward DT. Pure HD is tracked separately.
           </p>
         </div>
@@ -344,25 +344,25 @@ export default function PlaystyleCard({ scores }) {
           {/* archetype colour wash */}
           <div className={`absolute inset-0 bg-gradient-to-br ${a.from} ${a.to} opacity-25`} />
           <div className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b ${a.from} ${a.to}`} />
-          <div className="relative flex items-center justify-between gap-4">
+          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-4 min-w-0">
               <div className={`shrink-0 w-14 h-14 rounded-full border ${a.border} bg-gray-900/70 flex items-center justify-center ${a.text}`}>
                 {archetypeIcon(key)}
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-gray-400 uppercase tracking-widest font-medium">Playstyle</p>
+                <p className="text-sm text-gray-400 uppercase tracking-widest font-medium">Playstyle</p>
                 <h3 className={`text-3xl font-extrabold leading-tight ${a.text}`}>{a.label}</h3>
-                <p className="text-xs text-gray-400 mt-0.5 font-mono">{a.criteria}</p>
+                <p className="text-sm text-gray-400 mt-0.5 font-mono">{a.criteria}</p>
               </div>
             </div>
             <div className="flex items-start gap-3 shrink-0">
               <div className="text-right">
-                <p className="text-gray-400 text-xs">Avg accuracy</p>
+                <p className="text-gray-400 text-sm">Avg accuracy</p>
                 <p className="text-white font-bold text-lg">{avgAcc.toFixed(1)}%</p>
               </div>
               <button
                 onClick={() => setShowModal(true)}
-                className="w-6 h-6 rounded-full bg-gray-700 hover:bg-gray-600 transition text-gray-400 hover:text-white text-xs font-bold leading-none flex items-center justify-center shrink-0 mt-0.5"
+                className="w-6 h-6 rounded-full bg-gray-700 hover:bg-gray-600 transition text-gray-400 hover:text-white text-sm font-bold leading-none flex items-center justify-center shrink-0 mt-0.5"
                 title="View all archetypes"
               >
                 ?
@@ -374,19 +374,19 @@ export default function PlaystyleCard({ scores }) {
         <div className="p-5">
           <p className={`text-sm mb-5 ${a.text}`}>{a.desc}</p>
 
-          <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">Mod breakdown · {total} scores</p>
+          <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Mod breakdown · {total} scores</p>
           <div className="space-y-2 mb-5">
             {breakdown.map(({ mod, count, color }) => (
               <div key={mod} className="flex items-center gap-3">
-                <span className="text-gray-400 text-xs w-8 shrink-0">{mod}</span>
+                <span className="text-gray-400 text-sm w-8 shrink-0">{mod}</span>
                 <div className="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">
                   <div
                     className={`h-full rounded-full ${color} transition-all duration-700`}
                     style={{ width: `${(count / total) * 100}%` }}
                   />
                 </div>
-                <span className="text-gray-400 text-xs w-16 text-right shrink-0">
-                  {count} <span className="text-gray-600">({Math.round((count / total) * 100)}%)</span>
+                <span className="text-gray-400 text-sm w-24 text-right shrink-0 whitespace-nowrap">
+                  {count} <span className="text-gray-400">({Math.round((count / total) * 100)}%)</span>
                 </span>
               </div>
             ))}
@@ -396,7 +396,7 @@ export default function PlaystyleCard({ scores }) {
             <div className="flex flex-wrap gap-2 border-t border-gray-700 pt-4">
               {traits.map(k => (
                 <span key={k} title={TRAITS[k].title}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${TRAITS[k].style}`}>
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${TRAITS[k].style}`}>
                   {TRAITS[k].label}
                 </span>
               ))}

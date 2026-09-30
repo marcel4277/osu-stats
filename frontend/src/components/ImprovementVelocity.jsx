@@ -6,7 +6,7 @@ const MONTHS_SHOWN = 18;
 function buildVerdict(daysSinceLast, last90, last180) {
   if (daysSinceLast <= 14 && last90  >= 5) return { label: 'Actively Improving', color: 'text-green-400',  border: 'border-green-400',  glow: 'shadow-green-400/20',  dot: 'bg-green-400',  tip: 'Top score within 14 days + 5 or more in the last 90 days'   };
   if (daysSinceLast <= 60 && last90  >= 3) return { label: 'On the Rise',        color: 'text-osu-cyan',  border: 'border-osu-cyan',   glow: 'shadow-cyan-400/20',   dot: 'bg-osu-cyan',   tip: 'Top score within 60 days + 3 or more in the last 90 days'   };
-  if (daysSinceLast <= 90 && last180 >= 1) return { label: 'Still Active',       color: 'text-osu-purple',border: 'border-osu-purple', glow: 'shadow-purple-400/20', dot: 'bg-osu-purple', tip: 'Top score within 90 days'                                    };
+  if (daysSinceLast <= 90 && last180 >= 1) return { label: 'Still Active',       color: 'text-purple-300',border: 'border-osu-purple', glow: 'shadow-purple-400/20', dot: 'bg-osu-purple', tip: 'Top score within 90 days'                                    };
   if (daysSinceLast <= 270)               return { label: 'Slowing Down',       color: 'text-yellow-400',border: 'border-yellow-400', glow: 'shadow-yellow-400/20', dot: 'bg-yellow-400', tip: 'No top score in 4–9 months'                                  };
   if (daysSinceLast <= 365)               return { label: 'Plateaued',          color: 'text-orange-400',border: 'border-orange-400', glow: 'shadow-orange-400/20', dot: 'bg-orange-400', tip: 'No top score in 9–12 months'                                 };
   return                                         { label: 'Inactive',           color: 'text-red-400',   border: 'border-red-400',    glow: 'shadow-red-400/20',    dot: 'bg-red-400',    tip: 'No top score set in over a year'                            };
@@ -90,7 +90,7 @@ export default function ImprovementVelocity({ scores }) {
         <div className="flex items-start justify-between mb-5">
           <div>
             <h3 className="text-lg font-bold text-white leading-tight">Improvement Velocity</h3>
-            <p className="text-gray-500 text-xs mt-0.5">Based on {scores.length} top scores</p>
+            <p className="text-gray-400 text-sm mt-0.5">Based on {scores.length} top scores</p>
           </div>
           <div
             title={verdict.tip}
@@ -100,7 +100,7 @@ export default function ImprovementVelocity({ scores }) {
             <span className={`text-sm font-semibold ${verdict.color}`}>{verdict.label}</span>
             {/* Hover tooltip */}
             <div className="absolute right-0 top-full mt-2 hidden group-hover:block z-20 pointer-events-none">
-              <div className="bg-gray-900 border border-gray-600 text-gray-300 text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl text-left">
+              <div className="bg-gray-900 border border-gray-600 text-gray-300 text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-xl text-left">
                 {verdict.tip}
               </div>
             </div>
@@ -115,15 +115,15 @@ export default function ImprovementVelocity({ scores }) {
             { label: 'Active Span',    value: spanLabel,                accent: 'text-osu-cyan' },
           ].map(({ label, value, sub, accent }) => (
             <div key={label} className="bg-gray-900 rounded-lg p-3 text-center">
-              <p className="text-gray-500 text-xs mb-1">{label}</p>
+              <p className="text-gray-400 text-sm mb-1">{label}</p>
               <p className={`font-bold text-sm ${accent}`}>{value}</p>
-              {sub && <p className="text-gray-500 text-xs mt-0.5">{sub}</p>}
+              {sub && <p className="text-gray-400 text-sm mt-0.5">{sub}</p>}
             </div>
           ))}
         </div>
 
         {/* Chart */}
-        <p className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Activity · last 18 months</p>
+        <p className="text-gray-400 text-sm mb-3 uppercase tracking-widest">Activity · last 18 months</p>
 
         <div className="relative">
           {/* Subtle grid lines */}
@@ -149,7 +149,7 @@ export default function ImprovementVelocity({ scores }) {
                 <div key={b.key} className="flex-1 flex flex-col items-center justify-end h-full group relative">
                   {/* Hover tooltip */}
                   <div className="absolute bottom-full mb-2 hidden group-hover:block z-10 pointer-events-none">
-                    <div className="bg-gray-900 border border-gray-600 text-white text-xs rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-xl">
+                    <div className="bg-gray-900 border border-gray-600 text-white text-sm rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-xl">
                       <p className="font-semibold">{b.label}</p>
                       <p className="text-gray-400">{b.count === 0 ? 'No scores' : pluralise(b.count, 'score')}</p>
                     </div>
@@ -171,7 +171,7 @@ export default function ImprovementVelocity({ scores }) {
           {buckets.map((b, i) => (
             <div key={b.key} className="flex-1 text-center">
               {i % 3 === 0 && (
-                <span className="text-gray-500 text-xs">{b.label.split(' ')[0]}</span>
+                <span className="text-gray-400 text-sm">{b.label.split(' ')[0]}</span>
               )}
             </div>
           ))}
@@ -179,8 +179,8 @@ export default function ImprovementVelocity({ scores }) {
 
         {/* Insight */}
         <div className="mt-5 flex items-start gap-2 border-t border-gray-700 pt-4">
-          <span className="text-gray-500 text-xs mt-0.5">◆</span>
-          <p className="text-xs text-gray-400 leading-relaxed">{insightText}</p>
+          <span className="text-gray-400 text-sm mt-0.5">◆</span>
+          <p className="text-sm text-gray-400 leading-relaxed">{insightText}</p>
         </div>
       </div>
     </div>

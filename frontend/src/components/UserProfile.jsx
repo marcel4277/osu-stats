@@ -16,7 +16,7 @@ export default function UserProfile({ user, compact = false }) {
   if (!user) return null;
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 flex gap-6 items-center">
+    <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 flex flex-col sm:flex-row gap-4 sm:gap-6 items-center">
       {/* Avatar — links to osu! profile */}
       <div className="flex-shrink-0">
         <a
@@ -34,7 +34,7 @@ export default function UserProfile({ user, compact = false }) {
       </div>
 
       {/* User Info */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 w-full sm:w-auto">
         <h2 className={`font-bold text-white mb-1 truncate ${compact ? 'text-xl' : 'text-3xl mb-2'}`}>{user.username}</h2>
         <p className="text-gray-400 mb-3 text-sm truncate">
           {user.country} • {user.playcount.toLocaleString()} plays
@@ -44,12 +44,12 @@ export default function UserProfile({ user, compact = false }) {
         <div className={`grid grid-cols-2 gap-2 ${compact ? '' : 'md:grid-cols-4 gap-4'}`}>
           <div className="bg-gray-900 rounded p-3">
             <p className="text-gray-400 text-sm">Global Rank</p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-x-2 flex-wrap">
               <p className="text-osu-cyan text-xl font-bold">
                 #{user.stats.global_rank ? user.stats.global_rank.toLocaleString() : 'N/A'}
               </p>
               <div className="flex flex-col items-start leading-tight">
-                <span className="text-gray-600 text-xs">90d</span>
+                <span className="text-gray-400 text-xs">90d</span>
                 <RankDelta history={user.rank_history} currentRank={user.stats.global_rank} />
               </div>
             </div>
