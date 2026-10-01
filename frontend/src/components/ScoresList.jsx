@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { modMatches, buildChips, MOD_NAMES } from './modUtils.js';
 
 const COLUMNS = [
   { key: 'accuracy', label: 'Accuracy' },
@@ -52,6 +53,12 @@ const MOD_STYLE = {
   DT: AMBER, NC: AMBER,
   EZ: GREEN, HT: GREEN,
   FL: 'bg-slate-400/10 text-slate-300 border-slate-400/30',
+  DC: GREEN,
+  SD: 'bg-orange-400/10 text-orange-300 border-orange-400/30',
+  PF: 'bg-orange-400/10 text-orange-300 border-orange-400/30',
+  SO: 'bg-pink-400/10 text-pink-300 border-pink-400/30',
+  TD: 'bg-cyan-400/10 text-cyan-300 border-cyan-400/30',
+  MR: 'bg-fuchsia-400/10 text-fuchsia-300 border-fuchsia-400/30',
 };
 const MOD_UNKNOWN = 'bg-gray-400/10 text-gray-300 border-gray-400/30';
 
@@ -62,7 +69,14 @@ const CHIP_ACTIVE = {
   HR:    'bg-rose-400/25 text-rose-200',
   DT:    'bg-amber-400/25 text-amber-100',
   HD:    'bg-indigo-400/25 text-indigo-200',
-  OTHER: 'bg-emerald-400/25 text-emerald-200',
+  EZ:    'bg-emerald-400/25 text-emerald-200',
+  HT:    'bg-emerald-400/25 text-emerald-200',
+  FL:    'bg-slate-400/25 text-slate-200',
+  SD:    'bg-orange-400/25 text-orange-200',
+  PF:    'bg-orange-400/25 text-orange-200',
+  SO:    'bg-pink-400/25 text-pink-200',
+  TD:    'bg-cyan-400/25 text-cyan-200',
+  MR:    'bg-fuchsia-400/25 text-fuchsia-200',
 };
 
 function ModBadges({ mods }) {
@@ -75,30 +89,6 @@ function ModBadges({ mods }) {
       ))}
     </div>
   );
-}
-
-const MOD_FILTERS = [
-  { key: 'all',   label: 'All' },
-  { key: 'NM',    label: 'NM' },
-  { key: 'HR',    label: 'HR' },
-  { key: 'DT',    label: 'DT' },
-  { key: 'HD',    label: 'HD' },
-  { key: 'OTHER', label: 'Other' },
-];
-
-const IGNORED_FOR_NM = ['NF', 'CL', 'SO', 'PF', 'SD', 'TD', 'MR'];
-
-// Same idea as the playstyle card: HDHR counts as HR, HDDT/NC counts as DT.
-function modMatches(score, key) {
-  const m = score.mods || [];
-  switch (key) {
-    case 'HR':    return m.includes('HR');
-    case 'DT':    return m.includes('DT') || m.includes('NC');
-    case 'HD':    return m.includes('HD');
-    case 'OTHER': return m.some(x => ['EZ', 'HT', 'FL', 'DC'].includes(x));
-    case 'NM':    return !m.some(x => !IGNORED_FOR_NM.includes(x));
-    default:      return true;
-  }
 }
 
 function accuracyColor(accuracy) {
@@ -137,10 +127,8 @@ export default function ScoresList({ scores, username }) {
   const sorted = sortScores(scores, sortKey, sortDir);
   const visible = sorted.filter(sc => modMatches(sc, modFilter));
   const rankOf = new Map(scores.map((sc, i) => [sc.id, i + 1])); // true top-200 position
-  const modChips = MOD_FILTERS
-    .map(f => ({ ...f, count: f.key === 'all' ? scores.length : scores.filter(sc => modMatches(sc, f.key)).length }))
-    .filter(f => f.key === 'all' || f.count > 0);
-  const showModChips = modChips.length > 2; // "All" + at least two real options
+  const modChips = buildChips(scores);
+  const showModChips = modChips.length > 2; // "All" + at least two other options
 
   const isLazer = (score) => score.score === 0;
 
@@ -170,15 +158,15 @@ export default function ScoresList({ scores, username }) {
         </h3>
         <div className="flex items-center gap-3 flex-wrap">
           {showModChips && (
-            <div className="flex rounded-lg overflow-hidden border border-gray-600">
+            <div className="flex flex-wrap rounded-lg overflow-hidden border border-gray-600">
               {modChips.map(f => (
                 <button
                   key={f.key}
                   onClick={() => setModFilter(f.key)}
-                  title={f.key === 'all' ? 'Show all scores' : `Only ${f.label} scores (${f.count})`}
+                  title={f.key === 'all' ? 'Show all scores' : f.key === 'NM' ? `No difficulty-changing mods (${f.count}). NF, SD, PF etc. still count as NM` : `${MOD_NAMES[f.key] || f.label} (${f.count})`}
                   className={`px-3 py-1 text-sm font-semibold transition ${
                     modFilter === f.key
-                      ? CHIP_ACTIVE[f.key]
+                      ? (CHIP_ACTIVE[f.key] || 'bg-gray-500 text-white')
                       : 'text-gray-400 hover:text-white hover:bg-gray-700'
                   }`}
                 >
@@ -192,7 +180,7 @@ export default function ScoresList({ scores, username }) {
               {matchCount} score{matchCount !== 1 ? 's' : ''}
             </span>
           )}
-          <div className="flex rounded-lg overflow-hidden border border-gray-600">
+          <div className="flex flex-wrap rounded-lg overflow-hidden border border-gray-600">
             {TIME_FILTERS.map(f => (
               <button
                 key={f.label}

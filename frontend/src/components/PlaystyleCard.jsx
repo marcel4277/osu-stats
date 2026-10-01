@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { modCounts } from './modUtils.js';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -159,7 +160,13 @@ const TRAITS = {
 // ─── Analyse ──────────────────────────────────────────────────────────────────
 
 const GIMMICK_MODS  = new Set(['EZ', 'HT', 'FL']);
-const STANDARD_MODS = new Set(['NF', 'HD', 'HR', 'DT', 'NC', 'SD', 'PF', 'SO', 'TD', 'MR']);
+const STANDARD_MODS = new Set(['NF', 'HD', 'HR', 'DT', 'NC', 'SD', 'PF', 'SO', 'TD', 'MR', 'CL']);
+
+const BAR_COLORS = {
+  HR: 'bg-rose-400', DT: 'bg-yellow-400', HD: 'bg-indigo-400', EZ: 'bg-emerald-400',
+  HT: 'bg-teal-400', FL: 'bg-slate-300', SD: 'bg-orange-400', PF: 'bg-amber-300',
+  NF: 'bg-slate-400', SO: 'bg-pink-400', TD: 'bg-cyan-400', MR: 'bg-fuchsia-400',
+};
 
 function analyse(scores) {
   const total = scores.length;
@@ -234,11 +241,10 @@ function analyse(scores) {
   if (key === 'allrounder' && Math.max(nmR, hrR, dtR, pureHDR) < 0.50) traits.push('modMixer');
   if (gimmickR >= 0.05 && gimmickR < 0.10)               traits.push('gimmickTouch');
 
+  // Every mod that appears in the scores, most common first (NM always first)
   const breakdown = [
-    { mod: 'NM', count: nmCount,    color: 'bg-gray-400'   },
-    { mod: 'HR', count: hrCount,    color: 'bg-rose-400'   },
-    { mod: 'DT', count: dtCount,    color: 'bg-yellow-400' },
-    { mod: 'HD', count: allHDCount, color: 'bg-indigo-400' },
+    { mod: 'NM', count: nmCount, color: 'bg-gray-400' },
+    ...modCounts(scores).map(({ mod, count }) => ({ mod, count, color: BAR_COLORS[mod] || 'bg-slate-400' })),
   ].filter(b => b.count > 0);
 
   return { key, traits, breakdown, total, avgAcc };
