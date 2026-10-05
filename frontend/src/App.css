@@ -51,6 +51,12 @@ body {
   background-blend-mode: normal, normal, luminosity;
 }
 
+/* Rows inside an active time filter: a pink bar on the left edge, matching the
+   selected filter chip */
+.score-row-active > td:first-child {
+  box-shadow: inset 3px 0 0 #ff6b9d;
+}
+
 /* Hover: an accent bar on the left instead of lightening the row, which
    would push text contrast below AA on bright covers. */
 .score-row-link:hover > td:first-child {
