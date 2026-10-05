@@ -153,13 +153,13 @@ export default function ScoresList({ scores, username }) {
                   onClick={() => setModFilter(chip.key)}
                   aria-pressed={modFilter === chip.key}
                   title={chipTitle(chip)}
-                  className={`px-3 py-1 text-sm font-semibold transition ${
+                  className={`inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold transition ${
                     modFilter === chip.key
                       ? chipActiveClass(chip.key)
                       : 'text-gray-400 hover:text-white hover:bg-gray-700'
                   }`}
                 >
-                  {chip.label}{chip.key !== 'all' && <span className="ml-1 text-xs opacity-80">{chip.count}</span>}
+                  {chip.label}{chip.key !== 'all' && <span className="text-xs opacity-80 tabular-nums">{chip.count}</span>}
                 </button>
               ))}
             </div>
