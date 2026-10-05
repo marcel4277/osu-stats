@@ -26,28 +26,47 @@ body {
   background: #555;
 }
 
-/* Score row with the map's cover behind it, darkened by a gray-900 overlay at 87%.
-   87% keeps all row text at WCAG AA (4.5:1) or better, with a little margin,
-   even over a pure-white patch of the cover, so don't lower it.
-   The cover spans the left 60% of the row and fades out to the right: rows are
-   very wide and short, so stretching it full width shows only a thin slice. */
+/* Score row with the map's cover behind it. The cover spans the left 60% of the
+   row and fades out to the right: rows are very wide and short, so stretching
+   it full width shows only a thin slice.
+   In-range rows show the cover at full brightness; --cover-dim is the dark
+   overlay, 0 here. Text on these rows gets a dark shadow to stay readable. */
 .score-row-cover {
+  --cover-dim: 0;
   background-color: #111827;
   background-image:
-    linear-gradient(rgb(17 24 39 / 0.87), rgb(17 24 39 / 0.87)),
+    linear-gradient(rgb(17 24 39 / var(--cover-dim)), rgb(17 24 39 / var(--cover-dim))),
     linear-gradient(to right, transparent 35%, #111827 60%),
     var(--cover);
   background-size: auto, auto, 60% auto;
   background-position: center, center, left center;
   background-repeat: no-repeat;
-  /* size layers against the border box so the overlay also covers the row
-     border; otherwise a bright line of the cover shows through there */
+  /* size layers against the border box so the cover can't show through as a
+     bright line along the row border */
   background-origin: border-box;
 }
 
+.score-row-cover:not(.score-row-cover-muted) > td {
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.95), 0 0 8px rgb(0 0 0 / 0.8);
+}
+
+/* On a full-brightness cover: secondary grey text goes lighter, and badges /
+   the accuracy chip / the lazer tag get a solid dark backing so they stay
+   readable whatever the cover looks like. */
+.score-row-cover:not(.score-row-cover-muted) .text-gray-400 {
+  color: #e5e7eb;
+}
+
+.score-row-cover:not(.score-row-cover-muted) .chip-on-cover {
+  background-color: rgb(17 24 39 / 0.85);
+  text-shadow: none;
+}
+
 /* Rows outside the time filter: the cover greyed out (luminosity blend onto the
-   dark base colour). That's the only marker; the row text stays as normal. */
+   dark base colour) and darkened by an 87% overlay, which keeps row text at
+   WCAG AA (4.5:1) even over a pure-white cover. */
 .score-row-cover-muted {
+  --cover-dim: 0.87;
   background-blend-mode: normal, normal, luminosity;
 }
 
