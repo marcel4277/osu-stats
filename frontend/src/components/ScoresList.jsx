@@ -70,7 +70,9 @@ function chipActiveClass(key) {
   return key === 'all' ? 'bg-gray-600 text-white' : modColors(key).chip;
 }
 
-function ModBadges({ mods }) {
+const LAZER_BADGE = 'bg-blue-400/10 text-blue-300 border-blue-400/30';
+
+function ModBadges({ mods, isLazer }) {
   const shown = (mods || []).filter(mod => mod !== 'NF' && mod !== 'CL');
   const list = shown.length === 0 ? ['NM'] : shown;
   return (
@@ -78,6 +80,9 @@ function ModBadges({ mods }) {
       {list.map(mod => (
         <span key={mod} className={`${BADGE_BASE} ${modColors(mod).badge}`}>{mod}</span>
       ))}
+      {isLazer && (
+        <Tooltip text="Set on osu!lazer" className={`${BADGE_BASE} ${LAZER_BADGE}`}>LAZER</Tooltip>
+      )}
     </div>
   );
 }
@@ -223,7 +228,7 @@ export default function ScoresList({ scores, username }) {
                       <p className="text-sm text-gray-400">{score.artist}</p>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} /></td>
+                  <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} isLazer={score.is_lazer} /></td>
                   <td className="px-4 py-3 text-center">
                     <span
                       className="px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
