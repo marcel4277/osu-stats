@@ -16,41 +16,38 @@ async function fetchPlayer(username) {
   return { user: userData, scores: scoresData.scores };
 }
 
+// Loads a player whenever `username` changes. If the name changes again before
+// the request finishes, the stale response is ignored so it can't overwrite the
+// newer player.
+function usePlayer(username) {
+  const [player, setPlayer] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setPlayer(null);
+    setError(null);
+    if (!username) { setLoading(false); return; }
+
+    let stale = false;
+    setLoading(true);
+    fetchPlayer(username)
+      .then(data => { if (!stale) setPlayer(data); })
+      .catch(err => { if (!stale) setError(err.response?.data?.message || err.message || 'Failed to fetch data'); })
+      .finally(() => { if (!stale) setLoading(false); });
+
+    return () => { stale = true; };
+  }, [username]);
+
+  return { player, loading, error };
+}
+
 export default function HomePage() {
   const { username, username2 } = useParams();
   const navigate = useNavigate();
 
-  const [player1, setPlayer1] = useState(null);
-  const [loading1, setLoading1] = useState(false);
-  const [error1, setError1]   = useState(null);
-
-  const [player2, setPlayer2] = useState(null);
-  const [loading2, setLoading2] = useState(false);
-  const [error2, setError2]   = useState(null);
-
-  // Load player 1 when username param changes
-  useEffect(() => {
-    if (!username) { setPlayer1(null); return; }
-    setLoading1(true);
-    setError1(null);
-    setPlayer1(null);
-    fetchPlayer(username)
-      .then(setPlayer1)
-      .catch(err => setError1(err.response?.data?.message || err.message || 'Failed to fetch data'))
-      .finally(() => setLoading1(false));
-  }, [username]);
-
-  // Load player 2 when username2 param changes
-  useEffect(() => {
-    if (!username2) { setPlayer2(null); return; }
-    setLoading2(true);
-    setError2(null);
-    setPlayer2(null);
-    fetchPlayer(username2)
-      .then(setPlayer2)
-      .catch(err => setError2(err.response?.data?.message || err.message || 'Failed to fetch data'))
-      .finally(() => setLoading2(false));
-  }, [username2]);
+  const { player: player1, loading: loading1, error: error1 } = usePlayer(username);
+  const { player: player2, loading: loading2, error: error2 } = usePlayer(username2);
 
   const handleSearch1 = (name) => {
     navigate(`/${encodeURIComponent(name.trim())}`);
