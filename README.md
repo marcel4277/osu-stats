@@ -47,10 +47,10 @@ npm run dev
 
 ### Frontend
 
+No `.env` needed locally — Vite proxies `/api` to `localhost:5000`.
+
 ```bash
 cd frontend
-cp .env.example .env.local
-# Set VITE_API_URL=http://localhost:5000
 npm install
 npm run dev
 ```
@@ -65,11 +65,15 @@ OSU_API_ID=your_client_id
 OSU_API_SECRET=your_client_secret
 PORT=5000
 FRONTEND_URL=http://localhost:5174
+
+# Optional — visit counter. Without these it just shows 0.
+UPSTASH_REDIS_REST_URL=https://your-db.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_token
 ```
 
-**Frontend (`frontend/.env.local`)**
+**Frontend (production only, set on Vercel)**
 ```
-VITE_API_URL=http://localhost:5000
+VITE_API_URL=https://your-backend.onrender.com
 ```
 
 ---
