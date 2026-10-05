@@ -1,6 +1,7 @@
 // Styled tooltip used across the site instead of the browser's plain `title` box.
-// Shows on hover, and on keyboard focus or a tap (focus-within), so it also
-// works without a mouse.
+// Shows on hover (mouse), on keyboard focus (Tab), and on tap on touch screens.
+// A mouse click doesn't count as keyboard focus, so clicking a chip on desktop
+// doesn't leave its tooltip stuck open.
 //
 // focusable: make the wrapper itself focusable. Leave it on for plain content
 // (a date, a badge); turn it off when wrapping something already focusable,
@@ -23,7 +24,7 @@ export default function Tooltip({ text, children, placement = 'top', focusable =
       {children}
       <span
         role="tooltip"
-        className={`absolute ${PLACEMENTS[placement]} hidden group-hover/tip:block group-focus-within/tip:block z-30 pointer-events-none`}
+        className={`absolute ${PLACEMENTS[placement]} hidden group-hover/tip:block group-focus-visible/tip:block group-has-[:focus-visible]/tip:block [@media(hover:none)]:group-focus-within/tip:block z-30 pointer-events-none`}
       >
         <span className="block w-max max-w-[16rem] bg-gray-900 border border-gray-600 text-gray-300 text-xs font-normal normal-case tracking-normal text-left rounded-lg px-3 py-2 shadow-xl">
           {text}

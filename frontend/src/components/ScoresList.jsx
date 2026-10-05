@@ -48,8 +48,8 @@ const BADGE_BASE = 'px-1.5 py-0.5 rounded text-xs font-bold border';
 
 function chipTitle(chip) {
   if (chip.key === 'all') return 'Show all scores';
-  if (chip.key === 'NM') return `No difficulty-changing mods (${chip.count}). NF, SD, PF etc. still count as NM`;
-  return `${MOD_NAMES[chip.key] || chip.label} (${chip.count})`;
+  if (chip.key === 'NM') return 'No difficulty-changing mods. NF, SD, PF etc. still count as NM';
+  return MOD_NAMES[chip.key] || chip.label;
 }
 
 function chipActiveClass(key) {
