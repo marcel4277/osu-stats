@@ -2,10 +2,32 @@ import express from 'express';
 import axios from 'axios';
 import config from '../config/env.js';
 import OsuApiService from '../services/osuApiService.js';
-import { getCacheEntry, setCacheEntry } from '../services/scoreCache.js';
+import { createCache } from '../services/cache.js';
 
 const router = express.Router();
 const osuApi = new OsuApiService(config.OSU_API_ID, config.OSU_API_SECRET);
+
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const userCache = createCache({ ttlMs: CACHE_TTL_MS, maxEntries: 200 });
+const scoreCache = createCache({ ttlMs: CACHE_TTL_MS, maxEntries: 100 });
+
+// osu! usernames are case-insensitive, so "Cookiezi" and "cookiezi" share an entry.
+// The frontend asks for the profile and the scores at the same time; both go
+// through here, so that's one osu! lookup instead of two.
+function getUser(username) {
+  return userCache(username.toLowerCase(), () => osuApi.getUserByUsername(username));
+}
+
+function getScores(userId, type) {
+  return scoreCache(`${userId}:${type}`, async () => {
+    if (type === 'recent') return osuApi.getUserRecentScores(userId, 50);
+    // Best scores: 200 max, fetched as four pages of 50 in parallel
+    const pages = await Promise.all(
+      [0, 50, 100, 150].map(offset => osuApi.getUserBestScoresPage(userId, 50, offset)),
+    );
+    return pages.flat();
+  });
+}
 
 const REDIS_URL = config.UPSTASH_REDIS_URL;
 const REDIS_TOKEN = config.UPSTASH_REDIS_TOKEN;
@@ -15,6 +37,7 @@ async function redisCommand(command) {
   try {
     const res = await axios.get(`${REDIS_URL}/${command}`, {
       headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
+      timeout: 5000,
     });
     return res.data.result;
   } catch {
@@ -57,7 +80,7 @@ router.get('/user/:username', async (req, res) => {
   }
 
   try {
-    const user = await osuApi.getUserByUsername(username);
+    const user = await getUser(username);
     res.json(user);
   } catch (error) {
     if (error.message.includes('Not found')) {
@@ -70,9 +93,6 @@ router.get('/user/:username', async (req, res) => {
 
 // GET /api/user/:username/scores
 // Query: type ('best'|'recent', default 'best')
-//
-// Cache-hit  → return immediately
-// Cache-miss → fetch all pages in parallel, cache, respond (always complete: true)
 router.get('/user/:username/scores', async (req, res) => {
   const { username } = req.params;
   const validationError = validateUsername(username);
@@ -84,32 +104,9 @@ router.get('/user/:username/scores', async (req, res) => {
   const type = ALLOWED_TYPES.has(rawType) ? rawType : 'best';
 
   try {
-    const user = await osuApi.getUserByUsername(username);
-    const cacheKey = `${user.id}:${type}`;
-    const cached = getCacheEntry(cacheKey);
-
-    // --- Cache hit ---
-    if (cached) {
-      return res.json({ username: user.username, user_id: user.id, type, scores: cached.scores, complete: true });
-    }
-
-    // --- Cache miss: fetch all pages in parallel ---
-    let allScores;
-    if (type === 'recent') {
-      allScores = await osuApi.getUserRecentScores(user.id, 50);
-    } else {
-      const pages = await Promise.all([
-        osuApi.getUserBestScoresPage(user.id, 50, 0),
-        osuApi.getUserBestScoresPage(user.id, 50, 50),
-        osuApi.getUserBestScoresPage(user.id, 50, 100),
-        osuApi.getUserBestScoresPage(user.id, 50, 150),
-      ]);
-      allScores = pages.flat();
-    }
-
-    setCacheEntry(cacheKey, allScores, true);
-    console.log(`[cache] ${username}: ${allScores.length} scores cached`);
-    res.json({ username: user.username, user_id: user.id, type, scores: allScores, complete: true });
+    const user = await getUser(username);
+    const scores = await getScores(user.id, type);
+    res.json({ username: user.username, user_id: user.id, type, scores });
   } catch (error) {
     if (error.message.includes('Not found')) {
       return res.status(404).json({ error: 'User not found', message: `"${username}" does not exist on osu!` });

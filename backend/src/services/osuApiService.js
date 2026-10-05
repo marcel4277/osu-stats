@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const OSU_API_BASE = 'https://osu.ppy.sh/api/v2';
 const OSU_OAUTH_TOKEN_URL = 'https://osu.ppy.sh/oauth/token';
+const REQUEST_TIMEOUT_MS = 10000;
 
 export class OsuApiService {
   constructor(clientId, clientSecret) {
@@ -9,13 +10,22 @@ export class OsuApiService {
     this.clientSecret = clientSecret;
     this.accessToken = null;
     this.tokenExpiresAt = null;
+    this.tokenRequest = null;
   }
 
+  // Requests that arrive while a new token is being fetched wait for that one
+  // instead of each requesting their own.
   async getAccessToken() {
     if (this.accessToken && this.tokenExpiresAt > Date.now()) {
       return this.accessToken;
     }
+    if (!this.tokenRequest) {
+      this.tokenRequest = this._fetchAccessToken().finally(() => { this.tokenRequest = null; });
+    }
+    return this.tokenRequest;
+  }
 
+  async _fetchAccessToken() {
     console.log('[OsuApiService] Requesting new access token');
 
     try {
@@ -24,7 +34,7 @@ export class OsuApiService {
         client_secret: this.clientSecret,
         grant_type: 'client_credentials',
         scope: 'public',
-      });
+      }, { timeout: REQUEST_TIMEOUT_MS });
 
       const { access_token, expires_in } = response.data;
 
@@ -50,6 +60,7 @@ export class OsuApiService {
       const response = await axios({
         method,
         url: `${OSU_API_BASE}${endpoint}`,
+        timeout: REQUEST_TIMEOUT_MS,
         headers: {
           Authorization: `Bearer ${token}`,
           ...config.headers,
