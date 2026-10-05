@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { modMatches, buildChips, MOD_NAMES } from './modUtils.js';
+import { modMatches, buildChips, modColors, MOD_NAMES } from './modUtils.js';
 
 const COLUMNS = [
   { key: 'accuracy', label: 'Accuracy' },
@@ -42,50 +42,20 @@ function timeAgo(dateStr) {
   return `${years} year${years > 1 ? 's' : ''} ago`;
 }
 
-// Soft tinted badges: light text on a faint tint of the same hue, thin border.
+// Soft tinted badges: light text on a faint tint of the mod's colour, thin border.
 const BADGE_BASE = 'px-1.5 py-0.5 rounded text-xs font-bold border';
-const AMBER = 'bg-amber-400/10 text-amber-200 border-amber-300/30';
-const GREEN = 'bg-emerald-400/10 text-emerald-300 border-emerald-400/30';
-const MOD_STYLE = {
-  NM: 'bg-sky-400/10 text-sky-300 border-sky-400/30',
-  HD: 'bg-indigo-400/10 text-indigo-300 border-indigo-400/30',
-  HR: 'bg-rose-400/10 text-rose-300 border-rose-400/30',
-  DT: AMBER, NC: AMBER,
-  EZ: GREEN, HT: GREEN,
-  FL: 'bg-slate-400/10 text-slate-300 border-slate-400/30',
-  DC: GREEN,
-  SD: 'bg-orange-400/10 text-orange-300 border-orange-400/30',
-  PF: 'bg-orange-400/10 text-orange-300 border-orange-400/30',
-  SO: 'bg-pink-400/10 text-pink-300 border-pink-400/30',
-  TD: 'bg-cyan-400/10 text-cyan-300 border-cyan-400/30',
-  MR: 'bg-fuchsia-400/10 text-fuchsia-300 border-fuchsia-400/30',
-};
-const MOD_UNKNOWN = 'bg-gray-400/10 text-gray-300 border-gray-400/30';
 
-// Same colours for the filter chips when selected (a bit stronger tint)
-const CHIP_ACTIVE = {
-  all:   'bg-gray-600 text-white',
-  NM:    'bg-sky-400/25 text-sky-200',
-  HR:    'bg-rose-400/25 text-rose-200',
-  DT:    'bg-amber-400/25 text-amber-100',
-  HD:    'bg-indigo-400/25 text-indigo-200',
-  EZ:    'bg-emerald-400/25 text-emerald-200',
-  HT:    'bg-emerald-400/25 text-emerald-200',
-  FL:    'bg-slate-400/25 text-slate-200',
-  SD:    'bg-orange-400/25 text-orange-200',
-  PF:    'bg-orange-400/25 text-orange-200',
-  SO:    'bg-pink-400/25 text-pink-200',
-  TD:    'bg-cyan-400/25 text-cyan-200',
-  MR:    'bg-fuchsia-400/25 text-fuchsia-200',
-};
+function chipActiveClass(key) {
+  return key === 'all' ? 'bg-gray-600 text-white' : modColors(key).chip;
+}
 
 function ModBadges({ mods }) {
-  const shown = (mods || []).filter(m => m !== 'NF' && m !== 'CL');
+  const shown = (mods || []).filter(mod => mod !== 'NF' && mod !== 'CL');
   const list = shown.length === 0 ? ['NM'] : shown;
   return (
     <div className="flex flex-wrap justify-center gap-1">
-      {list.map(m => (
-        <span key={m} className={`${BADGE_BASE} ${MOD_STYLE[m] || MOD_UNKNOWN}`}>{m}</span>
+      {list.map(mod => (
+        <span key={mod} className={`${BADGE_BASE} ${modColors(mod).badge}`}>{mod}</span>
       ))}
     </div>
   );
@@ -166,7 +136,7 @@ export default function ScoresList({ scores, username }) {
                   title={f.key === 'all' ? 'Show all scores' : f.key === 'NM' ? `No difficulty-changing mods (${f.count}). NF, SD, PF etc. still count as NM` : `${MOD_NAMES[f.key] || f.label} (${f.count})`}
                   className={`px-3 py-1 text-sm font-semibold transition ${
                     modFilter === f.key
-                      ? (CHIP_ACTIVE[f.key] || 'bg-gray-500 text-white')
+                      ? chipActiveClass(f.key)
                       : 'text-gray-400 hover:text-white hover:bg-gray-700'
                   }`}
                 >
