@@ -29,13 +29,17 @@ body {
 /* Score row with the map's cover behind it. The cover spans the left 60% of the
    row and fades out to the right: rows are very wide and short, so stretching
    it full width shows only a thin slice.
-   In-range rows show the cover at full brightness in colour; rows outside the
-   time filter show it in greyscale. --cover-dim is a dark overlay on top. */
+   In-range rows show the cover in colour; rows outside the time filter show it
+   in greyscale. On top is a dark overlay, --dim-top at the top of the row to
+   --dim-bottom at the bottom.
+   Colour rows: 50% -> 75%, so the top of the cover stays brightest while the
+   text area is dark enough for WCAG AA (4.5:1) even over a pure-white cover. */
 .score-row-cover {
-  --cover-dim: 0;
+  --dim-top: 0.5;
+  --dim-bottom: 0.75;
   background-color: #111827;
   background-image:
-    linear-gradient(rgb(17 24 39 / var(--cover-dim)), rgb(17 24 39 / var(--cover-dim))),
+    linear-gradient(to bottom, rgb(17 24 39 / var(--dim-top)), rgb(17 24 39 / var(--dim-bottom))),
     linear-gradient(to right, transparent 35%, #111827 60%),
     var(--cover);
   background-size: auto, auto, 60% auto;
@@ -46,10 +50,10 @@ body {
   background-origin: border-box;
 }
 
-/* Keeping text readable on a bright cover: a dark text shadow, lighter
-   secondary grey text, and a solid dark backing on badges / the accuracy
-   chip / the lazer tag. */
-.score-row-cover > td {
+/* Keeping text readable on a cover: lighter secondary grey text and a solid
+   dark backing on badges / the accuracy chip / the lazer tag. Greyscale rows
+   (lightly dimmed) also get a dark text shadow. */
+.score-row-cover-muted > td {
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.95), 0 0 8px rgb(0 0 0 / 0.8);
 }
 
@@ -65,7 +69,8 @@ body {
 /* Rows outside the time filter: the same cover in greyscale (luminosity blend
    onto the dark base colour), dimmed slightly so the colour rows stand out. */
 .score-row-cover-muted {
-  --cover-dim: 0.3;
+  --dim-top: 0.3;
+  --dim-bottom: 0.3;
   background-blend-mode: normal, normal, luminosity;
 }
 
