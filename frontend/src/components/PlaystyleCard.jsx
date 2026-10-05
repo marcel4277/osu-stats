@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { modCounts } from './modUtils.js';
+import { modCounts, hasMod, isNM, isGimmick, modColors } from './modUtils.js';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -159,25 +159,13 @@ const TRAITS = {
 
 // ─── Analyse ──────────────────────────────────────────────────────────────────
 
-const GIMMICK_MODS  = new Set(['EZ', 'HT', 'FL']);
-const STANDARD_MODS = new Set(['NF', 'HD', 'HR', 'DT', 'NC', 'SD', 'PF', 'SO', 'TD', 'MR', 'CL']);
-
-const BAR_COLORS = {
-  HR: 'bg-rose-400', DT: 'bg-yellow-400', HD: 'bg-indigo-400', EZ: 'bg-emerald-400',
-  HT: 'bg-teal-400', FL: 'bg-slate-300', SD: 'bg-orange-400', PF: 'bg-amber-300',
-  NF: 'bg-slate-400', SO: 'bg-pink-400', TD: 'bg-cyan-400', MR: 'bg-fuchsia-400',
-};
-
 function analyse(scores) {
   const total = scores.length;
 
-  const hasDT      = s => s.mods.some(m => m === 'DT' || m === 'NC');
-  const hasHR      = s => s.mods.includes('HR');
-  const hasHD      = s => s.mods.includes('HD');
-  const hasGimmick = s => s.mods.some(m => GIMMICK_MODS.has(m) || (!STANDARD_MODS.has(m) && m !== 'NM' && m !== ''));
+  const hasDT      = s => hasMod(s, 'DT');
+  const hasHR      = s => hasMod(s, 'HR');
+  const hasHD      = s => hasMod(s, 'HD');
 
-  // NM: no HR, DT, HD, or gimmick mods
-  const isNM     = s => !hasDT(s) && !hasHR(s) && !hasHD(s) && !hasGimmick(s);
   // Pure HD: HD without HR or DT stacked (HDHR counts as HR, HDDT counts as DT)
   const isPureHD = s => hasHD(s) && !hasHR(s) && !hasDT(s);
 
@@ -188,7 +176,7 @@ function analyse(scores) {
   const allHDCount   = scores.filter(hasHD).length;
   const hdhrCount    = scores.filter(s => hasHD(s) && hasHR(s)).length;
   const hddtCount    = scores.filter(s => hasHD(s) && hasDT(s)).length;
-  const gimmickCount = scores.filter(hasGimmick).length;
+  const gimmickCount = scores.filter(isGimmick).length;
 
   const nmR      = nmCount      / total;
   const hrR      = hrCount      / total;
@@ -243,8 +231,8 @@ function analyse(scores) {
 
   // Every mod that appears in the scores, most common first (NM always first)
   const breakdown = [
-    { mod: 'NM', count: nmCount, color: 'bg-gray-400' },
-    ...modCounts(scores).map(({ mod, count }) => ({ mod, count, color: BAR_COLORS[mod] || 'bg-slate-400' })),
+    { mod: 'NM', count: nmCount, color: modColors('NM').bar },
+    ...modCounts(scores).map(({ mod, count }) => ({ mod, count, color: modColors(mod).bar })),
   ].filter(b => b.count > 0);
 
   return { key, traits, breakdown, total, avgAcc };
