@@ -40,7 +40,7 @@ A player stats site for osu! — look up any player by username and get a clean 
 ```bash
 cd backend
 cp .env.example .env
-# Fill in OSU_CLIENT_ID and OSU_CLIENT_SECRET in .env
+# Fill in OSU_API_ID and OSU_API_SECRET in .env
 npm install
 npm run dev
 ```
@@ -61,8 +61,8 @@ npm run dev
 
 **Backend (`backend/.env`)**
 ```
-OSU_CLIENT_ID=your_client_id
-OSU_CLIENT_SECRET=your_client_secret
+OSU_API_ID=your_client_id
+OSU_API_SECRET=your_client_secret
 PORT=5000
 FRONTEND_URL=http://localhost:5174
 ```
