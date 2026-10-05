@@ -46,7 +46,7 @@ body {
 }
 
 /* Rows outside the time filter: the cover greyed out (luminosity blend onto the
-   dark base colour). The row is also faded via opacity in ScoresList. */
+   dark base colour). That's the only marker; the row text stays as normal. */
 .score-row-cover-muted {
   background-blend-mode: normal, normal, luminosity;
 }
