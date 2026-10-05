@@ -27,8 +27,9 @@ body {
 }
 
 /* Score row with the map's cover behind it. The cover spans the left 60% of the
-   row and fades out to the right: rows are very wide and short, so stretching
-   it full width shows only a thin slice.
+   row and fades out to the right on an eased curve, so there is no visible
+   edge. (Rows are very wide and short, so stretching
+   it full width would show only a thin slice.)
    In-range rows show the cover in colour; rows outside the time filter show it
    in greyscale. On top is a dark overlay, --dim-top at the top of the row to
    --dim-bottom at the bottom.
@@ -40,7 +41,10 @@ body {
   background-color: #111827;
   background-image:
     linear-gradient(to bottom, rgb(17 24 39 / var(--dim-top)), rgb(17 24 39 / var(--dim-bottom))),
-    linear-gradient(to right, transparent 35%, #111827 60%),
+    linear-gradient(to right,
+      rgb(17 24 39 / 0) 15%, rgb(17 24 39 / 0.08) 22%, rgb(17 24 39 / 0.25) 30%,
+      rgb(17 24 39 / 0.5) 38%, rgb(17 24 39 / 0.75) 46%, rgb(17 24 39 / 0.92) 53%,
+      rgb(17 24 39) 60%),
     var(--cover);
   background-size: auto, auto, 60% auto;
   background-position: center, center, left center;
