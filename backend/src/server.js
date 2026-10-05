@@ -6,6 +6,10 @@ import apiRouter from './routes/api.js';
 
 const app = express();
 
+// Render sits in front of the app as a reverse proxy. Without this, req.ip is the
+// proxy's address and every visitor shares one rate-limit bucket.
+app.set('trust proxy', 1);
+
 // Security headers
 app.use(helmet());
 
