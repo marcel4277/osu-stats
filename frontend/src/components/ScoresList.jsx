@@ -242,7 +242,7 @@ export default function ScoresList({ scores, username }) {
                       {score.score != null ? score.score.toLocaleString() : '—'}
                       {score.is_lazer && (
                         <Tooltip
-                          text="Set on osu!lazer, shown on the classic score scale"
+                          text="osu!lazer score (standardised, max 1,000,000)"
                           className="bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-40 px-1.5 py-0.5 rounded text-[0.65rem] leading-none font-semibold tracking-wide"
                         >
                           lazer
