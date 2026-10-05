@@ -2,14 +2,14 @@ import { useMemo } from 'react';
 
 const MONTHS_SHOWN = 18;
 
-// Each verdict also carries a tooltip string shown on hover of the badge.
+// Each verdict also carries a tooltip shown when hovering the badge.
 function buildVerdict(daysSinceLast, last90, last180) {
-  if (daysSinceLast <= 14 && last90  >= 5) return { label: 'Actively Improving', color: 'text-green-400',  border: 'border-green-400',  glow: 'shadow-green-400/20',  dot: 'bg-green-400',  tip: 'Top score within 14 days + 5 or more in the last 90 days'   };
-  if (daysSinceLast <= 60 && last90  >= 3) return { label: 'On the Rise',        color: 'text-osu-cyan',  border: 'border-osu-cyan',   glow: 'shadow-cyan-400/20',   dot: 'bg-osu-cyan',   tip: 'Top score within 60 days + 3 or more in the last 90 days'   };
-  if (daysSinceLast <= 90 && last180 >= 1) return { label: 'Still Active',       color: 'text-purple-300',border: 'border-osu-purple', glow: 'shadow-purple-400/20', dot: 'bg-osu-purple', tip: 'Top score within 90 days'                                    };
-  if (daysSinceLast <= 270)               return { label: 'Slowing Down',       color: 'text-yellow-400',border: 'border-yellow-400', glow: 'shadow-yellow-400/20', dot: 'bg-yellow-400', tip: 'No top score in 4–9 months'                                  };
-  if (daysSinceLast <= 365)               return { label: 'Plateaued',          color: 'text-orange-400',border: 'border-orange-400', glow: 'shadow-orange-400/20', dot: 'bg-orange-400', tip: 'No top score in 9–12 months'                                 };
-  return                                         { label: 'Inactive',           color: 'text-red-400',   border: 'border-red-400',    glow: 'shadow-red-400/20',    dot: 'bg-red-400',    tip: 'No top score set in over a year'                            };
+  if (daysSinceLast <= 14 && last90  >= 5) return { label: 'Actively Improving', color: 'text-green-400',  border: 'border-green-400',  dot: 'bg-green-400',  tip: 'Top score within 14 days + 5 or more in the last 90 days'   };
+  if (daysSinceLast <= 60 && last90  >= 3) return { label: 'On the Rise',        color: 'text-osu-cyan',  border: 'border-osu-cyan',   dot: 'bg-osu-cyan',   tip: 'Top score within 60 days + 3 or more in the last 90 days'   };
+  if (daysSinceLast <= 90 && last180 >= 1) return { label: 'Still Active',       color: 'text-purple-300',border: 'border-osu-purple', dot: 'bg-osu-purple', tip: 'Top score within 90 days'                                    };
+  if (daysSinceLast <= 270)               return { label: 'Slowing Down',       color: 'text-yellow-400',border: 'border-yellow-400', dot: 'bg-yellow-400', tip: 'No top score in 4–9 months'                                  };
+  if (daysSinceLast <= 365)               return { label: 'Plateaued',          color: 'text-orange-400',border: 'border-orange-400', dot: 'bg-orange-400', tip: 'No top score in 9–12 months'                                 };
+  return                                         { label: 'Inactive',           color: 'text-red-400',   border: 'border-red-400',    dot: 'bg-red-400',    tip: 'No top score set in over a year'                            };
 }
 
 function formatMonthLabel(year, month) {
@@ -64,11 +64,11 @@ export default function ImprovementVelocity({ scores }) {
     const maxCount = Math.max(...buckets.map(b => b.count), 1);
     const verdict = buildVerdict(daysSinceLast, last90, last180);
 
-    return { daysSinceLast, last90, peakCount, peakKey: formatMonthLabel(peakYear, peakMonth), spanMonths, buckets, maxCount, verdict };
+    return { daysSinceLast, last90, peakCount, peakLabel: formatMonthLabel(peakYear, peakMonth), spanMonths, buckets, maxCount, verdict };
   }, [scores]);
 
   if (!stats) return null;
-  const { daysSinceLast, last90, peakCount, peakKey, spanMonths, buckets, maxCount, verdict } = stats;
+  const { daysSinceLast, last90, peakCount, peakLabel, spanMonths, buckets, maxCount, verdict } = stats;
 
   const lastScoreLabel = daysSinceLast === 0 ? 'Today' : pluralise(daysSinceLast, 'day') + ' ago';
   const spanLabel = spanMonths < 1 ? '< 1 month'
@@ -80,7 +80,7 @@ export default function ImprovementVelocity({ scores }) {
     : `No top scores in the last 90 days.${daysSinceLast > 365 ? ' This player may have stepped back from competing.' : ' A return could mean new peaks soon.'}`;
 
   return (
-    <div className={`relative bg-gray-800 rounded-lg border border-gray-700 overflow-hidden`}>
+    <div className="relative bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
 
       {/* Coloured top accent bar */}
       <div className={`h-1 w-full ${verdict.dot}`} />
@@ -93,7 +93,6 @@ export default function ImprovementVelocity({ scores }) {
             <p className="text-gray-400 text-sm mt-0.5">Based on {scores.length} top scores</p>
           </div>
           <div
-            title={verdict.tip}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${verdict.border} bg-gray-900 cursor-default group relative`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${verdict.dot} animate-pulse`} />
@@ -111,7 +110,7 @@ export default function ImprovementVelocity({ scores }) {
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
             { label: 'Last Top Score', value: lastScoreLabel,           accent: verdict.color },
-            { label: 'Peak Month',     value: `${peakKey}`,             sub: `${peakCount} scores`, accent: 'text-osu-pink' },
+            { label: 'Peak Month',     value: peakLabel,                sub: `${peakCount} scores`, accent: 'text-osu-pink' },
             { label: 'Active Span',    value: spanLabel,                accent: 'text-osu-cyan' },
           ].map(({ label, value, sub, accent }) => (
             <div key={label} className="bg-gray-900 rounded-lg p-3 text-center">

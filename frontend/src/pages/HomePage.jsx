@@ -42,6 +42,15 @@ function usePlayer(username) {
   return { player, loading, error };
 }
 
+function ErrorMessage({ message }) {
+  return (
+    <div className="p-4 bg-red-500 bg-opacity-20 border border-red-500 rounded-lg text-red-300">
+      <p className="font-semibold">Error</p>
+      <p>{message}</p>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const { username, username2 } = useParams();
   const navigate = useNavigate();
@@ -78,18 +87,8 @@ export default function HomePage() {
         )}
       </div>
 
-      {error1 && (
-        <div className="p-4 bg-red-500 bg-opacity-20 border border-red-500 rounded-lg text-red-300">
-          <p className="font-semibold">Error</p>
-          <p>{error1}</p>
-        </div>
-      )}
-      {error2 && (
-        <div className="p-4 bg-red-500 bg-opacity-20 border border-red-500 rounded-lg text-red-300">
-          <p className="font-semibold">Error</p>
-          <p>{error2}</p>
-        </div>
-      )}
+      {error1 && <ErrorMessage message={error1} />}
+      {error2 && <ErrorMessage message={error2} />}
 
       {/* Comparison view */}
       {isComparing && (

@@ -83,7 +83,7 @@ router.get('/user/:username', async (req, res) => {
     const user = await getUser(username);
     res.json(user);
   } catch (error) {
-    if (error.message.includes('Not found')) {
+    if (error.status === 404) {
       return res.status(404).json({ error: 'User not found', message: `"${username}" does not exist on osu!` });
     }
     console.error(`[api] GET /user/${username}: ${error.message}`);
@@ -108,7 +108,7 @@ router.get('/user/:username/scores', async (req, res) => {
     const scores = await getScores(user.id, type);
     res.json({ username: user.username, user_id: user.id, type, scores });
   } catch (error) {
-    if (error.message.includes('Not found')) {
+    if (error.status === 404) {
       return res.status(404).json({ error: 'User not found', message: `"${username}" does not exist on osu!` });
     }
     console.error(`[api] GET /user/${username}/scores: ${error.message}`);

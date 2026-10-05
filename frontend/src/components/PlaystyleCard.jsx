@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { modCounts, hasMod, isNM, isGimmick, modColors } from './modUtils.js';
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
+// Icons
 
 function Icon({ children, className = '' }) {
   return (
@@ -32,7 +32,7 @@ function archetypeIcon(key) {
   return FAMILY_ICONS.allrounder;
 }
 
-// ─── Archetypes ───────────────────────────────────────────────────────────────
+// Archetypes
 
 const ARCHETYPES = {
   // NM family
@@ -146,7 +146,7 @@ const ARCHETYPES = {
   },
 };
 
-// ─── Trait badges ─────────────────────────────────────────────────────────────
+// Trait badges
 
 const TRAITS = {
   accMachine:   { label: 'Acc Machine',    title: 'Exceptionally high average accuracy',            criteria: 'Avg accuracy ≥ 99% (non-Paragon)',      style: 'bg-emerald-900 text-emerald-300' },
@@ -157,7 +157,7 @@ const TRAITS = {
   gimmickTouch: { label: 'Gimmick Touch',  title: 'Occasionally dips into non-standard mods',      criteria: 'EZ / HT / FL on 5–10% of scores',       style: 'bg-green-900   text-green-300'   },
 };
 
-// ─── Analyse ──────────────────────────────────────────────────────────────────
+// Analyse
 
 function analyse(scores) {
   const total = scores.length;
@@ -178,39 +178,39 @@ function analyse(scores) {
   const hddtCount    = scores.filter(s => hasHD(s) && hasDT(s)).length;
   const gimmickCount = scores.filter(isGimmick).length;
 
-  const nmR      = nmCount      / total;
-  const hrR      = hrCount      / total;
-  const dtR      = dtCount      / total;
-  const pureHDR  = pureHDCount  / total;
-  const allHDR   = allHDCount   / total;
-  const hdhrR    = hdhrCount    / total;
-  const hddtR    = hddtCount    / total;
-  const gimmickR = gimmickCount / total;
+  const nmRate       = nmCount      / total;
+  const hrRate       = hrCount      / total;
+  const dtRate       = dtCount      / total;
+  const pureHDRate   = pureHDCount  / total;
+  const allHDRate    = allHDCount   / total;
+  const hdhrRate     = hdhrCount    / total;
+  const hddtRate     = hddtCount    / total;
+  const gimmickRate  = gimmickCount / total;
 
-  const avgAcc = scores.reduce((sum, s) => sum + parseFloat(s.accuracy), 0) / total;
+  const avgAccuracy = scores.reduce((sum, s) => sum + parseFloat(s.accuracy), 0) / total;
 
   // Gimmick archetype takes priority if significant
   let key;
-  if (gimmickR >= 0.10) {
+  if (gimmickRate >= 0.10) {
     key = 'gimmick';
   } else {
     // Each mod with its player/specialist thresholds and paragon acc requirement
     const candidates = [
-      { prefix: 'nm', rate: nmR,     playerT: 0.70, specialistT: 0.90, paragonAcc: 99.0 },
-      { prefix: 'hr', rate: hrR,     playerT: 0.40, specialistT: 0.60, paragonAcc: 97.0 },
-      { prefix: 'dt', rate: dtR,     playerT: 0.50, specialistT: 0.70, paragonAcc: 97.0 },
-      { prefix: 'hd', rate: pureHDR, playerT: 0.50, specialistT: 0.70, paragonAcc: 98.0 },
+      { prefix: 'nm', rate: nmRate,     playerMin: 0.70, specialistMin: 0.90, paragonAcc: 99.0 },
+      { prefix: 'hr', rate: hrRate,     playerMin: 0.40, specialistMin: 0.60, paragonAcc: 97.0 },
+      { prefix: 'dt', rate: dtRate,     playerMin: 0.50, specialistMin: 0.70, paragonAcc: 97.0 },
+      { prefix: 'hd', rate: pureHDRate, playerMin: 0.50, specialistMin: 0.70, paragonAcc: 98.0 },
     ];
 
     // Sort by rate descending, pick the dominant mod that meets its Player threshold
     const sorted = [...candidates].sort((a, b) => b.rate - a.rate);
-    const match  = sorted.find(c => c.rate >= c.playerT);
+    const match  = sorted.find(c => c.rate >= c.playerMin);
 
     if (!match) {
       key = 'allrounder';
-    } else if (match.rate >= match.specialistT && avgAcc >= match.paragonAcc) {
+    } else if (match.rate >= match.specialistMin && avgAccuracy >= match.paragonAcc) {
       key = `${match.prefix}Paragon`;
-    } else if (match.rate >= match.specialistT) {
+    } else if (match.rate >= match.specialistMin) {
       key = `${match.prefix}Specialist`;
     } else {
       key = `${match.prefix}Player`;
@@ -219,15 +219,15 @@ function analyse(scores) {
 
   // Trait badges
   const traits = [];
-  const isParagon = key.endsWith('Paragon');
-  const isHDarch  = key.startsWith('hd');
+  const isParagon     = key.endsWith('Paragon');
+  const isHDArchetype = key.startsWith('hd');
 
-  if (avgAcc >= 99.0 && !isParagon)                      traits.push('accMachine');
-  if (allHDR >= 0.30 && !isHDarch)                       traits.push('hdStacker');
-  if (hdhrR  >= 0.20)                                    traits.push('hdhrStacker');
-  if (hddtR  >= 0.20)                                    traits.push('hddtStacker');
-  if (key === 'allrounder' && Math.max(nmR, hrR, dtR, pureHDR) < 0.50) traits.push('modMixer');
-  if (gimmickR >= 0.05 && gimmickR < 0.10)               traits.push('gimmickTouch');
+  if (avgAccuracy >= 99.0 && !isParagon)          traits.push('accMachine');
+  if (allHDRate >= 0.30 && !isHDArchetype)        traits.push('hdStacker');
+  if (hdhrRate >= 0.20)                           traits.push('hdhrStacker');
+  if (hddtRate >= 0.20)                           traits.push('hddtStacker');
+  if (key === 'allrounder' && Math.max(nmRate, hrRate, dtRate, pureHDRate) < 0.50) traits.push('modMixer');
+  if (gimmickRate >= 0.05 && gimmickRate < 0.10)  traits.push('gimmickTouch');
 
   // Every mod that appears in the scores, most common first (NM always first)
   const breakdown = [
@@ -235,10 +235,10 @@ function analyse(scores) {
     ...modCounts(scores).map(({ mod, count }) => ({ mod, count, color: modColors(mod).bar })),
   ].filter(b => b.count > 0);
 
-  return { key, traits, breakdown, total, avgAcc };
+  return { key, traits, breakdown, total, avgAccuracy };
 }
 
-// ─── Archetypes modal ─────────────────────────────────────────────────────────
+// Archetypes modal
 
 const MOD_GROUPS = [
   { label: 'Nomod',       keys: ['nmPlayer', 'nmSpecialist', 'nmParagon'] },
@@ -265,8 +265,8 @@ function ArchetypesModal({ onClose }) {
 
         <div className="p-6 space-y-6">
           <p className="text-gray-400 text-sm">
-            Archetypes are based on your most-played mod across your top scores.
-            The highest tier you qualify for within that mod is shown.
+            Archetypes are based on the player's most-played mod across their top scores.
+            The highest tier they qualify for within that mod is shown.
             Paragon tiers add an accuracy requirement on top.
           </p>
 
@@ -274,15 +274,15 @@ function ArchetypesModal({ onClose }) {
             <div key={group.label}>
               <p className="text-gray-400 text-xs uppercase tracking-widest mb-3">{group.label}</p>
               <div className="space-y-2">
-                {group.keys.map(k => {
-                  const a = ARCHETYPES[k];
+                {group.keys.map(archetypeKey => {
+                  const archetype = ARCHETYPES[archetypeKey];
                   return (
-                    <div key={k} className={`flex items-start gap-3 rounded-lg p-3 border ${a.border} bg-gray-800`}>
-                      <div className={`shrink-0 mt-0.5 ${a.text}`}>{archetypeIcon(k)}</div>
+                    <div key={archetypeKey} className={`flex items-start gap-3 rounded-lg p-3 border ${archetype.border} bg-gray-800`}>
+                      <div className={`shrink-0 mt-0.5 ${archetype.text}`}>{archetypeIcon(archetypeKey)}</div>
                       <div className="min-w-0">
-                        <p className={`font-semibold text-sm ${a.text}`}>{a.label}</p>
-                        <p className="text-gray-300 text-xs mt-0.5">{a.desc}</p>
-                        <p className="text-gray-400 text-xs mt-1 font-mono">{a.criteria}</p>
+                        <p className={`font-semibold text-sm ${archetype.text}`}>{archetype.label}</p>
+                        <p className="text-gray-300 text-xs mt-0.5">{archetype.desc}</p>
+                        <p className="text-gray-400 text-xs mt-1 font-mono">{archetype.criteria}</p>
                       </div>
                     </div>
                   );
@@ -315,7 +315,7 @@ function ArchetypesModal({ onClose }) {
   );
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// Component
 
 export default function PlaystyleCard({ scores }) {
   const [showModal, setShowModal] = useState(false);
@@ -327,32 +327,32 @@ export default function PlaystyleCard({ scores }) {
 
   if (!result) return null;
 
-  const { key, traits, breakdown, total, avgAcc } = result;
-  const a = ARCHETYPES[key];
+  const { key, traits, breakdown, total, avgAccuracy } = result;
+  const archetype = ARCHETYPES[key];
 
   return (
     <>
-      <div className={`bg-gray-800 rounded-lg border border-gray-700 overflow-hidden`}>
+      <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
 
         <div className="relative bg-gray-900 px-5 py-5 overflow-hidden">
           {/* archetype colour wash */}
-          <div className={`absolute inset-0 bg-gradient-to-br ${a.from} ${a.to} opacity-25`} />
-          <div className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b ${a.from} ${a.to}`} />
+          <div className={`absolute inset-0 bg-gradient-to-br ${archetype.from} ${archetype.to} opacity-25`} />
+          <div className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b ${archetype.from} ${archetype.to}`} />
           <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-4 min-w-0">
-              <div className={`shrink-0 w-14 h-14 rounded-full border ${a.border} bg-gray-900/70 flex items-center justify-center ${a.text}`}>
+              <div className={`shrink-0 w-14 h-14 rounded-full border ${archetype.border} bg-gray-900/70 flex items-center justify-center ${archetype.text}`}>
                 {archetypeIcon(key)}
               </div>
               <div className="min-w-0">
                 <p className="text-sm text-gray-400 uppercase tracking-widest font-medium">Playstyle</p>
-                <h3 className={`text-3xl font-extrabold leading-tight ${a.text}`}>{a.label}</h3>
-                <p className="text-sm text-gray-400 mt-0.5 font-mono">{a.criteria}</p>
+                <h3 className={`text-3xl font-extrabold leading-tight ${archetype.text}`}>{archetype.label}</h3>
+                <p className="text-sm text-gray-400 mt-0.5 font-mono">{archetype.criteria}</p>
               </div>
             </div>
             <div className="flex items-start gap-3 shrink-0">
               <div className="text-right">
                 <p className="text-gray-400 text-sm">Avg accuracy</p>
-                <p className="text-white font-bold text-lg">{avgAcc.toFixed(1)}%</p>
+                <p className="text-white font-bold text-lg">{avgAccuracy.toFixed(1)}%</p>
               </div>
               <button
                 onClick={() => setShowModal(true)}
@@ -366,7 +366,7 @@ export default function PlaystyleCard({ scores }) {
         </div>
 
         <div className="p-5">
-          <p className={`text-sm mb-5 ${a.text}`}>{a.desc}</p>
+          <p className={`text-sm mb-5 ${archetype.text}`}>{archetype.desc}</p>
 
           <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Mod breakdown · {total} scores</p>
           <div className="space-y-2 mb-5">
@@ -388,10 +388,10 @@ export default function PlaystyleCard({ scores }) {
 
           {traits.length > 0 && (
             <div className="flex flex-wrap gap-2 border-t border-gray-700 pt-4">
-              {traits.map(k => (
-                <span key={k} title={TRAITS[k].title}
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${TRAITS[k].style}`}>
-                  {TRAITS[k].label}
+              {traits.map(traitKey => (
+                <span key={traitKey} title={TRAITS[traitKey].title}
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${TRAITS[traitKey].style}`}>
+                  {TRAITS[traitKey].label}
                 </span>
               ))}
             </div>

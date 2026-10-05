@@ -4,6 +4,16 @@ const OSU_API_BASE = 'https://osu.ppy.sh/api/v2';
 const OSU_OAUTH_TOKEN_URL = 'https://osu.ppy.sh/oauth/token';
 const REQUEST_TIMEOUT_MS = 10000;
 
+// Errors carry the osu! HTTP status so callers can check `error.status === 404`
+function apiError(status, message) {
+  const text = status === 404 ? `Not found: ${message}`
+    : status === 401 ? 'Unauthorized: Check API credentials'
+    : `API error (${status}): ${message}`;
+  const error = new Error(text);
+  error.status = status;
+  return error;
+}
+
 export class OsuApiService {
   constructor(clientId, clientSecret) {
     this.clientId = clientId;
@@ -74,14 +84,12 @@ export class OsuApiService {
         const status = error.response.status;
         const message = error.response.data?.message || error.message;
 
-        if (status === 404) throw new Error(`Not found: ${message}`);
         if (status === 401) {
           this.accessToken = null;
           this.tokenExpiresAt = null;
           if (!isRetry) return this._request(method, endpoint, config, true);
-          throw new Error('Unauthorized: Check API credentials');
         }
-        throw new Error(`API error (${status}): ${message}`);
+        throw apiError(status, message);
       }
       throw error;
     }
@@ -130,10 +138,6 @@ export class OsuApiService {
     });
     if (!Array.isArray(data)) return [];
     return data.map(s => this._mapScore(s));
-  }
-
-  async getUserBestScores(userId, limit = 50) {
-    return this.getUserBestScoresPage(userId, limit, 0);
   }
 
   async getUserRecentScores(userId, limit = 50) {

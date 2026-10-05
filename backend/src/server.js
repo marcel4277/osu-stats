@@ -13,9 +13,6 @@ app.set('trust proxy', 1);
 // Security headers
 app.use(helmet());
 
-// Limit request body size (all routes are GET, but guards against abuse)
-app.use(express.json({ limit: '10kb' }));
-
 // Rate limiting: 60 requests per minute per IP — applied to /api only, not /health
 const limiter = rateLimit({
   windowMs: 60 * 1000,
