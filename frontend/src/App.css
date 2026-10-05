@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Dark page background, so fast scrolling never flashes white while rows are still painting */
+html,
+body {
+  background-color: #050505;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -23,13 +29,22 @@
 /* Score row with the map's cover behind it: greyed out (luminosity blend onto
    the dark base colour) and darkened by a gray-900 overlay at 86%.
    86% is the lightest overlay where all row text still meets WCAG AA (4.5:1)
-   even over a pure-white patch of the cover, so don't lower it. */
+   even over a pure-white patch of the cover, so don't lower it.
+   The cover spans the left 60% of the row and fades out to the right: rows are
+   very wide and short, so stretching it full width shows only a thin slice. */
 .score-row-cover {
   background-color: #111827;
-  background-image: linear-gradient(rgb(17 24 39 / 0.86), rgb(17 24 39 / 0.86)), var(--cover);
-  background-size: cover;
-  background-position: center;
-  background-blend-mode: normal, luminosity;
+  background-image:
+    linear-gradient(rgb(17 24 39 / 0.86), rgb(17 24 39 / 0.86)),
+    linear-gradient(to right, transparent 35%, #111827 60%),
+    var(--cover);
+  background-size: auto, auto, 60% auto;
+  background-position: center, center, left center;
+  background-repeat: no-repeat;
+  /* size layers against the border box so the overlay also covers the row
+     border; otherwise a bright line of the cover shows through there */
+  background-origin: border-box;
+  background-blend-mode: normal, normal, luminosity;
 }
 
 /* Hover: an accent bar on the left instead of lightening the row, which
