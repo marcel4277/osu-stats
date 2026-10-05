@@ -38,21 +38,21 @@ const ARCHETYPES = {
   // NM family
   nmPlayer: {
     label: 'NM Player',
-    desc: 'Prefers to play clean, without mods. Comfortable across a wide range of maps.',
+    desc: 'Mostly plays without mods.',
     criteria: 'NM on 70%+ of scores',
     from: 'from-sky-700', to: 'to-cyan-500',
     text: 'text-cyan-300', border: 'border-cyan-600',
   },
   nmSpecialist: {
     label: 'NM Specialist',
-    desc: 'Almost exclusively plays nomod. A dedicated raw player with a strong preference for clean maps.',
+    desc: 'Almost only plays nomod.',
     criteria: 'NM on 90%+ of scores',
     from: 'from-sky-600', to: 'to-cyan-400',
     text: 'text-cyan-200', border: 'border-cyan-500',
   },
   nmParagon: {
     label: 'NM Paragon',
-    desc: 'Plays almost entirely nomod and does it with exceptional accuracy. The gold standard of clean play.',
+    desc: 'Nomod with exceptional accuracy.',
     criteria: 'NM on 90%+ of scores AND avg accuracy ≥ 99%',
     from: 'from-cyan-500', to: 'to-teal-300',
     text: 'text-teal-100', border: 'border-teal-400',
@@ -61,21 +61,21 @@ const ARCHETYPES = {
   // HR family
   hrPlayer: {
     label: 'HR Player',
-    desc: 'Hard Rock is a regular part of the mod pool. Comfortable reading tighter approach rates.',
+    desc: 'Hard Rock is a regular pick.',
     criteria: 'HR on 40%+ of scores',
     from: 'from-rose-800', to: 'to-red-500',
     text: 'text-rose-300', border: 'border-rose-600',
   },
   hrSpecialist: {
     label: 'HR Specialist',
-    desc: 'Hard Rock is the go-to mod. Consistently challenges high approach rates across their top plays.',
+    desc: 'Hard Rock is the go-to mod.',
     criteria: 'HR on 60%+ of scores',
     from: 'from-rose-700', to: 'to-pink-500',
     text: 'text-rose-200', border: 'border-rose-500',
   },
   hrParagon: {
     label: 'HR Paragon',
-    desc: 'Plays HR at a high rate and maintains elite accuracy doing it. Reading and precision at their peak.',
+    desc: 'Lots of HR with elite accuracy.',
     criteria: 'HR on 60%+ of scores AND avg accuracy ≥ 97%',
     from: 'from-rose-600', to: 'to-fuchsia-400',
     text: 'text-fuchsia-100', border: 'border-fuchsia-500',
@@ -84,21 +84,21 @@ const ARCHETYPES = {
   // DT family
   dtPlayer: {
     label: 'DT Player',
-    desc: 'Double Time features heavily in their top plays. Comfortable at elevated BPM.',
+    desc: 'Double Time features heavily.',
     criteria: 'DT on 50%+ of scores',
     from: 'from-yellow-700', to: 'to-orange-500',
     text: 'text-yellow-200', border: 'border-yellow-600',
   },
   dtSpecialist: {
     label: 'DT Specialist',
-    desc: 'Speed is the main focus. The majority of top plays are set under Double Time.',
+    desc: 'Most top plays are on DT.',
     criteria: 'DT on 70%+ of scores',
     from: 'from-yellow-600', to: 'to-amber-400',
     text: 'text-yellow-100', border: 'border-amber-500',
   },
   dtParagon: {
     label: 'DT Paragon',
-    desc: 'Plays DT at high volume and keeps accuracy in check. Speed and precision combined.',
+    desc: 'Lots of DT with high accuracy.',
     criteria: 'DT on 70%+ of scores AND avg accuracy ≥ 97%',
     from: 'from-amber-500', to: 'to-yellow-300',
     text: 'text-amber-100', border: 'border-yellow-400',
@@ -107,21 +107,21 @@ const ARCHETYPES = {
   // HD family
   hdPlayer: {
     label: 'HD Player',
-    desc: 'Hidden is their mod of choice without stacking HR or DT. A reading-focused playstyle.',
+    desc: 'Hidden on its own is the mod of choice.',
     criteria: 'Pure HD on 50%+ of scores',
     from: 'from-indigo-800', to: 'to-purple-500',
     text: 'text-indigo-200', border: 'border-indigo-600',
   },
   hdSpecialist: {
     label: 'HD Specialist',
-    desc: 'Almost all top plays are under Hidden. Reads approach circles purely from memory and flow.',
+    desc: 'Almost all top plays are HD.',
     criteria: 'Pure HD on 70%+ of scores',
     from: 'from-indigo-700', to: 'to-violet-400',
     text: 'text-violet-200', border: 'border-violet-500',
   },
   hdParagon: {
     label: 'HD Paragon',
-    desc: 'Plays Hidden at an elite level with exceptional accuracy. Mastery of reading under pressure.',
+    desc: 'Hidden with exceptional accuracy.',
     criteria: 'Pure HD on 70%+ of scores AND avg accuracy ≥ 98%',
     from: 'from-violet-600', to: 'to-indigo-300',
     text: 'text-violet-100', border: 'border-violet-400',
@@ -130,7 +130,7 @@ const ARCHETYPES = {
   // Gimmick
   gimmick: {
     label: 'Gimmick Player',
-    desc: 'A significant portion of top plays use non-standard mods like EZ, HT, or FL. Unconventional but effective.',
+    desc: 'Often uses EZ, HT or FL.',
     criteria: 'EZ / HT / FL or unknown mods on 10%+ of scores',
     from: 'from-green-700', to: 'to-teal-400',
     text: 'text-green-200', border: 'border-green-600',
@@ -139,7 +139,7 @@ const ARCHETYPES = {
   // Fallback
   allrounder: {
     label: 'All-Rounder',
-    desc: 'No single mod dominates the top plays. Comfortable across multiple playstyles without a clear specialisation.',
+    desc: 'No single mod dominates.',
     criteria: 'No single mod exceeds its Player threshold',
     from: 'from-slate-700', to: 'to-violet-500',
     text: 'text-slate-200', border: 'border-slate-500',
