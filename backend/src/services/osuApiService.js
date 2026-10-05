@@ -104,9 +104,10 @@ export class OsuApiService {
 
   // Maps a score in the current API format. Stable scores have a
   // legacy_score_id; scores set on lazer don't.
-  //   score: stable scores keep their original score; lazer scores use the
-  //          classic-scale score, so both are in the same range.
-  //   url:   /scores/{id} works for stable and lazer scores alike.
+  //   score:    stable scores keep their original score; lazer scores use
+  //             total_score, the standardised score the osu! website shows.
+  //   accuracy: rounded down to 2 decimals, like the osu! website and client.
+  //   url:      /scores/{id} works for stable and lazer scores alike.
   _mapScore(score) {
     const isLazer = score.legacy_score_id == null;
     return {
@@ -118,8 +119,8 @@ export class OsuApiService {
       title: score.beatmapset?.title || 'Unknown',
       artist: score.beatmapset?.artist || 'Unknown',
       pp: score.pp ? Math.round(score.pp) : null,
-      accuracy: (score.accuracy * 100).toFixed(2),
-      score: isLazer ? score.classic_total_score : score.legacy_total_score,
+      accuracy: (Math.floor(score.accuracy * 10000) / 100).toFixed(2),
+      score: isLazer ? score.total_score : score.legacy_total_score,
       is_lazer: isLazer,
       combo: score.max_combo,
       mods: (score.mods || []).map(mod => mod.acronym),
