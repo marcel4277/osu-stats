@@ -26,16 +26,15 @@ body {
   background: #555;
 }
 
-/* Score row with the map's cover behind it: greyed out (luminosity blend onto
-   the dark base colour) and darkened by a gray-900 overlay at 86%.
-   86% is the lightest overlay where all row text still meets WCAG AA (4.5:1)
+/* Score row with the map's cover behind it, darkened by a gray-900 overlay at 87%.
+   87% keeps all row text at WCAG AA (4.5:1) or better, with a little margin,
    even over a pure-white patch of the cover, so don't lower it.
    The cover spans the left 60% of the row and fades out to the right: rows are
    very wide and short, so stretching it full width shows only a thin slice. */
 .score-row-cover {
   background-color: #111827;
   background-image:
-    linear-gradient(rgb(17 24 39 / 0.86), rgb(17 24 39 / 0.86)),
+    linear-gradient(rgb(17 24 39 / 0.87), rgb(17 24 39 / 0.87)),
     linear-gradient(to right, transparent 35%, #111827 60%),
     var(--cover);
   background-size: auto, auto, 60% auto;
@@ -44,6 +43,11 @@ body {
   /* size layers against the border box so the overlay also covers the row
      border; otherwise a bright line of the cover shows through there */
   background-origin: border-box;
+}
+
+/* Rows outside the time filter: the cover greyed out (luminosity blend onto the
+   dark base colour). The row is also faded via opacity in ScoresList. */
+.score-row-cover-muted {
   background-blend-mode: normal, normal, luminosity;
 }
 
