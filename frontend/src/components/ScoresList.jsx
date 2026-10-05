@@ -102,12 +102,15 @@ function ScoreRow({ score, rank, inRange, onOpen }) {
   const [ref, near] = useNearScreen();
   const url = score.url;
   const showCover = near && score.cover_url;
+  // Outside the time filter: a row with a cover is marked by the greyed cover
+  // alone; a row without one is faded instead.
+  const fade = !inRange && !score.cover_url;
   return (
     <tr
       ref={ref}
       className={`border-b border-gray-700 transition ${showCover ? `score-row-cover ${inRange ? '' : 'score-row-cover-muted'}` : ''} ${
-        !inRange ? 'opacity-25' : url ? 'score-row-link cursor-pointer' : 'cursor-default'
-      }`}
+        fade ? 'opacity-25' : ''
+      } ${url ? 'score-row-link cursor-pointer' : 'cursor-default'}`}
       style={showCover ? { '--cover': `url("${score.cover_url}")` } : undefined}
       onClick={() => onOpen(url)}
     >
