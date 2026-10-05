@@ -18,6 +18,7 @@ export default function UsernameInput({ onSearch, isLoading, placeholder = 'Ente
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder={placeholder}
+          aria-label={placeholder}
           className="flex-1 px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-osu-purple focus:outline-none transition"
           disabled={isLoading}
         />

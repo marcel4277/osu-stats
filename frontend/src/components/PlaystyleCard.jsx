@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { modCounts, hasMod, isNM, isGimmick, modColors } from './modUtils.js';
 
 // Icons
@@ -249,18 +249,39 @@ const MOD_GROUPS = [
 ];
 
 function ArchetypesModal({ onClose }) {
+  const closeButtonRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Escape closes the popup; focus starts on the close button so keyboard
+  // users land inside it, and returns to whatever opened it afterwards.
+  // Runs once on open (onClose is read through a ref so re-renders don't re-run it).
+  useEffect(() => {
+    const opener = document.activeElement;
+    closeButtonRef.current?.focus();
+    const onKeyDown = (e) => { if (e.key === 'Escape') onCloseRef.current(); };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      opener?.focus?.();
+    };
+  }, []);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="archetypes-title"
         className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700 sticky top-0 bg-gray-900 z-10">
-          <h2 className="text-white font-bold text-lg">All Playstyle Archetypes</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition text-xl leading-none">✕</button>
+          <h2 id="archetypes-title" className="text-white font-bold text-lg">All Playstyle Archetypes</h2>
+          <button ref={closeButtonRef} onClick={onClose} aria-label="Close" className="text-gray-400 hover:text-white transition text-xl leading-none">✕</button>
         </div>
 
         <div className="p-6 space-y-6">
@@ -358,6 +379,7 @@ export default function PlaystyleCard({ scores }) {
                 onClick={() => setShowModal(true)}
                 className="w-6 h-6 rounded-full bg-gray-700 hover:bg-gray-600 transition text-gray-400 hover:text-white text-sm font-bold leading-none flex items-center justify-center shrink-0 mt-0.5"
                 title="View all archetypes"
+                aria-label="View all archetypes"
               >
                 ?
               </button>

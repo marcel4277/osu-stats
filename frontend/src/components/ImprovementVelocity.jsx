@@ -93,12 +93,13 @@ export default function ImprovementVelocity({ scores }) {
             <p className="text-gray-400 text-sm mt-0.5">Based on {scores.length} top scores</p>
           </div>
           <div
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${verdict.border} bg-gray-900 cursor-default group relative`}
+            tabIndex={0}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${verdict.border} bg-gray-900 cursor-default group relative focus:outline-none`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${verdict.dot} animate-pulse`} />
             <span className={`text-sm font-semibold ${verdict.color}`}>{verdict.label}</span>
             {/* Hover tooltip */}
-            <div className="absolute right-0 top-full mt-2 hidden group-hover:block z-20 pointer-events-none">
+            <div role="tooltip" className="absolute right-0 top-full mt-2 hidden group-hover:block group-focus:block z-20 pointer-events-none">
               <div className="bg-gray-900 border border-gray-600 text-gray-300 text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-xl text-left">
                 {verdict.tip}
               </div>

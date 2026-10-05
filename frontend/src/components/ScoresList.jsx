@@ -45,6 +45,32 @@ function timeAgo(dateStr) {
 // Soft tinted badges: light text on a faint tint of the mod's colour, thin border.
 const BADGE_BASE = 'px-1.5 py-0.5 rounded text-xs font-bold border';
 
+const RULESET_NAMES = ['osu', 'taiko', 'fruits', 'mania'];
+
+// Link to the score on osu!, or null for lazer scores (no legacy score page)
+function scoreUrl(score) {
+  if (score.score === 0 || !score.best_id) return null;
+  const mode = typeof score.mode === 'number'
+    ? RULESET_NAMES[score.mode] ?? 'osu'
+    : score.mode || 'osu';
+  return `https://osu.ppy.sh/scores/${mode}/${score.best_id}`;
+}
+
+// Hover text that also opens on keyboard focus or a tap (focus), not just mouse hover.
+// Clicks stop here so tapping a tooltip inside a row doesn't also open the score.
+function Tooltip({ text, children, className = '' }) {
+  return (
+    <span tabIndex={0} onClick={e => e.stopPropagation()} className={`relative group inline-block cursor-default focus:outline-none ${className}`}>
+      {children}
+      <span role="tooltip" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block group-focus:block z-20 pointer-events-none">
+        <span className="block bg-gray-900 border border-gray-600 text-gray-300 text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl">
+          {text}
+        </span>
+      </span>
+    </span>
+  );
+}
+
 function chipTitle(chip) {
   if (chip.key === 'all') return 'Show all scores';
   if (chip.key === 'NM') return `No difficulty-changing mods (${chip.count}). NF, SD, PF etc. still count as NM`;
@@ -88,7 +114,7 @@ export default function ScoresList({ scores, username }) {
       setSortDir(d => d === 'desc' ? 'asc' : 'desc');
     } else {
       setSortKey(key);
-      setSortDir('asc');
+      setSortDir('desc');
     }
   };
 
@@ -98,22 +124,16 @@ export default function ScoresList({ scores, username }) {
   const modChips = buildChips(scores);
   const showModChips = modChips.length > 2; // "All" + at least two other options
 
-  const isLazer = (score) => score.score === 0;
-
   const isInRange = (score) => {
     if (!filterDays) return true;
     const cutoff = Date.now() - filterDays * 86400 * 1000;
     return new Date(score.date).getTime() >= cutoff;
   };
 
-  const handleRowClick = (score) => {
-    if (isLazer(score)) return;
-    const id = score.best_id;
-    if (!id) return;
-    const mode = typeof score.mode === 'number'
-      ? ['osu', 'taiko', 'fruits', 'mania'][score.mode] ?? 'osu'
-      : score.mode || 'osu';
-    window.open(`https://osu.ppy.sh/scores/${mode}/${id}`, '_blank', 'noopener,noreferrer');
+  // Clicking anywhere on a row opens the score; the title is a real link for
+  // keyboard users, middle-click and "open in new tab".
+  const handleRowClick = (url) => {
+    if (url) window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const matchCount = (filterDays || modFilter !== 'all') ? visible.filter(isInRange).length : null;
@@ -131,6 +151,7 @@ export default function ScoresList({ scores, username }) {
                 <button
                   key={chip.key}
                   onClick={() => setModFilter(chip.key)}
+                  aria-pressed={modFilter === chip.key}
                   title={chipTitle(chip)}
                   className={`px-3 py-1 text-sm font-semibold transition ${
                     modFilter === chip.key
@@ -153,6 +174,7 @@ export default function ScoresList({ scores, username }) {
               <button
                 key={range.label}
                 onClick={() => setFilterDays(range.days)}
+                aria-pressed={filterDays === range.days}
                 className={`px-3 py-1 text-xs font-semibold transition ${
                   filterDays === range.days
                     ? 'bg-osu-pink text-white'
@@ -173,34 +195,43 @@ export default function ScoresList({ scores, username }) {
               <th className="px-4 py-3 text-left text-gray-400 font-semibold">#</th>
               <th className="px-4 py-3 text-left text-gray-400 font-semibold">Beatmap</th>
               <th className="px-4 py-3 text-center text-gray-400 font-semibold">Mods</th>
-              {COLUMNS.map(col => (
-                <th
-                  key={col.key}
-                  onClick={() => handleSort(col.key)}
-                  className="px-4 py-3 text-center text-gray-400 font-semibold cursor-pointer select-none hover:text-white transition"
-                >
-                  {col.label}<SortIcon direction={sortKey === col.key ? sortDir : null} />
-                </th>
-              ))}
+              {COLUMNS.map(col => {
+                const direction = sortKey === col.key ? sortDir : null;
+                return (
+                  <th
+                    key={col.key}
+                    aria-sort={direction ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+                    className="px-4 py-3 text-center text-gray-400 font-semibold"
+                  >
+                    <button type="button" onClick={() => handleSort(col.key)} className="font-semibold select-none hover:text-white transition">
+                      {col.label}<SortIcon direction={direction} />
+                    </button>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
             {visible.map((score) => {
               const inRange = isInRange(score);
-              const lazer = isLazer(score);
+              const url = scoreUrl(score);
               return (
                 <tr
                   key={score.id}
                   className={`border-b border-gray-700 transition ${
-                    !inRange ? 'opacity-25' : lazer ? 'cursor-default' : 'hover:bg-gray-700 cursor-pointer'
+                    !inRange ? 'opacity-25' : url ? 'hover:bg-gray-700 cursor-pointer' : 'cursor-default'
                   }`}
-                  onClick={() => handleRowClick(score)}
-                  title={lazer ? undefined : inRange ? 'View score on osu!' : undefined}
+                  onClick={() => handleRowClick(url)}
+                  title={url && inRange ? 'View score on osu!' : undefined}
                 >
                   <td className="px-4 py-3 text-gray-400">{rankOf.get(score.id)}</td>
                   <td className="px-4 py-3">
                     <div>
-                      <p className="text-white font-semibold">{score.title}</p>
+                      <p className="text-white font-semibold">
+                        {url
+                          ? <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="hover:underline focus:underline">{score.title}</a>
+                          : score.title}
+                      </p>
                       <p className="text-sm text-gray-400">{score.artist}</p>
                     </div>
                   </td>
@@ -215,14 +246,12 @@ export default function ScoresList({ scores, username }) {
                   </td>
                   <td className="px-4 py-3 text-center text-white font-semibold">
                     {score.score === 0
-                      ? <span className="relative group inline-block bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-40 px-2 py-0.5 rounded text-xs font-semibold tracking-wide cursor-default">
+                      ? <Tooltip
+                          text="osu! Lazer uses a different scoring system — legacy score not available"
+                          className="bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-40 px-2 py-0.5 rounded text-xs font-semibold tracking-wide"
+                        >
                           lazer
-                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20 pointer-events-none">
-                            <span className="block bg-gray-900 border border-gray-600 text-gray-300 text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl">
-                              osu! Lazer uses a different scoring system — legacy score not available
-                            </span>
-                          </span>
-                        </span>
+                        </Tooltip>
                       : score.score.toLocaleString()
                     }
                   </td>
@@ -235,13 +264,10 @@ export default function ScoresList({ scores, username }) {
                       : <span className="text-gray-400">—</span>
                     }
                   </td>
-                  <td className="px-4 py-3 text-center text-sm text-gray-400 relative group cursor-default">
-                    {new Date(score.date).toLocaleDateString()}
-                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20 pointer-events-none">
-                      <span className="block bg-gray-900 border border-gray-600 text-gray-300 text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl">
-                        {timeAgo(score.date)}
-                      </span>
-                    </span>
+                  <td className="px-4 py-3 text-center text-sm text-gray-400">
+                    <Tooltip text={timeAgo(score.date)}>
+                      {new Date(score.date).toLocaleDateString()}
+                    </Tooltip>
                   </td>
                 </tr>
               );
