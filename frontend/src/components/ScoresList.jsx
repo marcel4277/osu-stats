@@ -60,7 +60,7 @@ function ModBadges({ mods }) {
   const shown = (mods || []).filter(mod => mod !== 'NF' && mod !== 'CL');
   const list = shown.length === 0 ? ['NM'] : shown;
   return (
-    <div className="flex flex-wrap justify-center gap-1">
+    <div className="flex flex-nowrap justify-center gap-1">
       {list.map(mod => (
         <span key={mod} className={`${BADGE_BASE} ${modColors(mod).badge}`}>{mod}</span>
       ))}
