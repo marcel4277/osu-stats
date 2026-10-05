@@ -4,6 +4,12 @@ const OSU_API_BASE = 'https://osu.ppy.sh/api/v2';
 const OSU_OAUTH_TOKEN_URL = 'https://osu.ppy.sh/oauth/token';
 const REQUEST_TIMEOUT_MS = 10000;
 
+// Score requests ask for the API's current score format. The old format (sent
+// when no version is given) only has the stable score, which is 0 for anything
+// set on lazer. Any version from 20220705 on switches to the current format.
+const SCORE_FORMAT_HEADERS = { 'x-api-version': '20220705' };
+const RULESET_NAMES = ['osu', 'taiko', 'fruits', 'mania'];
+
 // Errors carry the osu! HTTP status so callers can check `error.status === 404`
 function apiError(status, message) {
   const text = status === 404 ? `Not found: ${message}`
@@ -71,11 +77,12 @@ export class OsuApiService {
         method,
         url: `${OSU_API_BASE}${endpoint}`,
         timeout: REQUEST_TIMEOUT_MS,
+        ...config,
+        // After ...config, so extra headers are merged in rather than replacing Authorization
         headers: {
           Authorization: `Bearer ${token}`,
           ...config.headers,
         },
-        ...config,
       });
 
       return response.data;
@@ -95,21 +102,28 @@ export class OsuApiService {
     }
   }
 
+  // Maps a score in the current API format. Stable scores have a
+  // legacy_score_id; scores set on lazer don't.
+  //   score: stable scores keep their original score; lazer scores use the
+  //          classic-scale score, so both are in the same range.
+  //   url:   /scores/{id} works for stable and lazer scores alike.
   _mapScore(score) {
+    const isLazer = score.legacy_score_id == null;
     return {
       id: score.id,
-      best_id: score.best_id,
-      mode: score.ruleset_id ?? score.mode ?? 'osu',
+      url: `https://osu.ppy.sh/scores/${score.id}`,
+      mode: RULESET_NAMES[score.ruleset_id] ?? 'osu',
       beatmap_id: score.beatmap?.id,
       beatmapset_id: score.beatmapset?.id,
       title: score.beatmapset?.title || 'Unknown',
       artist: score.beatmapset?.artist || 'Unknown',
       pp: score.pp ? Math.round(score.pp) : null,
       accuracy: (score.accuracy * 100).toFixed(2),
-      score: score.score,
+      score: isLazer ? score.classic_total_score : score.legacy_total_score,
+      is_lazer: isLazer,
       combo: score.max_combo,
-      mods: score.mods || [],
-      date: score.created_at,
+      mods: (score.mods || []).map(mod => mod.acronym),
+      date: score.ended_at,
     };
   }
 
@@ -135,6 +149,7 @@ export class OsuApiService {
   async getUserBestScoresPage(userId, limit, offset = 0) {
     const data = await this._request('GET', `/users/${userId}/scores/best`, {
       params: { limit: Math.min(limit, 100), offset },
+      headers: SCORE_FORMAT_HEADERS,
     });
     if (!Array.isArray(data)) return [];
     return data.map(s => this._mapScore(s));
@@ -143,6 +158,7 @@ export class OsuApiService {
   async getUserRecentScores(userId, limit = 50) {
     const data = await this._request('GET', `/users/${userId}/scores/recent`, {
       params: { limit: Math.min(limit, 100), include_fails: 0 },
+      headers: SCORE_FORMAT_HEADERS,
     });
     if (!Array.isArray(data)) return [];
     return data.map(s => this._mapScore(s));
