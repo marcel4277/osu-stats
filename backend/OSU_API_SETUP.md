@@ -18,8 +18,8 @@ The backend uses **osu! API v2** with OAuth2 client credentials to fetch player 
 In `backend/`, create a `.env` file (copy from `.env.example`):
 
 ```env
-OSU_CLIENT_ID=your_client_id
-OSU_CLIENT_SECRET=your_client_secret
+OSU_API_ID=your_client_id
+OSU_API_SECRET=your_client_secret
 PORT=5000
 FRONTEND_URL=http://localhost:5174
 ```
@@ -38,7 +38,7 @@ npm run dev
 
 ## Troubleshooting
 
-- **"Failed to get OAuth2 token"** — check `OSU_CLIENT_ID` and `OSU_CLIENT_SECRET` are correct
+- **"Failed to get OAuth2 token"** — check `OSU_API_ID` and `OSU_API_SECRET` are correct
 - **"User not found"** — username must be exact (case-insensitive)
 - **"Unauthorized"** — re-generate credentials from osu! account settings
 
