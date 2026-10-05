@@ -95,8 +95,9 @@ function useNearScreen() {
   return [ref, near];
 }
 
-// A score row. The map's cover sits behind it as a greyed-out, darkened
-// backdrop (see .score-row-cover in App.css).
+// A score row. The map's cover sits behind it as a darkened backdrop: full
+// colour normally, greyed out when the row is outside the time filter
+// (see .score-row-cover in App.css).
 function ScoreRow({ score, rank, inRange, onOpen }) {
   const [ref, near] = useNearScreen();
   const url = score.url;
@@ -104,7 +105,7 @@ function ScoreRow({ score, rank, inRange, onOpen }) {
   return (
     <tr
       ref={ref}
-      className={`border-b border-gray-700 transition ${showCover ? 'score-row-cover' : ''} ${
+      className={`border-b border-gray-700 transition ${showCover ? `score-row-cover ${inRange ? '' : 'score-row-cover-muted'}` : ''} ${
         !inRange ? 'opacity-25' : url ? 'score-row-link cursor-pointer' : 'cursor-default'
       }`}
       style={showCover ? { '--cover': `url("${score.cover_url}")` } : undefined}
