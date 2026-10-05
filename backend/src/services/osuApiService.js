@@ -41,7 +41,9 @@ export class OsuApiService {
     }
   }
 
-  async _request(method, endpoint, config = {}) {
+  // A cached token can be revoked before it expires. On a 401 the token is
+  // dropped and the request is retried once with a fresh one.
+  async _request(method, endpoint, config = {}, isRetry = false) {
     try {
       const token = await this.getAccessToken();
 
@@ -65,6 +67,7 @@ export class OsuApiService {
         if (status === 401) {
           this.accessToken = null;
           this.tokenExpiresAt = null;
+          if (!isRetry) return this._request(method, endpoint, config, true);
           throw new Error('Unauthorized: Check API credentials');
         }
         throw new Error(`API error (${status}): ${message}`);
