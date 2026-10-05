@@ -45,17 +45,6 @@ function timeAgo(dateStr) {
 // Soft tinted badges: light text on a faint tint of the mod's colour, thin border.
 const BADGE_BASE = 'px-1.5 py-0.5 rounded text-xs font-bold border';
 
-const RULESET_NAMES = ['osu', 'taiko', 'fruits', 'mania'];
-
-// Link to the score on osu!, or null for lazer scores (no legacy score page)
-function scoreUrl(score) {
-  if (score.score === 0 || !score.best_id) return null;
-  const mode = typeof score.mode === 'number'
-    ? RULESET_NAMES[score.mode] ?? 'osu'
-    : score.mode || 'osu';
-  return `https://osu.ppy.sh/scores/${mode}/${score.best_id}`;
-}
-
 // Hover text that also opens on keyboard focus or a tap (focus), not just mouse hover.
 // Clicks stop here so tapping a tooltip inside a row doesn't also open the score.
 function Tooltip({ text, children, className = '' }) {
@@ -213,7 +202,7 @@ export default function ScoresList({ scores, username }) {
           <tbody>
             {visible.map((score) => {
               const inRange = isInRange(score);
-              const url = scoreUrl(score);
+              const url = score.url;
               return (
                 <tr
                   key={score.id}
@@ -244,15 +233,17 @@ export default function ScoresList({ scores, username }) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center text-white font-semibold">
-                    {score.score === 0
-                      ? <Tooltip
-                          text="osu! Lazer uses a different scoring system — legacy score not available"
-                          className="bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-40 px-2 py-0.5 rounded text-xs font-semibold tracking-wide"
+                    <div className="flex items-center justify-center gap-1.5">
+                      {score.score != null ? score.score.toLocaleString() : '—'}
+                      {score.is_lazer && (
+                        <Tooltip
+                          text="Set on osu!lazer, shown on the classic score scale"
+                          className="bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-40 px-1.5 py-0.5 rounded text-[0.65rem] leading-none font-semibold tracking-wide"
                         >
                           lazer
                         </Tooltip>
-                      : score.score.toLocaleString()
-                    }
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-center text-gray-400">
                     {score.combo}x

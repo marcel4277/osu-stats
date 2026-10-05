@@ -14,7 +14,7 @@ A player stats site for osu! — look up any player by username and get a clean 
 - **Time range filter** — filter scores by 1M / 3M / 6M / 1Y to see recent activity
 - **Playstyle archetypes** — classifies players into mod-based tiers (Player, Specialist, Paragon) across NM, HR, DT, and HD
 - **Improvement velocity** — tracks how a player's PP has changed over time
-- **osu! Lazer support** — Lazer scores are detected and badged separately
+- **osu! Lazer support** — lazer scores are shown on the classic score scale with a "lazer" tag
 - **Visitor counter** — global site visit tracking
 
 ---
