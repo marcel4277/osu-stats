@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { modMatches, buildChips, modColors, MOD_NAMES } from './modUtils.js';
 import Tooltip from './Tooltip.jsx';
 
@@ -76,6 +76,91 @@ function accuracyColor(accuracy) {
   if (acc >= 95)  return '#facc15';
   if (acc >= 90)  return '#fb923c';
   return '#f87171';
+}
+
+// Loads a row's cover only once it's near the screen, so a long table doesn't
+// download every map background up front.
+function useNearScreen() {
+  const ref = useRef(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    if (near || !ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setNear(true); },
+      { rootMargin: '300px' },
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [near]);
+  return [ref, near];
+}
+
+// A score row. The map's cover sits behind it as a greyed-out, darkened
+// backdrop (see .score-row-cover in App.css).
+function ScoreRow({ score, rank, inRange, onOpen }) {
+  const [ref, near] = useNearScreen();
+  const url = score.url;
+  const showCover = near && score.cover_url;
+  return (
+    <tr
+      ref={ref}
+      className={`border-b border-gray-700 transition ${showCover ? 'score-row-cover' : ''} ${
+        !inRange ? 'opacity-25' : url ? 'score-row-link cursor-pointer' : 'cursor-default'
+      }`}
+      style={showCover ? { '--cover': `url("${score.cover_url}")` } : undefined}
+      onClick={() => onOpen(url)}
+    >
+      <td className="px-4 py-3 text-gray-400">{rank}</td>
+      <td className="px-4 py-3">
+        <div>
+          <p className="text-white font-semibold">
+            {url
+              ? <Tooltip text="View score on osu!" focusable={false}>
+                  <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="hover:underline focus:underline">{score.title}</a>
+                </Tooltip>
+              : score.title}
+          </p>
+          <p className="text-sm text-gray-400">{score.artist}</p>
+        </div>
+      </td>
+      <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} /></td>
+      <td className="px-4 py-3 text-center">
+        <span
+          className="px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
+          style={{ color: accuracyColor(score.accuracy) }}
+        >
+          {score.accuracy}%
+        </span>
+      </td>
+      <td className="px-4 py-3 text-center text-white font-semibold">
+        <div className="flex flex-col items-center gap-0.5">
+          {score.score != null ? score.score.toLocaleString() : '—'}
+          {score.is_lazer && (
+            <Tooltip
+              text="osu!lazer score (standardised, max 1,000,000)"
+              className="bg-blue-500 bg-opacity-20 text-blue-300 border border-blue-500 border-opacity-40 px-1.5 py-0.5 rounded text-[0.65rem] leading-none font-semibold tracking-wide"
+            >
+              lazer
+            </Tooltip>
+          )}
+        </div>
+      </td>
+      <td className="px-4 py-3 text-center text-gray-400">
+        {score.combo}x
+      </td>
+      <td className="px-4 py-3 text-center">
+        {score.pp != null
+          ? <span className="text-osu-cyan font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
+          : <span className="text-gray-400">—</span>
+        }
+      </td>
+      <td className="px-4 py-3 text-center text-sm text-gray-400">
+        <Tooltip text={timeAgo(score.date)}>
+          {new Date(score.date).toLocaleDateString()}
+        </Tooltip>
+      </td>
+    </tr>
+  );
 }
 
 export default function ScoresList({ scores, username }) {
@@ -187,69 +272,15 @@ export default function ScoresList({ scores, username }) {
             </tr>
           </thead>
           <tbody>
-            {visible.map((score) => {
-              const inRange = isInRange(score);
-              const url = score.url;
-              return (
-                <tr
-                  key={score.id}
-                  className={`border-b border-gray-700 transition ${
-                    !inRange ? 'opacity-25' : url ? 'hover:bg-gray-700 cursor-pointer' : 'cursor-default'
-                  }`}
-                  onClick={() => handleRowClick(url)}
-                >
-                  <td className="px-4 py-3 text-gray-400">{rankOf.get(score.id)}</td>
-                  <td className="px-4 py-3">
-                    <div>
-                      <p className="text-white font-semibold">
-                        {url
-                          ? <Tooltip text="View score on osu!" focusable={false}>
-                              <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="hover:underline focus:underline">{score.title}</a>
-                            </Tooltip>
-                          : score.title}
-                      </p>
-                      <p className="text-sm text-gray-400">{score.artist}</p>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} /></td>
-                  <td className="px-4 py-3 text-center">
-                    <span
-                      className="px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
-                      style={{ color: accuracyColor(score.accuracy) }}
-                    >
-                      {score.accuracy}%
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center text-white font-semibold">
-                    <div className="flex flex-col items-center gap-0.5">
-                      {score.score != null ? score.score.toLocaleString() : '—'}
-                      {score.is_lazer && (
-                        <Tooltip
-                          text="osu!lazer score (standardised, max 1,000,000)"
-                          className="bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-40 px-1.5 py-0.5 rounded text-[0.65rem] leading-none font-semibold tracking-wide"
-                        >
-                          lazer
-                        </Tooltip>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-center text-gray-400">
-                    {score.combo}x
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {score.pp != null
-                      ? <span className="text-osu-cyan font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
-                      : <span className="text-gray-400">—</span>
-                    }
-                  </td>
-                  <td className="px-4 py-3 text-center text-sm text-gray-400">
-                    <Tooltip text={timeAgo(score.date)}>
-                      {new Date(score.date).toLocaleDateString()}
-                    </Tooltip>
-                  </td>
-                </tr>
-              );
-            })}
+            {visible.map(score => (
+              <ScoreRow
+                key={score.id}
+                score={score}
+                rank={rankOf.get(score.id)}
+                inRange={isInRange(score)}
+                onOpen={handleRowClick}
+              />
+            ))}
           </tbody>
         </table>
       </div>
