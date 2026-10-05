@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, Link, useMatch } from 'react-router-dom';
 import HomePage from './pages/HomePage.jsx';
 import osuAPI from './services/api.js';
+import Tooltip from './components/Tooltip.jsx';
 import './App.css';
 
 export default function App() {
@@ -33,12 +34,12 @@ export default function App() {
           </div>
 
           {visitors !== null && (
-            <div className="flex items-center gap-1.5 text-gray-400 text-sm mt-1" title="Total site visits">
+            <Tooltip text="Total site visits" placement="bottom" className="items-center gap-1.5 text-gray-400 text-sm mt-1">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10 3C5 3 1.73 7.11 1.05 9.78a1 1 0 000 .44C1.73 12.89 5 17 10 17s8.27-4.11 8.95-6.78a1 1 0 000-.44C18.27 7.11 15 3 10 3zm0 11a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z" />
               </svg>
               <span>{visitors.toLocaleString()}</span>
-            </div>
+            </Tooltip>
           )}
         </div>
       </header>
