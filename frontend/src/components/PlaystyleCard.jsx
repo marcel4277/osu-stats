@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { modCounts, hasMod, isNM, isGimmick, modColors } from './modUtils.js';
+import Tooltip from './Tooltip.jsx';
 
 // Icons
 
@@ -375,14 +376,15 @@ export default function PlaystyleCard({ scores }) {
                 <p className="text-gray-400 text-sm">Avg accuracy</p>
                 <p className="text-white font-bold text-lg">{avgAccuracy.toFixed(1)}%</p>
               </div>
-              <button
-                onClick={() => setShowModal(true)}
-                className="w-6 h-6 rounded-full bg-gray-700 hover:bg-gray-600 transition text-gray-400 hover:text-white text-sm font-bold leading-none flex items-center justify-center shrink-0 mt-0.5"
-                title="View all archetypes"
-                aria-label="View all archetypes"
-              >
-                ?
-              </button>
+              <Tooltip text="View all archetypes" placement="left" focusable={false} className="shrink-0 mt-0.5">
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="w-6 h-6 rounded-full bg-gray-700 hover:bg-gray-600 transition text-gray-400 hover:text-white text-sm font-bold leading-none flex items-center justify-center"
+                  aria-label="View all archetypes"
+                >
+                  ?
+                </button>
+              </Tooltip>
             </div>
           </div>
         </div>
@@ -411,10 +413,10 @@ export default function PlaystyleCard({ scores }) {
           {traits.length > 0 && (
             <div className="flex flex-wrap gap-2 border-t border-gray-700 pt-4">
               {traits.map(traitKey => (
-                <span key={traitKey} title={TRAITS[traitKey].title}
+                <Tooltip key={traitKey} text={TRAITS[traitKey].title}
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${TRAITS[traitKey].style}`}>
                   {TRAITS[traitKey].label}
-                </span>
+                </Tooltip>
               ))}
             </div>
           )}

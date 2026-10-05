@@ -1,3 +1,5 @@
+import Tooltip from './Tooltip.jsx';
+
 function RankDelta({ history, currentRank }) {
   if (!history || history.length < 2 || !currentRank) return null;
   const earliest = history.find(v => v > 0);
@@ -19,18 +21,19 @@ export default function UserProfile({ user, compact = false }) {
     <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 flex flex-col sm:flex-row gap-4 sm:gap-6 items-center">
       {/* Avatar — links to osu! profile */}
       <div className="flex-shrink-0">
-        <a
-          href={`https://osu.ppy.sh/users/${user.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title={`View ${user.username}'s osu! profile`}
-        >
-          <img
-            src={user.avatar_url}
-            alt={user.username}
-            className={`rounded-full border-2 border-osu-purple hover:border-osu-pink transition cursor-pointer ${compact ? 'w-16 h-16' : 'w-24 h-24'}`}
-          />
-        </a>
+        <Tooltip text={`View ${user.username}'s osu! profile`} placement="bottom" focusable={false}>
+          <a
+            href={`https://osu.ppy.sh/users/${user.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src={user.avatar_url}
+              alt={user.username}
+              className={`rounded-full border-2 border-osu-purple hover:border-osu-pink transition cursor-pointer ${compact ? 'w-16 h-16' : 'w-24 h-24'}`}
+            />
+          </a>
+        </Tooltip>
       </div>
 
       {/* User Info */}

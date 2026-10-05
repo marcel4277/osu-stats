@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { modMatches, buildChips, modColors, MOD_NAMES } from './modUtils.js';
+import Tooltip from './Tooltip.jsx';
 
 const COLUMNS = [
   { key: 'accuracy', label: 'Accuracy' },
@@ -33,32 +34,17 @@ function sortScores(scores, key, direction) {
 
 function timeAgo(dateStr) {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (seconds < 60)                  return 'Just now';
-  if (seconds < 3600)                return `${Math.floor(seconds / 60)} minutes ago`;
-  if (seconds < 86400)               return `${Math.floor(seconds / 3600)} hours ago`;
-  if (seconds < 86400 * 30)         return `${Math.floor(seconds / 86400)} days ago`;
-  if (seconds < 86400 * 365)        return `${Math.floor(seconds / (86400 * 30))} months ago`;
-  const years = Math.floor(seconds / (86400 * 365));
-  return `${years} year${years > 1 ? 's' : ''} ago`;
+  const ago = (n, unit) => `${n} ${unit}${n === 1 ? '' : 's'} ago`;
+  if (seconds < 60)          return 'Just now';
+  if (seconds < 3600)        return ago(Math.floor(seconds / 60), 'minute');
+  if (seconds < 86400)       return ago(Math.floor(seconds / 3600), 'hour');
+  if (seconds < 86400 * 30)  return ago(Math.floor(seconds / 86400), 'day');
+  if (seconds < 86400 * 365) return ago(Math.floor(seconds / (86400 * 30)), 'month');
+  return ago(Math.floor(seconds / (86400 * 365)), 'year');
 }
 
 // Soft tinted badges: light text on a faint tint of the mod's colour, thin border.
 const BADGE_BASE = 'px-1.5 py-0.5 rounded text-xs font-bold border';
-
-// Hover text that also opens on keyboard focus or a tap (focus), not just mouse hover.
-// Clicks stop here so tapping a tooltip inside a row doesn't also open the score.
-function Tooltip({ text, children, className = '' }) {
-  return (
-    <span tabIndex={0} onClick={e => e.stopPropagation()} className={`relative group inline-block cursor-default focus:outline-none ${className}`}>
-      {children}
-      <span role="tooltip" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block group-focus:block z-20 pointer-events-none">
-        <span className="block bg-gray-900 border border-gray-600 text-gray-300 text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl">
-          {text}
-        </span>
-      </span>
-    </span>
-  );
-}
 
 function chipTitle(chip) {
   if (chip.key === 'all') return 'Show all scores';
@@ -70,9 +56,7 @@ function chipActiveClass(key) {
   return key === 'all' ? 'bg-gray-600 text-white' : modColors(key).chip;
 }
 
-const LAZER_BADGE = 'bg-blue-400/10 text-blue-300 border-blue-400/30';
-
-function ModBadges({ mods, isLazer }) {
+function ModBadges({ mods }) {
   const shown = (mods || []).filter(mod => mod !== 'NF' && mod !== 'CL');
   const list = shown.length === 0 ? ['NM'] : shown;
   return (
@@ -80,9 +64,6 @@ function ModBadges({ mods, isLazer }) {
       {list.map(mod => (
         <span key={mod} className={`${BADGE_BASE} ${modColors(mod).badge}`}>{mod}</span>
       ))}
-      {isLazer && (
-        <Tooltip text="Set on osu!lazer" className={`${BADGE_BASE} ${LAZER_BADGE}`}>LAZER</Tooltip>
-      )}
     </div>
   );
 }
@@ -140,21 +121,22 @@ export default function ScoresList({ scores, username }) {
         </h3>
         <div className="flex items-center gap-3 flex-wrap">
           {showModChips && (
-            <div className="flex flex-wrap rounded-lg overflow-hidden border border-gray-600">
+            <div className="flex flex-wrap rounded-lg border border-gray-600">
               {modChips.map(chip => (
-                <button
-                  key={chip.key}
-                  onClick={() => setModFilter(chip.key)}
-                  aria-pressed={modFilter === chip.key}
-                  title={chipTitle(chip)}
-                  className={`inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold transition ${
-                    modFilter === chip.key
-                      ? chipActiveClass(chip.key)
-                      : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                  }`}
-                >
-                  {chip.label}{chip.key !== 'all' && <span className="text-xs opacity-80 tabular-nums">{chip.count}</span>}
-                </button>
+                <Tooltip key={chip.key} text={chipTitle(chip)} placement="bottom" focusable={false}
+                  className="first:[&>button]:rounded-l-md last:[&>button]:rounded-r-md">
+                  <button
+                    onClick={() => setModFilter(chip.key)}
+                    aria-pressed={modFilter === chip.key}
+                    className={`inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold transition ${
+                      modFilter === chip.key
+                        ? chipActiveClass(chip.key)
+                        : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                    }`}
+                  >
+                    {chip.label}{chip.key !== 'all' && <span className="text-xs opacity-80 tabular-nums">{chip.count}</span>}
+                  </button>
+                </Tooltip>
               ))}
             </div>
           )}
@@ -215,20 +197,21 @@ export default function ScoresList({ scores, username }) {
                     !inRange ? 'opacity-25' : url ? 'hover:bg-gray-700 cursor-pointer' : 'cursor-default'
                   }`}
                   onClick={() => handleRowClick(url)}
-                  title={url && inRange ? 'View score on osu!' : undefined}
                 >
                   <td className="px-4 py-3 text-gray-400">{rankOf.get(score.id)}</td>
                   <td className="px-4 py-3">
                     <div>
                       <p className="text-white font-semibold">
                         {url
-                          ? <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="hover:underline focus:underline">{score.title}</a>
+                          ? <Tooltip text="View score on osu!" focusable={false}>
+                              <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="hover:underline focus:underline">{score.title}</a>
+                            </Tooltip>
                           : score.title}
                       </p>
                       <p className="text-sm text-gray-400">{score.artist}</p>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} isLazer={score.is_lazer} /></td>
+                  <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} /></td>
                   <td className="px-4 py-3 text-center">
                     <span
                       className="px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
