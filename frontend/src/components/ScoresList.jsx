@@ -221,7 +221,7 @@ export default function ScoresList({ scores, username }) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center text-white font-semibold">
-                    <div className="flex items-center justify-center gap-1.5">
+                    <div className="flex flex-col items-center gap-0.5">
                       {score.score != null ? score.score.toLocaleString() : '—'}
                       {score.is_lazer && (
                         <Tooltip
