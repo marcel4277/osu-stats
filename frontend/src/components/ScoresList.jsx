@@ -98,34 +98,34 @@ function useNearScreen() {
 // A score row. The map's cover sits behind it as a darkened backdrop: full
 // colour normally, greyed out when the row is outside the time filter
 // (see .score-row-cover in App.css).
-function ScoreRow({ score, rank, inRange, onOpen }) {
+// highlight: a time filter is active and this row is inside it.
+function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
   const [ref, near] = useNearScreen();
   const url = score.url;
   const showCover = near && score.cover_url;
-  // Outside the time filter: a row with a cover is marked by the greyed cover
-  // alone; a row without one is faded instead.
-  const fade = !inRange && !score.cover_url;
+  // Outside the time filter: greyed cover and the row's text dimmed (the
+  // background itself isn't faded). Inside an active filter: pink edge bar.
   return (
     <tr
       ref={ref}
       className={`border-b border-gray-700 transition ${showCover ? `score-row-cover ${inRange ? '' : 'score-row-cover-muted'}` : ''} ${
-        fade ? 'opacity-25' : ''
-      } ${url ? 'score-row-link cursor-pointer' : 'cursor-default'}`}
+        inRange ? '' : '[&>td]:opacity-60'
+      } ${highlight ? 'score-row-active' : ''} ${url ? 'score-row-link cursor-pointer' : 'cursor-default'}`}
       style={showCover ? { '--cover': `url("${score.cover_url}")` } : undefined}
       onClick={() => onOpen(url)}
     >
       <td className="px-4 py-3 text-gray-400">{rank}</td>
-      <td className="px-4 py-3">
-        <div>
-          <p className="text-white font-semibold">
-            {url
-              ? <Tooltip text="View score on osu!" focusable={false}>
-                  <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="hover:underline focus:underline">{score.title}</a>
-                </Tooltip>
-              : score.title}
-          </p>
-          <p className="text-sm text-gray-400">{score.artist}</p>
-        </div>
+      {/* w-full + max-w-0: the beatmap column takes the leftover width and long
+          titles are cut off with "…" instead of wrapping onto a second line */}
+      <td className="px-4 py-3 w-full max-w-0 min-w-[10rem]">
+        <p className="text-white font-semibold">
+          {url
+            ? <Tooltip text={<>{score.title}<br /><span className="text-gray-400">View score on osu!</span></>} focusable={false} className="max-w-full">
+                <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="min-w-0 truncate hover:underline focus:underline">{score.title}</a>
+              </Tooltip>
+            : <span className="block truncate">{score.title}</span>}
+        </p>
+        <p className="text-sm text-gray-400 truncate">{score.artist}</p>
       </td>
       <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} /></td>
       <td className="px-4 py-3 text-center">
@@ -282,6 +282,7 @@ export default function ScoresList({ scores, username }) {
                 score={score}
                 rank={rankOf.get(score.id)}
                 inRange={isInRange(score)}
+                highlight={filterDays != null && isInRange(score)}
                 onOpen={handleRowClick}
               />
             ))}
