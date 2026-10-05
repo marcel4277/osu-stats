@@ -19,3 +19,21 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* Score row with the map's cover behind it: greyed out (luminosity blend onto
+   the dark base colour) and darkened by a gray-900 overlay at 86%.
+   86% is the lightest overlay where all row text still meets WCAG AA (4.5:1)
+   even over a pure-white patch of the cover, so don't lower it. */
+.score-row-cover {
+  background-color: #111827;
+  background-image: linear-gradient(rgb(17 24 39 / 0.86), rgb(17 24 39 / 0.86)), var(--cover);
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: normal, luminosity;
+}
+
+/* Hover: an accent bar on the left instead of lightening the row, which
+   would push text contrast below AA on bright covers. */
+.score-row-link:hover > td:first-child {
+  box-shadow: inset 3px 0 0 #b84ed6;
+}

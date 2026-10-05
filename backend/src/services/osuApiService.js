@@ -116,6 +116,8 @@ export class OsuApiService {
       mode: RULESET_NAMES[score.ruleset_id] ?? 'osu',
       beatmap_id: score.beatmap?.id,
       beatmapset_id: score.beatmapset?.id,
+      // Map background (800x280), used as a muted backdrop on the score row
+      cover_url: score.beatmapset?.covers?.['card@2x'] ?? null,
       title: score.beatmapset?.title || 'Unknown',
       artist: score.beatmapset?.artist || 'Unknown',
       pp: score.pp ? Math.round(score.pp) : null,
