@@ -136,7 +136,7 @@ export default function ScoresList({ scores, username }) {
     if (url) window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const matchCount = (filterDays || modFilter !== 'all') ? visible.filter(isInRange).length : null;
+  const matchCount = visible.filter(isInRange).length;
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
@@ -164,11 +164,10 @@ export default function ScoresList({ scores, username }) {
               ))}
             </div>
           )}
-          {matchCount !== null && (
-            <span className="text-xs text-gray-400 mr-1">
-              {matchCount} score{matchCount !== 1 ? 's' : ''}
-            </span>
-          )}
+          {/* Always shown at a fixed width so changing filters doesn't shift the chips */}
+          <span className="w-20 text-right text-xs text-gray-400 tabular-nums">
+            {matchCount} score{matchCount !== 1 ? 's' : ''}
+          </span>
           <div className="flex flex-wrap rounded-lg overflow-hidden border border-gray-600">
             {TIME_FILTERS.map(range => (
               <button
