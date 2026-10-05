@@ -44,7 +44,7 @@ function timeAgo(dateStr) {
 }
 
 // Soft tinted badges: light text on a faint tint of the mod's colour, thin border.
-const BADGE_BASE = 'px-1.5 py-0.5 rounded text-xs font-bold border';
+const BADGE_BASE = 'chip-on-cover px-1.5 py-0.5 rounded text-xs font-bold border';
 
 function chipTitle(chip) {
   if (chip.key === 'all') return 'Show all scores';
@@ -130,7 +130,7 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
       <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} /></td>
       <td className="px-4 py-3 text-center">
         <span
-          className="px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
+          className="chip-on-cover px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
           style={{ color: accuracyColor(score.accuracy) }}
         >
           {score.accuracy}%
@@ -142,7 +142,7 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
           {score.is_lazer && (
             <Tooltip
               text="osu!lazer score (standardised, max 1,000,000)"
-              className="bg-blue-500 bg-opacity-20 text-blue-300 border border-blue-500 border-opacity-40 px-1.5 py-0.5 rounded text-[0.65rem] leading-none font-semibold tracking-wide"
+              className="chip-on-cover bg-blue-500 bg-opacity-20 text-blue-300 border border-blue-500 border-opacity-40 px-1.5 py-0.5 rounded text-[0.65rem] leading-none font-semibold tracking-wide"
             >
               lazer
             </Tooltip>
