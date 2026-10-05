@@ -25,9 +25,9 @@ function SortIcon({ direction }) {
 function sortScores(scores, key, direction) {
   if (!key) return scores;
   return [...scores].sort((a, b) => {
-    let av = key === 'date' ? new Date(a.date).getTime() : Number(a[key] ?? -Infinity);
-    let bv = key === 'date' ? new Date(b.date).getTime() : Number(b[key] ?? -Infinity);
-    return direction === 'asc' ? av - bv : bv - av;
+    const aValue = key === 'date' ? new Date(a.date).getTime() : Number(a[key] ?? -Infinity);
+    const bValue = key === 'date' ? new Date(b.date).getTime() : Number(b[key] ?? -Infinity);
+    return direction === 'asc' ? aValue - bValue : bValue - aValue;
   });
 }
 
@@ -44,6 +44,12 @@ function timeAgo(dateStr) {
 
 // Soft tinted badges: light text on a faint tint of the mod's colour, thin border.
 const BADGE_BASE = 'px-1.5 py-0.5 rounded text-xs font-bold border';
+
+function chipTitle(chip) {
+  if (chip.key === 'all') return 'Show all scores';
+  if (chip.key === 'NM') return `No difficulty-changing mods (${chip.count}). NF, SD, PF etc. still count as NM`;
+  return `${MOD_NAMES[chip.key] || chip.label} (${chip.count})`;
+}
 
 function chipActiveClass(key) {
   return key === 'all' ? 'bg-gray-600 text-white' : modColors(key).chip;
@@ -77,14 +83,6 @@ export default function ScoresList({ scores, username }) {
   const [filterDays, setFilterDays] = useState(null);
   const [modFilter, setModFilter] = useState('all');
 
-  if (!scores || scores.length === 0) {
-    return (
-      <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center text-gray-400">
-        No scores found
-      </div>
-    );
-  }
-
   const handleSort = (key) => {
     if (sortKey === key) {
       setSortDir(d => d === 'desc' ? 'asc' : 'desc');
@@ -95,8 +93,8 @@ export default function ScoresList({ scores, username }) {
   };
 
   const sorted = sortScores(scores, sortKey, sortDir);
-  const visible = sorted.filter(sc => modMatches(sc, modFilter));
-  const rankOf = new Map(scores.map((sc, i) => [sc.id, i + 1])); // true top-200 position
+  const visible = sorted.filter(score => modMatches(score, modFilter));
+  const rankOf = new Map(scores.map((score, i) => [score.id, i + 1])); // true top-200 position
   const modChips = buildChips(scores);
   const showModChips = modChips.length > 2; // "All" + at least two other options
 
@@ -129,18 +127,18 @@ export default function ScoresList({ scores, username }) {
         <div className="flex items-center gap-3 flex-wrap">
           {showModChips && (
             <div className="flex flex-wrap rounded-lg overflow-hidden border border-gray-600">
-              {modChips.map(f => (
+              {modChips.map(chip => (
                 <button
-                  key={f.key}
-                  onClick={() => setModFilter(f.key)}
-                  title={f.key === 'all' ? 'Show all scores' : f.key === 'NM' ? `No difficulty-changing mods (${f.count}). NF, SD, PF etc. still count as NM` : `${MOD_NAMES[f.key] || f.label} (${f.count})`}
+                  key={chip.key}
+                  onClick={() => setModFilter(chip.key)}
+                  title={chipTitle(chip)}
                   className={`px-3 py-1 text-sm font-semibold transition ${
-                    modFilter === f.key
-                      ? chipActiveClass(f.key)
+                    modFilter === chip.key
+                      ? chipActiveClass(chip.key)
                       : 'text-gray-400 hover:text-white hover:bg-gray-700'
                   }`}
                 >
-                  {f.label}{f.key !== 'all' && <span className="ml-1 text-xs opacity-80">{f.count}</span>}
+                  {chip.label}{chip.key !== 'all' && <span className="ml-1 text-xs opacity-80">{chip.count}</span>}
                 </button>
               ))}
             </div>
@@ -151,17 +149,17 @@ export default function ScoresList({ scores, username }) {
             </span>
           )}
           <div className="flex flex-wrap rounded-lg overflow-hidden border border-gray-600">
-            {TIME_FILTERS.map(f => (
+            {TIME_FILTERS.map(range => (
               <button
-                key={f.label}
-                onClick={() => setFilterDays(f.days)}
+                key={range.label}
+                onClick={() => setFilterDays(range.days)}
                 className={`px-3 py-1 text-xs font-semibold transition ${
-                  filterDays === f.days
+                  filterDays === range.days
                     ? 'bg-osu-pink text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
                 }`}
               >
-                {f.label}
+                {range.label}
               </button>
             ))}
           </div>
