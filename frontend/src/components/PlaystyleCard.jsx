@@ -41,21 +41,18 @@ const ARCHETYPES = {
     label: 'NM Player',
     desc: 'Mostly plays without mods.',
     criteria: 'NM on 70%+ of top plays',
-    from: 'from-sky-700', to: 'to-cyan-500',
     text: 'text-cyan-300', border: 'border-cyan-600',
   },
   nmSpecialist: {
     label: 'NM Specialist',
     desc: 'Almost only plays nomod.',
     criteria: 'NM on 90%+ of top plays',
-    from: 'from-sky-600', to: 'to-cyan-400',
     text: 'text-cyan-200', border: 'border-cyan-500',
   },
   nmParagon: {
     label: 'NM Paragon',
     desc: 'Nomod with exceptional accuracy.',
     criteria: 'NM on 90%+ of top plays AND avg accuracy ≥ 99%',
-    from: 'from-cyan-500', to: 'to-teal-300',
     text: 'text-teal-100', border: 'border-teal-400',
   },
 
@@ -64,21 +61,18 @@ const ARCHETYPES = {
     label: 'HR Player',
     desc: 'Hard Rock is a regular pick.',
     criteria: 'HR on 40%+ of top plays',
-    from: 'from-rose-800', to: 'to-red-500',
     text: 'text-rose-300', border: 'border-rose-600',
   },
   hrSpecialist: {
     label: 'HR Specialist',
     desc: 'Hard Rock is the go-to mod.',
     criteria: 'HR on 60%+ of top plays',
-    from: 'from-rose-700', to: 'to-pink-500',
     text: 'text-rose-200', border: 'border-rose-500',
   },
   hrParagon: {
     label: 'HR Paragon',
     desc: 'Lots of HR with elite accuracy.',
     criteria: 'HR on 60%+ of top plays AND avg accuracy ≥ 97%',
-    from: 'from-rose-600', to: 'to-fuchsia-400',
     text: 'text-fuchsia-100', border: 'border-fuchsia-500',
   },
 
@@ -87,21 +81,18 @@ const ARCHETYPES = {
     label: 'DT Player',
     desc: 'Double Time features heavily.',
     criteria: 'DT on 50%+ of top plays',
-    from: 'from-yellow-700', to: 'to-orange-500',
     text: 'text-yellow-200', border: 'border-yellow-600',
   },
   dtSpecialist: {
     label: 'DT Specialist',
     desc: 'Most top plays are on DT.',
     criteria: 'DT on 70%+ of top plays',
-    from: 'from-yellow-600', to: 'to-amber-400',
     text: 'text-yellow-100', border: 'border-amber-500',
   },
   dtParagon: {
     label: 'DT Paragon',
     desc: 'Lots of DT with high accuracy.',
     criteria: 'DT on 70%+ of top plays AND avg accuracy ≥ 97%',
-    from: 'from-amber-500', to: 'to-yellow-300',
     text: 'text-amber-100', border: 'border-yellow-400',
   },
 
@@ -110,21 +101,18 @@ const ARCHETYPES = {
     label: 'HD Player',
     desc: 'Hidden on its own is the mod of choice.',
     criteria: 'Pure HD on 50%+ of top plays',
-    from: 'from-indigo-800', to: 'to-purple-500',
     text: 'text-indigo-200', border: 'border-indigo-600',
   },
   hdSpecialist: {
     label: 'HD Specialist',
     desc: 'Almost all top plays are HD.',
     criteria: 'Pure HD on 70%+ of top plays',
-    from: 'from-indigo-700', to: 'to-violet-400',
     text: 'text-violet-200', border: 'border-violet-500',
   },
   hdParagon: {
     label: 'HD Paragon',
     desc: 'Hidden with exceptional accuracy.',
     criteria: 'Pure HD on 70%+ of top plays AND avg accuracy ≥ 98%',
-    from: 'from-violet-600', to: 'to-indigo-300',
     text: 'text-violet-100', border: 'border-violet-400',
   },
 
@@ -133,7 +121,6 @@ const ARCHETYPES = {
     label: 'Gimmick Player',
     desc: 'Often uses EZ, HT or FL.',
     criteria: 'EZ / HT / FL or unknown mods on 10%+ of top plays',
-    from: 'from-green-700', to: 'to-teal-400',
     text: 'text-green-200', border: 'border-green-600',
   },
 
@@ -142,22 +129,22 @@ const ARCHETYPES = {
     label: 'All-Rounder',
     desc: 'No single mod dominates.',
     criteria: 'No single mod exceeds its Player threshold',
-    from: 'from-slate-700', to: 'to-violet-500',
     text: 'text-slate-200', border: 'border-slate-500',
   },
 };
 
-// Trait badges (all one neutral style: they're labels, not data)
-
-const TRAIT_STYLE = 'border border-gray-600 bg-gray-900/60 text-gray-200';
+// Trait badges. Each has its own colour so a badge matches its entry in the
+// archetypes popup; mod-based traits use that mod's colour from modUtils (HD
+// indigo, HR rose, DT amber, EZ/HT green). Drawn as muted tinted outlines,
+// like the mod badges, so they don't shout.
 
 const TRAITS = {
-  accMachine:   { label: 'Acc Machine',    title: 'Exceptionally high average accuracy',            criteria: 'Avg accuracy ≥ 99% (non-Paragon)' },
-  hdStacker:    { label: 'HD Stacker',     title: 'Regularly adds Hidden on top of other mods',     criteria: 'HD on 30%+ of top plays (not primary mod)' },
-  hdhrStacker:  { label: 'HDHR Stacker',   title: 'Frequently combines Hidden and Hard Rock',       criteria: 'HDHR on 20%+ of top plays' },
-  hddtStacker:  { label: 'HDDT Stacker',   title: 'Frequently combines Hidden and Double Time',     criteria: 'HDDT on 20%+ of top plays' },
-  modMixer:     { label: 'Mod Mixer',      title: 'No single mod dominates — plays a varied pool',  criteria: 'No mod above 50% (All-Rounder only)' },
-  gimmickTouch: { label: 'Gimmick Touch',  title: 'Occasionally dips into non-standard mods',      criteria: 'EZ / HT / FL on 5–10% of top plays' },
+  accMachine:   { label: 'Acc Machine',    title: 'Exceptionally high average accuracy',            criteria: 'Avg accuracy ≥ 99% (non-Paragon)',          style: 'bg-green-400/10 text-green-300 border-green-400/30' },
+  hdStacker:    { label: 'HD Stacker',     title: 'Regularly adds Hidden on top of other mods',     criteria: 'HD on 30%+ of top plays (not primary mod)', style: modColors('HD').badge },
+  hdhrStacker:  { label: 'HDHR Stacker',   title: 'Frequently combines Hidden and Hard Rock',       criteria: 'HDHR on 20%+ of top plays',                 style: modColors('HR').badge },
+  hddtStacker:  { label: 'HDDT Stacker',   title: 'Frequently combines Hidden and Double Time',     criteria: 'HDDT on 20%+ of top plays',                 style: modColors('DT').badge },
+  modMixer:     { label: 'Mod Mixer',      title: 'No single mod dominates — plays a varied pool',  criteria: 'No mod above 50% (All-Rounder only)',       style: 'bg-slate-400/10 text-slate-300 border-slate-400/30' },
+  gimmickTouch: { label: 'Gimmick Touch',  title: 'Occasionally dips into non-standard mods',      criteria: 'EZ / HT / FL on 5–10% of top plays',        style: modColors('EZ').badge },
 };
 
 // Analyse
@@ -320,7 +307,7 @@ function ArchetypesModal({ onClose }) {
             <div className="space-y-2">
               {Object.values(TRAITS).map(t => (
                 <div key={t.label} className="flex items-start gap-3 rounded-lg p-3 bg-gray-800 border border-gray-700">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 mt-0.5 ${TRAIT_STYLE}`}>{t.label}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border shrink-0 mt-0.5 ${t.style}`}>{t.label}</span>
                   <div className="min-w-0">
                     <p className="text-gray-300 text-xs">{t.title}</p>
                     <p className="text-gray-400 text-xs mt-0.5 font-mono">{t.criteria}</p>
@@ -356,12 +343,11 @@ export default function PlaystyleCard({ scores }) {
 
   return (
     <>
-      <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+      <div className="flex flex-col bg-gray-800 rounded-lg border border-gray-700">
 
-        <div className="relative bg-gray-900 px-5 py-5 overflow-hidden">
-          {/* archetype colour wash */}
-          {/* faint tint of the archetype's colour */}
-          <div className={`absolute inset-0 bg-gradient-to-br ${archetype.from} ${archetype.to} opacity-10`} />
+        {/* The archetype's colour is carried by the icon ring and the title only;
+            a colour wash behind the header turned muddy with warm colours. */}
+        <div className="relative bg-gray-900 px-5 py-5 rounded-t-lg">
           <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-4 min-w-0">
               <div className={`shrink-0 w-14 h-14 rounded-full border ${archetype.border} bg-gray-900/70 flex items-center justify-center ${archetype.text}`}>
@@ -391,7 +377,7 @@ export default function PlaystyleCard({ scores }) {
           </div>
         </div>
 
-        <div className="p-5">
+        <div className="flex-1 flex flex-col p-5">
           <p className="text-sm text-gray-300 mb-4">{archetype.desc}</p>
 
           <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Mod breakdown · {total} top plays</p>
@@ -412,14 +398,18 @@ export default function PlaystyleCard({ scores }) {
             ))}
           </div>
 
+          {/* mt-auto: pinned to the bottom, so in the comparison view both
+              players' trait rows line up */}
           {traits.length > 0 && (
-            <div className="flex flex-wrap gap-2 border-t border-gray-700 pt-4 mt-5">
+            <div className="mt-auto pt-5">
+            <div className="flex flex-wrap gap-2 border-t border-gray-700 pt-4">
               {traits.map(traitKey => (
-                <Tooltip key={traitKey} text={TRAITS[traitKey].title}
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${TRAIT_STYLE}`}>
+                <Tooltip key={traitKey} text={TRAITS[traitKey].title} placement="top-start"
+                  className={`px-3 py-1 rounded-full text-sm font-semibold border ${TRAITS[traitKey].style}`}>
                   {TRAITS[traitKey].label}
                 </Tooltip>
               ))}
+            </div>
             </div>
           )}
         </div>
