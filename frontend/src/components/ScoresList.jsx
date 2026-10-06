@@ -142,7 +142,7 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
           {score.is_lazer && (
             <Tooltip
               text="osu!lazer score (standardised, max 1,000,000)"
-              className="chip-on-cover bg-blue-500 bg-opacity-20 text-blue-300 border border-blue-500 border-opacity-40 px-1.5 py-0.5 rounded text-[0.65rem] leading-none font-semibold tracking-wide"
+              className="chip-on-cover bg-gray-700/40 text-gray-300 border border-gray-500/50 px-1.5 py-0.5 rounded text-[0.65rem] leading-none font-semibold tracking-wide"
             >
               lazer
             </Tooltip>
@@ -154,7 +154,7 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
       </td>
       <td className="px-4 py-3 text-center">
         {score.pp != null
-          ? <span className="text-osu-cyan font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
+          ? <span className="text-white font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
           : <span className="text-gray-400">—</span>
         }
       </td>

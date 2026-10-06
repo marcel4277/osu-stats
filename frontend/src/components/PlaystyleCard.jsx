@@ -356,11 +356,10 @@ export default function PlaystyleCard({ scores }) {
     <>
       <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
 
-        {/* Accent bar along the top, same treatment as Improvement Velocity */}
-        <div className={`h-1 w-full bg-gradient-to-r ${archetype.from} ${archetype.to}`} />
         <div className="relative bg-gray-900 px-5 py-5 overflow-hidden">
           {/* archetype colour wash */}
-          <div className={`absolute inset-0 bg-gradient-to-br ${archetype.from} ${archetype.to} opacity-25`} />
+          {/* faint tint of the archetype's colour */}
+          <div className={`absolute inset-0 bg-gradient-to-br ${archetype.from} ${archetype.to} opacity-10`} />
           <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-4 min-w-0">
               <div className={`shrink-0 w-14 h-14 rounded-full border ${archetype.border} bg-gray-900/70 flex items-center justify-center ${archetype.text}`}>
