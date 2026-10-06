@@ -139,6 +139,7 @@ export class OsuApiService {
       // Profile banner; osu! gives everyone one (a default if they haven't set their own)
       cover_url: data.cover?.url ?? data.cover_url ?? null,
       country: data.country?.code || 'Unknown',
+      country_name: data.country?.name || null,
       playcount: data.statistics?.play_count || 0,
       play_time: data.statistics?.play_time || 0, // seconds
       stats: {

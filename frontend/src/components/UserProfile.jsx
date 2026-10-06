@@ -38,6 +38,13 @@ function Stat({ label, value, className = '' }) {
   );
 }
 
+// Country flag image from osu! (same file naming osu! itself uses: the flag
+// emoji's code points). Images, because flag emoji don't render on Windows.
+function flagUrl(code) {
+  const codePoints = code.toUpperCase().split('').map(c => (c.charCodeAt(0) + 127397).toString(16));
+  return `https://osu.ppy.sh/assets/images/flags/${codePoints.join('-')}.svg`;
+}
+
 function formatHours(seconds) {
   return `${Math.round(seconds / 3600).toLocaleString()}h`;
 }
@@ -81,7 +88,12 @@ export default function UserProfile({ user, compact = false }) {
           </Tooltip>
           <div className="min-w-0">
             <h2 className={`font-bold text-white truncate ${compact ? 'text-xl' : 'text-3xl'}`}>{user.username}</h2>
-            <p className="text-gray-200 text-sm truncate">{user.country}</p>
+            <p className="flex items-center gap-1.5 text-gray-200 text-sm min-w-0">
+              {/^[A-Za-z]{2}$/.test(user.country) && (
+                <img src={flagUrl(user.country)} alt="" className="h-3.5 w-auto rounded-sm shrink-0" />
+              )}
+              <span className="truncate">{user.country_name || user.country}</span>
+            </p>
           </div>
         </div>
 
