@@ -215,8 +215,10 @@ This went through several rounds; this version is "design B".
   every third month on phones.
 - **Comparison view:** both players' charts share one scale (the larger of
   the two), so equal bar heights mean equal counts.
-- **Legend:** only lists a colour if that bar is actually on the chart. A
-  peak month older than 18 months gets no "Peak month" entry.
+- **Legend:** only lists a colour if that bar is actually on the chart.
+  - If the peak month is older than the 18 months shown, the legend instead
+    says "Peak month is older than this chart", so nobody looks for a pink
+    bar that isn't there.
 - **Status badge:** grey outline, grey text and a small coloured dot, with no
   pulsing. The tooltip explains the rule.
   - The labels must be clearly different from each other, from most to least
@@ -232,6 +234,9 @@ This went through several rounds; this version is "design B".
   - It says "in line with" or "fewer than" when that's the case.
   - It says "most of their top plays are recent" when there isn't 90 days of
     earlier history to compare with.
+  - With no recent top plays it still gives the number: "No top plays in the
+    last 90 days, against their usual 9 per 90 days." It doesn't guess what
+    happens next ("a return could mean new peaks soon" was cut as filler).
 
 **Rejected:**
 - "On the Rise" next to "Actively Improving": they couldn't be told apart.
@@ -316,7 +321,5 @@ This went through several rounds; this version is "design B".
 
 1. **The score table on phones** scrolls sideways and cuts off at the
    Accuracy column. It needs a proper phone layout.
-2. **A peak month outside the 18-month chart** has nothing on the chart to
-   match it. A small note would help.
-3. **Feature:** the comparison view should highlight the differences between
+2. **Feature:** the comparison view should highlight the differences between
    the players (who has more pp, better accuracy, and so on).
