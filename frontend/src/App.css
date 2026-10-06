@@ -77,7 +77,6 @@ body {
   color: #5b6270; /* between gray-500 and gray-600 */
 }
 
-.scores-table tbody .score-row-cover-muted .text-osu-cyan,
 .scores-table tbody .score-row-cover-muted .chip-on-cover {
   opacity: 0.6;
 }

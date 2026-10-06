@@ -84,9 +84,6 @@ export default function ImprovementVelocity({ scores }) {
   return (
     <div className="relative bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
 
-      {/* Coloured top accent bar */}
-      <div className={`h-1 w-full ${verdict.dot}`} />
-
       <div className="p-5">
         {/* Header row */}
         <div className="flex items-start justify-between mb-5">
@@ -96,10 +93,11 @@ export default function ImprovementVelocity({ scores }) {
           </div>
           <div
             tabIndex={0}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${verdict.border} bg-gray-900 cursor-default group relative focus:outline-none`}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-600 bg-gray-900 cursor-default group relative focus:outline-none"
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${verdict.dot} animate-pulse`} />
-            <span className={`text-sm font-semibold ${verdict.color}`}>{verdict.label}</span>
+            {/* the dot is the only coloured part: it says how active the player is */}
+            <span className={`w-2 h-2 rounded-full ${verdict.dot}`} />
+            <span className="text-sm font-semibold text-gray-200">{verdict.label}</span>
             {/* Hover tooltip */}
             <div role="tooltip" className="absolute right-0 top-full mt-2 hidden group-hover:block group-focus-visible:block [@media(hover:none)]:group-focus:block z-20 pointer-events-none">
               <div className="bg-gray-900 border border-gray-600 text-gray-300 text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-xl text-left">
@@ -132,10 +130,10 @@ export default function ImprovementVelocity({ scores }) {
           {/* What the two highlighted bar colours mean */}
           <div className="flex items-center gap-4 text-xs text-gray-400">
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-t from-osu-pink to-yellow-300" />Peak month
+              <span className="w-2.5 h-2.5 rounded-sm bg-osu-pink" />Peak month
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-t from-osu-cyan to-blue-300" />This month
+              <span className="w-2.5 h-2.5 rounded-sm bg-gray-300" />This month
             </span>
           </div>
         </div>
@@ -155,10 +153,10 @@ export default function ImprovementVelocity({ scores }) {
               const barColor = b.count === 0
                 ? 'bg-gray-700 opacity-20'
                 : b.isPeak
-                ? 'bg-gradient-to-t from-osu-pink to-yellow-300'
+                ? 'bg-osu-pink'
                 : b.isCurrent
-                ? 'bg-gradient-to-t from-osu-cyan to-blue-300'
-                : 'bg-gradient-to-t from-osu-purple to-osu-pink';
+                ? 'bg-gray-300'
+                : 'bg-osu-purple/45';
 
               return (
                 <div key={b.key} className="flex-1 flex flex-col items-center justify-end h-full group relative">
