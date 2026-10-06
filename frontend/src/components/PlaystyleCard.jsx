@@ -147,15 +147,17 @@ const ARCHETYPES = {
   },
 };
 
-// Trait badges
+// Trait badges (all one neutral style: they're labels, not data)
+
+const TRAIT_STYLE = 'border border-gray-600 bg-gray-900/60 text-gray-200';
 
 const TRAITS = {
-  accMachine:   { label: 'Acc Machine',    title: 'Exceptionally high average accuracy',            criteria: 'Avg accuracy ≥ 99% (non-Paragon)',      style: 'bg-emerald-900 text-emerald-300' },
-  hdStacker:    { label: 'HD Stacker',     title: 'Regularly adds Hidden on top of other mods',     criteria: 'HD on 30%+ of top plays (not primary mod)', style: 'bg-indigo-900  text-indigo-300'  },
-  hdhrStacker:  { label: 'HDHR Stacker',   title: 'Frequently combines Hidden and Hard Rock',       criteria: 'HDHR on 20%+ of top plays',                style: 'bg-fuchsia-900 text-fuchsia-300' },
-  hddtStacker:  { label: 'HDDT Stacker',   title: 'Frequently combines Hidden and Double Time',     criteria: 'HDDT on 20%+ of top plays',                style: 'bg-amber-900   text-amber-300'   },
-  modMixer:     { label: 'Mod Mixer',      title: 'No single mod dominates — plays a varied pool',  criteria: 'No mod above 50% (All-Rounder only)',    style: 'bg-slate-700   text-slate-300'   },
-  gimmickTouch: { label: 'Gimmick Touch',  title: 'Occasionally dips into non-standard mods',      criteria: 'EZ / HT / FL on 5–10% of top plays',       style: 'bg-green-900   text-green-300'   },
+  accMachine:   { label: 'Acc Machine',    title: 'Exceptionally high average accuracy',            criteria: 'Avg accuracy ≥ 99% (non-Paragon)' },
+  hdStacker:    { label: 'HD Stacker',     title: 'Regularly adds Hidden on top of other mods',     criteria: 'HD on 30%+ of top plays (not primary mod)' },
+  hdhrStacker:  { label: 'HDHR Stacker',   title: 'Frequently combines Hidden and Hard Rock',       criteria: 'HDHR on 20%+ of top plays' },
+  hddtStacker:  { label: 'HDDT Stacker',   title: 'Frequently combines Hidden and Double Time',     criteria: 'HDDT on 20%+ of top plays' },
+  modMixer:     { label: 'Mod Mixer',      title: 'No single mod dominates — plays a varied pool',  criteria: 'No mod above 50% (All-Rounder only)' },
+  gimmickTouch: { label: 'Gimmick Touch',  title: 'Occasionally dips into non-standard mods',      criteria: 'EZ / HT / FL on 5–10% of top plays' },
 };
 
 // Analyse
@@ -318,7 +320,7 @@ function ArchetypesModal({ onClose }) {
             <div className="space-y-2">
               {Object.values(TRAITS).map(t => (
                 <div key={t.label} className="flex items-start gap-3 rounded-lg p-3 bg-gray-800 border border-gray-700">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 mt-0.5 ${t.style}`}>{t.label}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 mt-0.5 ${TRAIT_STYLE}`}>{t.label}</span>
                   <div className="min-w-0">
                     <p className="text-gray-300 text-xs">{t.title}</p>
                     <p className="text-gray-400 text-xs mt-0.5 font-mono">{t.criteria}</p>
@@ -414,7 +416,7 @@ export default function PlaystyleCard({ scores }) {
             <div className="flex flex-wrap gap-2 border-t border-gray-700 pt-4 mt-5">
               {traits.map(traitKey => (
                 <Tooltip key={traitKey} text={TRAITS[traitKey].title}
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${TRAITS[traitKey].style}`}>
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${TRAIT_STYLE}`}>
                   {TRAITS[traitKey].label}
                 </Tooltip>
               ))}
