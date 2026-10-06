@@ -152,19 +152,25 @@ This went through several rounds; this version is "design B".
     narrower cards. The header and strip round their own corners instead.
 - **Header height:** at least `h-36` (`h-28` in the comparison view). It
   grows to fill the 4:1 card.
-- **Readability on any banner:**
-  - Soft dark "pools" sit in the header's bottom corners, where the name and
-    the headline stats sit. They are radial gradients with a fixed pixel
-    size, so they still cover the text on the narrow comparison cards.
-  - A vertical gradient darkens the header from 15% at the top to 75% at the
-    bottom.
-  - **The stats strip is a see-through dark band at the same 75%,** so the
-    header runs straight into it with no lighter bar or line between them.
-    It has no frost.
-  - Strip labels are `gray-300`, a step lighter than elsewhere, so they pass
-    over the see-through band.
-  - The header text has a drop shadow.
-  - Everything was measured against a pure-white banner, the worst case, at
+- **Readability on any banner:** one continuous layer of shading, with no
+  band, no line and no frost (`.player-card` in `App.css`):
+  - **a shadow rising from the bottom of the card,** darkest behind the
+    stats strip (85% at the bottom edge) and easing out towards the top
+    (8%), so the top of the art stays bright. Its stops are in px from the
+    bottom, so the strip is covered the same way at any card height, and
+    it's eased (many small steps), because a sudden change in how fast it
+    fades reads as a line;
+  - **soft dark pools** behind the name (bottom-left) and the headline stats
+    (bottom-right). They have fixed pixel sizes, so they still cover the
+    text on the narrow comparison cards. From 768px up they're painted on
+    the whole card: painted inside the header, they stopped dead at its
+    bottom edge, which made a visible line;
+  - **phones:** the banner sits behind the header only, which darkens from
+    15% at the top to 75% at the bottom, and the strip sits below it on the
+    plain card;
+  - strip labels are `gray-300`, a step lighter than elsewhere;
+  - the header text has a drop shadow;
+  - everything was measured against a pure-white banner, the worst case, at
     desktop, comparison and phone width, and passes.
 - **Both big stats have the same structure:** label above, number below,
   lined up exactly. The rank change (▲18) sits in the **label line**, so it
@@ -178,6 +184,10 @@ This went through several rounds; this version is "design B".
 - **A frosted (blurred) stats band.** It smeared the banner into fog, and the
   band was lighter than the header bottom above it, so it read as a hazy
   bar.
+- **A flat dark stats band, with or without frost.** Any band has a top edge,
+  and that edge reads as a grey line. "Glass without the shadow above it"
+  also failed contrast: with nothing behind the name, it measured 1.40 on a
+  bright banner.
 - **Banner behind the whole card at the old height.** It showed about 80%
   of the banner. Going to a full 4:1 card shows all of it for 53px more.
 - **Banner behind the whole card with rainbow stats.** It was messy. (The

@@ -54,25 +54,10 @@ function formatHours(seconds) {
 export default function UserProfile({ user, compact = false }) {
   if (!user) return null;
 
-  // Where the banner goes depends on the card's shape (see .player-card in
-  // App.css): from 768px up the card is at least 4:1 and the banner fills all
-  // of it; on narrower screens the banner stays behind the header only, which
-  // shows more of it there (the full card is too tall for its width).
-  // The header always gets soft dark pools in its bottom corners, where the
-  // name and the headline stats sit (fixed pixel sizes, so they cover the
-  // text on narrow cards too), and a gradient darkening towards the bottom,
-  // ending at the same darkness as the stats band below it.
-  // Without a banner it's a plain dark gradient.
-  const bannerVars = user.cover_url
-    ? {
-        '--banner': `url("${user.cover_url}")`,
-        '--header-shade': [
-          'radial-gradient(ellipse 560px 170px at 0% 100%, rgb(17 24 39 / 0.8), transparent)',
-          'radial-gradient(ellipse 620px 180px at 100% 100%, rgb(17 24 39 / 0.85), transparent)',
-          'linear-gradient(to bottom, rgb(17 24 39 / 0.15), rgb(17 24 39 / 0.75))',
-        ].join(', '),
-      }
-    : undefined;
+  // The banner and its shading are set in App.css (.player-card): it fills
+  // the whole card from 768px up and sits behind the header on phones.
+  // Without a banner the card is a plain dark gradient.
+  const bannerVars = user.cover_url ? { '--banner': `url("${user.cover_url}")` } : undefined;
 
   const rank = user.stats.global_rank ? `#${user.stats.global_rank.toLocaleString()}` : 'N/A';
   const countryRank = user.stats.country_rank ? `#${user.stats.country_rank.toLocaleString()}` : 'N/A';
@@ -125,10 +110,9 @@ export default function UserProfile({ user, compact = false }) {
         </div>
       </div>
 
-      {/* Secondary stats strip: a see-through dark band over the bottom of the
-          banner, the same darkness the header fades down to, so the two run
-          into each other with no lighter bar or line between them */}
-      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-y-3 sm:divide-x sm:divide-white/10 bg-gray-900/75 rounded-b-lg ${compact ? 'px-4 py-3' : 'px-6 py-4'} sm:[&>*]:px-5 sm:[&>*:first-child]:pl-0`}>
+      {/* Secondary stats strip. No background of its own: the card's shadow
+          rising from the bottom keeps it readable, with no band edge. */}
+      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-y-3 sm:divide-x sm:divide-white/10 ${compact ? 'px-4 py-3' : 'px-6 py-4'} sm:[&>*]:px-5 sm:[&>*:first-child]:pl-0`}>
         <Stat label="Country Rank" value={countryRank} />
         <Stat label="Accuracy" value={`${user.stats.accuracy}%`} />
         <Stat label="Play Count" value={user.playcount.toLocaleString()} />
