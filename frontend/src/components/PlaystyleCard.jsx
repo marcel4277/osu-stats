@@ -373,7 +373,7 @@ export default function PlaystyleCard({ scores }) {
             </div>
             <div className="flex items-start gap-3 shrink-0">
               <div className="text-right">
-                <p className="text-gray-400 text-sm">Avg accuracy</p>
+                <p className="text-gray-300 text-xs uppercase tracking-wider">Avg accuracy</p>
                 <p className="text-white font-bold text-lg">{avgAccuracy.toFixed(1)}%</p>
               </div>
               <Tooltip text="View all archetypes" placement="left" focusable={false} className="shrink-0 mt-0.5">

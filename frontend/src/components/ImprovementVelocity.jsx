@@ -107,17 +107,19 @@ export default function ImprovementVelocity({ scores }) {
           </div>
         </div>
 
-        {/* Stat row */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        {/* Stat strip, same style as the player card's */}
+        <div className="grid grid-cols-3 divide-x divide-gray-700 border-y border-gray-700 py-3 mb-6">
           {[
-            { label: 'Last Top Score', value: lastScoreLabel,           accent: verdict.color },
-            { label: 'Peak Month',     value: peakLabel,                sub: `${peakCount} scores`, accent: 'text-osu-pink' },
-            { label: 'Active Span',    value: spanLabel,                accent: 'text-osu-cyan' },
-          ].map(({ label, value, sub, accent }) => (
-            <div key={label} className="bg-gray-900 rounded-lg p-3 text-center">
-              <p className="text-gray-400 text-sm mb-1">{label}</p>
-              <p className={`font-bold text-sm ${accent}`}>{value}</p>
-              {sub && <p className="text-gray-400 text-sm mt-0.5">{sub}</p>}
+            { label: 'Last Top Score', value: lastScoreLabel },
+            { label: 'Peak Month',     value: peakLabel, sub: `${peakCount} scores` },
+            { label: 'Active Span',    value: spanLabel },
+          ].map(({ label, value, sub }) => (
+            <div key={label} className="min-w-0 px-4 first:pl-0">
+              <p className="text-gray-400 text-xs uppercase tracking-wider">{label}</p>
+              <p className="text-white text-lg font-semibold truncate">
+                {value}
+                {sub && <span className="ml-2 text-gray-400 text-xs font-normal">{sub}</span>}
+              </p>
             </div>
           ))}
         </div>
