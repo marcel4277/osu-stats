@@ -85,9 +85,17 @@ Mod colours come in three strengths, all from the same table:
 - **No developer language on the page.** No code-style (monospace) text, no
   "AND", "≥", or rule jargon like "Player threshold". Rules are written as
   plain sentences, e.g. "DT on 70%+ of top plays, with 97%+ average accuracy".
-- **Month names come from a fixed list** of three-letter names (Jan … Sep …
-  Dec). The browser's own short names vary by language; UK English gives
-  "Sept".
+- **Dates look the same for every visitor** (`components/dateUtils.js`):
+  - a day is written "18 Nov 2024", never "18/11/2024", which reads as
+    11/18 in the US and can't be read at all for dates like 04/04;
+  - a month is written "Apr 2026", never "Apr 26", which looks like the
+    26th of April;
+  - month names come from a fixed three-letter list, because UK English
+    gives "Sept".
+- **Two different accuracy numbers get two different names.** The player
+  card's "Accuracy" is osu!'s weighted profile figure. The playstyle card's
+  "Top play acc" is the plain average of the top plays, and its tooltip
+  explains the difference.
 
 ---
 
@@ -201,6 +209,7 @@ This went through several rounds; this version is "design B".
   - this month `gray-300`.
 - **Scale:** the top of the chart rounds up to a clean number (29 becomes 30),
   and the top and middle gridlines are labelled (30 / 15).
+  - The labels are `gray-400` (5.8:1). `gray-500` was too faint, at 3.2:1.
   - Gridlines are faint solid lines; the baseline is a step brighter.
 - **Month labels:** under every bar on desktop and in the comparison view;
   every third month on phones.
@@ -305,7 +314,9 @@ This went through several rounds; this version is "design B".
 
 ## 11. Known design issues still open
 
-1. **A peak month outside the 18-month chart** has nothing on the chart to
+1. **The score table on phones** scrolls sideways and cuts off at the
+   Accuracy column. It needs a proper phone layout.
+2. **A peak month outside the 18-month chart** has nothing on the chart to
    match it. A small note would help.
-2. **Feature:** the comparison view should highlight the differences between
+3. **Feature:** the comparison view should highlight the differences between
    the players (who has more pp, better accuracy, and so on).
