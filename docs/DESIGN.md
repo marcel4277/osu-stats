@@ -359,5 +359,9 @@ DJ TOTTO ..................... DT HD
 
 ## 11. Known design issues still open
 
-1. **Feature:** the comparison view should highlight the differences between
+1. **A faint edge on the score table at 80% browser zoom** (Windows Chrome,
+   seen near the table's left edge). Parked as a tiny edge case. It doesn't
+   reproduce on Linux Chromium: there are no seams and no 1px overflow at any
+   width from 1024 to 2100px. Needs a close-up screenshot to pin down.
+2. **Feature:** the comparison view should highlight the differences between
    the players (who has more pp, better accuracy, and so on).
