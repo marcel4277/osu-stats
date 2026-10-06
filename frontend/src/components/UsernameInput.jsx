@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
-export default function UsernameInput({ onSearch, isLoading, placeholder = 'Enter osu! username...' }) {
+// secondary: an outlined button, for the compare search, so the main search
+// stays the primary action
+export default function UsernameInput({ onSearch, isLoading, placeholder = 'Enter osu! username...', secondary = false }) {
   const [username, setUsername] = useState('');
 
   const handleSubmit = (e) => {
@@ -25,7 +27,11 @@ export default function UsernameInput({ onSearch, isLoading, placeholder = 'Ente
         <button
           type="submit"
           disabled={isLoading}
-          className="px-6 py-3 bg-osu-purple hover:bg-osu-pink text-white rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`px-6 py-3 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed ${
+            secondary
+              ? 'border border-osu-purple text-purple-300 hover:bg-osu-purple/15'
+              : 'bg-osu-purple hover:bg-osu-pink text-white'
+          }`}
         >
           {isLoading ? 'Searching...' : 'Search'}
         </button>
