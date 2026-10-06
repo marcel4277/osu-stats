@@ -356,10 +356,11 @@ export default function PlaystyleCard({ scores }) {
     <>
       <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
 
+        {/* Accent bar along the top, same treatment as Improvement Velocity */}
+        <div className={`h-1 w-full bg-gradient-to-r ${archetype.from} ${archetype.to}`} />
         <div className="relative bg-gray-900 px-5 py-5 overflow-hidden">
           {/* archetype colour wash */}
           <div className={`absolute inset-0 bg-gradient-to-br ${archetype.from} ${archetype.to} opacity-25`} />
-          <div className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b ${archetype.from} ${archetype.to}`} />
           <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-4 min-w-0">
               <div className={`shrink-0 w-14 h-14 rounded-full border ${archetype.border} bg-gray-900/70 flex items-center justify-center ${archetype.text}`}>
@@ -390,10 +391,10 @@ export default function PlaystyleCard({ scores }) {
         </div>
 
         <div className="p-5">
-          <p className={`text-sm mb-5 ${archetype.text}`}>{archetype.desc}</p>
+          <p className="text-sm text-gray-300 mb-4">{archetype.desc}</p>
 
           <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Mod breakdown · {total} scores</p>
-          <div className="space-y-2 mb-5">
+          <div className="space-y-2">
             {breakdown.map(({ mod, count, color }) => (
               <div key={mod} className="flex items-center gap-3">
                 <span className="text-gray-400 text-sm w-8 shrink-0">{mod}</span>
@@ -411,7 +412,7 @@ export default function PlaystyleCard({ scores }) {
           </div>
 
           {traits.length > 0 && (
-            <div className="flex flex-wrap gap-2 border-t border-gray-700 pt-4">
+            <div className="flex flex-wrap gap-2 border-t border-gray-700 pt-4 mt-5">
               {traits.map(traitKey => (
                 <Tooltip key={traitKey} text={TRAITS[traitKey].title}
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${TRAITS[traitKey].style}`}>

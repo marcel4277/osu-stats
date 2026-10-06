@@ -83,7 +83,7 @@ export default function HomePage() {
           </div>
         )}
         {player1 && (
-          <UsernameInput onSearch={handleSearch2} isLoading={loading2} placeholder="Compare with..." />
+          <UsernameInput onSearch={handleSearch2} isLoading={loading2} placeholder="Compare with..." secondary />
         )}
       </div>
 
