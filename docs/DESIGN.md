@@ -127,11 +127,18 @@ This went through several rounds; this version is "design B".
   bottom-left on the banner. **Global rank and pp sit big on the bottom-right.**
   Under the banner is one strip of secondary stats (country rank, accuracy,
   play count, play time) with thin dividers between them.
-- **The banner fills the whole card,** header and stats strip together.
-  Banners are about 4:1. A header-only strip (about 7.7:1) showed only the
-  middle half of the banner's height. The whole card is about 5:1 on desktop
-  (most of the banner shows) and close to 4:1 in the comparison view (nearly
-  all of it), with no extra height.
+- **Where the banner goes depends on the card's shape** (`.player-card` in
+  `App.css`). Banners are about 4:1, and the box they fill decides how much
+  shows (measured share of the banner visible):
+
+  | Layout | Banner behind | Visible |
+  |---|---|---|
+  | Desktop | whole card (about 5:1) | 81% (header only was 52%) |
+  | Comparison | whole card (close to 4:1) | 98% (header only was 63%) |
+  | Phone (under 640px) | header only (about 2.5:1) | 62% (whole card would be 27%) |
+
+  On phones the card is nearly square, so the whole-card version would crop
+  the sides hard.
 - **Height:** header part `h-36` (`h-28` in the comparison view).
 - **The stats strip is a see-through dark band** over the bottom of the banner
   (`gray-900` at 75%, lightly blurred, thin `white/10` top line and
