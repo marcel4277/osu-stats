@@ -253,7 +253,7 @@ export default function ScoresList({ scores, username }) {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="scores-table w-full">
           <thead>
             <tr className="bg-gray-900 border-b border-gray-700">
               <th className="px-4 py-3 text-left text-gray-400 font-semibold">#</th>
