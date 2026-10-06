@@ -55,21 +55,24 @@ function pluralise(n, word) {
 
 // Compares the last 90 days with the player's usual pace, e.g.
 // "11 top plays set in the last 90 days — 2.4× their usual 5 per 90 days."
+// "No top plays in the last 90 days, against their usual 9 per 90 days."
 // Usual pace = top plays per 90 days before the last 90 days, from their
 // oldest top play on. Needs at least 90 days of that earlier history.
-function insight(dates, now, last90, daysSinceLast) {
+function insight(dates, now, last90) {
   const DAY = 86400000;
-  if (last90 === 0) {
-    return `No top plays in the last 90 days.${daysSinceLast > 365 ? ' This player may have stepped back from competing.' : ' A return could mean new peaks soon.'}`;
-  }
-  const recent = `${pluralise(last90, 'top play')} set in the last 90 days`;
   const oldest = Math.min(...dates);
   const earlierDays = (now - 90 * DAY - oldest) / DAY;
-  if (earlierDays < 90) return `${recent} — most of their top plays are recent.`;
+  const usual = earlierDays >= 90 ? (dates.length - last90) / (earlierDays / 90) : null;
+  const usualText = usual === null ? null
+    : usual < 1 ? 'their usual pace of under 1 per 90 days'
+    : `their usual ${Math.round(usual)} per 90 days`;
 
-  const usual = (dates.length - last90) / (earlierDays / 90);
-  if (usual < 1) return `${recent} — far above their usual pace of under 1 per 90 days.`;
-  const usualText = `their usual ${Math.round(usual)} per 90 days`;
+  if (last90 === 0) {
+    return usualText ? `No top plays in the last 90 days, against ${usualText}.` : 'No top plays in the last 90 days.';
+  }
+  const recent = `${pluralise(last90, 'top play')} set in the last 90 days`;
+  if (usual === null) return `${recent} — most of their top plays are recent.`;
+  if (usual < 1) return `${recent} — far above ${usualText}.`;
   const ratio = last90 / usual;
   if (ratio >= 1.5) {
     const times = ratio >= 10 ? Math.round(ratio) : Math.round(ratio * 10) / 10;
@@ -119,7 +122,7 @@ export default function ImprovementVelocity({ scores, scaleMax = 0 }) {
     });
     const maxCount = niceMax(Math.max(...buckets.map(b => b.count), scaleMax, 1));
     const verdict = buildVerdict(daysSinceLast, last90, last180);
-    const insightText = insight(dates, now, last90, daysSinceLast);
+    const insightText = insight(dates, now, last90);
 
     return { daysSinceLast, peakCount, peakLabel: formatMonth(peakYear, peakMonth), spanMonths, buckets, maxCount, verdict, insightText };
   }, [scores, scaleMax]);
@@ -131,6 +134,9 @@ export default function ImprovementVelocity({ scores, scaleMax = 0 }) {
   // be older than the 18 months shown, and this month may have no plays yet.
   const showPeak = buckets.some(b => b.isPeak && b.count > 0);
   const showCurrent = buckets[buckets.length - 1].count > 0;
+  // The peak month stat can be older than the chart; say so where the pink
+  // "Peak month" key would be, so nobody looks for a bar that isn't there
+  const peakOffChart = !showPeak;
 
   const lastScoreLabel = daysSinceLast === 0 ? 'Today' : pluralise(daysSinceLast, 'day') + ' ago';
   const spanLabel = spanMonths < 1 ? '< 1 month'
@@ -187,7 +193,7 @@ export default function ImprovementVelocity({ scores, scaleMax = 0 }) {
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 mb-3">
           <p className="text-gray-400 text-sm uppercase tracking-widest">Activity · last 18 months</p>
           {/* What the highlighted bar colours mean */}
-          {(showPeak || showCurrent) && (
+          {(showPeak || showCurrent || peakOffChart) && (
             <div className="flex items-center gap-4 text-xs text-gray-400">
               {showPeak && (
                 <span className="flex items-center gap-1.5">
@@ -199,6 +205,7 @@ export default function ImprovementVelocity({ scores, scaleMax = 0 }) {
                   <span className="w-2.5 h-2.5 rounded-sm bg-gray-300" />This month
                 </span>
               )}
+              {peakOffChart && <span>Peak month is older than this chart</span>}
             </div>
           )}
         </div>
