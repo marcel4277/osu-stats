@@ -55,25 +55,25 @@ body {
 }
 
 /* Keeping text readable on a cover: lighter secondary grey text and a solid
-   dark backing on badges / the accuracy chip / the lazer tag. Greyscale rows
-   (lightly dimmed) also get a dark text shadow. */
-.score-row-cover-muted > td {
-  text-shadow: 0 1px 2px rgb(0 0 0 / 0.95), 0 0 8px rgb(0 0 0 / 0.8);
-}
-
+   dark backing on badges / the accuracy chip / the lazer tag. */
 .score-row-cover .text-gray-400 {
   color: #e5e7eb; /* gray-200 */
 }
 
-/* Rows outside the time filter: text toned down from white so the selected
-   (colour) rows stand out. Coloured accents (pp, accuracy, mod badges) keep
-   their colours. */
+/* Rows outside the time filter: text toned well down from white, and the
+   coloured accents (pp, accuracy, mod badges) faded, so the selected (colour)
+   rows stand out. */
 .scores-table tbody .score-row-cover-muted .text-white {
-  color: #d1d5db; /* gray-300 */
+  color: #9ca3af; /* gray-400 */
 }
 
 .scores-table tbody .score-row-cover-muted .text-gray-400 {
-  color: #9ca3af; /* gray-400 */
+  color: #6b7280; /* gray-500 */
+}
+
+.scores-table tbody .score-row-cover-muted .text-osu-cyan,
+.scores-table tbody .score-row-cover-muted .chip-on-cover {
+  opacity: 0.7;
 }
 
 .score-row-cover .chip-on-cover {
