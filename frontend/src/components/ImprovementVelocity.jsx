@@ -149,29 +149,29 @@ export default function ImprovementVelocity({ scores }) {
           )}
         </div>
 
-        <div className="relative">
-          {/* Subtle grid lines */}
-          <div className="absolute inset-0 flex flex-col justify-between pointer-events-none" style={{ height: '6rem' }}>
-            {[0, 1, 2, 3].map(i => (
-              <div key={i} className="w-full border-t border-gray-700 border-dashed opacity-40" />
-            ))}
+        <div className="relative h-28">
+          {/* Gridlines: faint, solid hairlines; the baseline a step brighter */}
+          <div className="absolute inset-x-0 top-5 bottom-0 flex flex-col justify-between pointer-events-none">
+            <div className="border-t border-gray-700/50" />
+            <div className="border-t border-gray-700/50" />
+            <div className="border-t border-gray-600" />
           </div>
 
-          {/* Bars */}
-          <div className="flex items-end gap-1 h-24 relative">
+          {/* Bars: capped at 24px wide with air between them, rounded at the
+              top and square at the baseline. Empty months draw nothing. The
+              peak month gets its count written on top. */}
+          <div className="absolute inset-x-0 top-5 bottom-0 flex items-end gap-1">
             {buckets.map(b => {
-              const heightPct = b.count === 0 ? 0 : Math.max((b.count / maxCount) * 100, 8);
-              const barColor = b.count === 0
-                ? 'bg-gray-700 opacity-20'
-                : b.isPeak
+              const heightPct = b.count === 0 ? 0 : Math.max((b.count / maxCount) * 100, 4);
+              const barColor = b.isPeak
                 ? 'bg-osu-pink'
                 : b.isCurrent
                 ? 'bg-gray-300'
-                : 'bg-osu-purple/45';
+                : 'bg-osu-purple/60';
 
               return (
                 <div key={b.key} className="flex-1 flex flex-col items-center justify-end h-full group relative">
-                  {/* Hover tooltip */}
+                  {/* Hover tooltip (the whole column is the hover target) */}
                   <div className="absolute bottom-full mb-2 hidden group-hover:block z-10 pointer-events-none">
                     <div className="bg-gray-900 border border-gray-600 text-white text-sm rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-xl">
                       <p className="font-semibold">{b.label}</p>
@@ -179,11 +179,15 @@ export default function ImprovementVelocity({ scores }) {
                     </div>
                   </div>
 
-                  {/* Bar */}
-                  <div
-                    className={`w-full rounded-t-sm transition-all duration-500 ${barColor}`}
-                    style={{ height: b.count === 0 ? '3px' : `${heightPct}%` }}
-                  />
+                  {b.isPeak && b.count > 0 && (
+                    <span className="text-xs font-semibold text-gray-200 mb-1 leading-none">{b.count}</span>
+                  )}
+                  {b.count > 0 && (
+                    <div
+                      className={`w-full max-w-[24px] shrink-0 rounded-t transition-all duration-500 group-hover:brightness-125 ${barColor}`}
+                      style={{ height: `${heightPct}%` }}
+                    />
+                  )}
                 </div>
               );
             })}
