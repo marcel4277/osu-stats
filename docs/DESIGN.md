@@ -125,35 +125,47 @@ This went through several rounds; this version is "design B".
 
 - **Layout:** the banner is the header. The avatar, name, flag and country sit
   bottom-left on the banner. **Global rank and pp sit big on the bottom-right.**
-  Under the banner is one strip of secondary stats (country rank, accuracy,
-  play count, play time) with thin dividers between them.
-- **Where the banner goes depends on the card's shape** (`.player-card` in
-  `App.css`). Banners are about 4:1, and the box they fill decides how much
-  shows (measured share of the banner visible):
+  Along the bottom is one strip of secondary stats (country rank, accuracy,
+  play count, play time) with thin dividers between them, on a see-through
+  band over the banner (on phones, under it).
+- **The banner, and how much of it shows** (`.player-card` in `App.css`).
+  Banners are about 4:1.
+  - **From 768px up the card is 4:1** (as a minimum: it grows if its content
+    needs more room) and the banner fills the whole card, so all of it shows.
+    The extra height is all picture, above the name.
+  - **Below 768px the banner stays behind the header only.** There the full
+    card would be too tall for its width and crop the banner harder. 768px
+    is where the two cross over.
+  - **Measured share visible:**
 
-  | Layout | Banner behind | Visible |
-  |---|---|---|
-  | Desktop | whole card (about 5:1) | 81% (header only was 52%) |
-  | Comparison | whole card (close to 4:1) | 98% (header only was 63%) |
-  | Phone (under 640px) | header only (about 2.5:1) | 62% (whole card would be 27%) |
+    | Width | Banner behind | Visible |
+    |---|---|---|
+    | 390 (phone) | header | 62% |
+    | 640 | header | 97% |
+    | 767 | header | 80% |
+    | 768 | whole card | 81% |
+    | 900 | whole card | 96% |
+    | 1024 and up, comparison view | whole card | 98–100% |
 
-  On phones the card is nearly square, so the whole-card version would crop
-  the sides hard.
-- **Height:** header part `h-36` (`h-28` in the comparison view).
-- **The stats strip is a see-through dark band** over the bottom of the banner
-  (`gray-900` at 75%, lightly blurred, thin `white/10` top line and
-  dividers). Its labels are `gray-300`, a step lighter than elsewhere, so
-  they pass 4.5:1 over a pure-white banner while the banner still shows
-  through. A solid enough band to keep `gray-400` labels (90%) would hide
-  the banner, which would defeat the point.
+  - **The card isn't clipped** (no `overflow-hidden` with a banner). Clipping
+    makes the browser hold the card at exactly 4:1 and cut off the stats on
+    narrower cards. The header and strip round their own corners instead.
+- **Header height:** at least `h-36` (`h-28` in the comparison view). It
+  grows to fill the 4:1 card.
 - **Readability on any banner:**
-  - Soft dark "pools" sit only in the bottom-left and bottom-right corners,
-    where the text is. These are radial gradients with a fixed pixel size, so
-    they still cover the text on the narrow comparison cards.
-  - A vertical gradient darkens from 15% at the top to 90% at the bottom.
-  - The text has a drop shadow.
-  - It was measured against a pure-white banner, the worst case, and
-    everything passes.
+  - Soft dark "pools" sit in the header's bottom corners, where the name and
+    the headline stats sit. They are radial gradients with a fixed pixel
+    size, so they still cover the text on the narrow comparison cards.
+  - A vertical gradient darkens the header from 15% at the top to 75% at the
+    bottom.
+  - **The stats strip is a see-through dark band at the same 75%,** so the
+    header runs straight into it with no lighter bar or line between them.
+    It has no frost.
+  - Strip labels are `gray-300`, a step lighter than elsewhere, so they pass
+    over the see-through band.
+  - The header text has a drop shadow.
+  - Everything was measured against a pure-white banner, the worst case, at
+    desktop, comparison and phone width, and passes.
 - **Both big stats have the same structure:** label above, number below,
   lined up exactly. The rank change (▲18) sits in the **label line**, so it
   can't push the number out of line.
@@ -163,6 +175,11 @@ This went through several rounds; this version is "design B".
 - **Phones:** rank and pp move into the stats strip and are listed first.
 
 **Rejected:**
+- **A frosted (blurred) stats band.** It smeared the banner into fog, and the
+  band was lighter than the header bottom above it, so it read as a hazy
+  bar.
+- **Banner behind the whole card at the old height.** It showed about 80%
+  of the banner. Going to a full 4:1 card shows all of it for 53px more.
 - **Banner behind the whole card with rainbow stats.** It was messy. (The
   banner covering the whole card came back later, and it works now because
   the numbers are neutral and the strip sits on its own dark band.)

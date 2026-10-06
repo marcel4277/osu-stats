@@ -55,12 +55,13 @@ export default function UserProfile({ user, compact = false }) {
   if (!user) return null;
 
   // Where the banner goes depends on the card's shape (see .player-card in
-  // App.css): behind the whole card from 640px up, where that shows more of
-  // it, and behind the header only on phones, where the card is nearly
-  // square and the whole-card version would crop the banner's sides hard.
+  // App.css): from 768px up the card is at least 4:1 and the banner fills all
+  // of it; on narrower screens the banner stays behind the header only, which
+  // shows more of it there (the full card is too tall for its width).
   // The header always gets soft dark pools in its bottom corners, where the
   // name and the headline stats sit (fixed pixel sizes, so they cover the
-  // text on narrow cards too), and a gradient darkening towards the bottom.
+  // text on narrow cards too), and a gradient darkening towards the bottom,
+  // ending at the same darkness as the stats band below it.
   // Without a banner it's a plain dark gradient.
   const bannerVars = user.cover_url
     ? {
@@ -68,7 +69,7 @@ export default function UserProfile({ user, compact = false }) {
         '--header-shade': [
           'radial-gradient(ellipse 560px 170px at 0% 100%, rgb(17 24 39 / 0.8), transparent)',
           'radial-gradient(ellipse 620px 180px at 100% 100%, rgb(17 24 39 / 0.85), transparent)',
-          'linear-gradient(to bottom, rgb(17 24 39 / 0.15), rgb(17 24 39 / 0.9))',
+          'linear-gradient(to bottom, rgb(17 24 39 / 0.15), rgb(17 24 39 / 0.75))',
         ].join(', '),
       }
     : undefined;
@@ -80,11 +81,15 @@ export default function UserProfile({ user, compact = false }) {
 
   return (
     <div
-      className={`rounded-lg border border-gray-700 overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 ${user.cover_url ? 'player-card' : ''}`}
+      // With a banner: 4:1 from 768px up, but only as a minimum. The card
+      // isn't clipped (overflow-hidden would make the browser hold it at
+      // exactly 4:1 and cut off the stats on narrower cards); the header and
+      // strip round their own corners instead.
+      className={`rounded-lg border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 ${user.cover_url ? 'player-card md:aspect-[4/1] md:flex md:flex-col' : 'overflow-hidden'}`}
       style={bannerVars}
     >
       <div
-        className={`flex items-end justify-between gap-4 [text-shadow:0_1px_2px_rgb(0_0_0/0.8),0_2px_8px_rgb(0_0_0/0.5)] ${user.cover_url ? 'player-card-header' : ''} ${compact ? 'h-28 px-4 pb-3' : 'h-36 px-6 pb-4'}`}
+        className={`flex items-end justify-between gap-4 [text-shadow:0_1px_2px_rgb(0_0_0/0.8),0_2px_8px_rgb(0_0_0/0.5)] ${user.cover_url ? 'player-card-header md:flex-1 rounded-t-lg' : ''} ${compact ? 'h-28 md:min-h-28 px-4 pb-3' : 'h-36 md:min-h-36 px-6 pb-4'} ${user.cover_url ? 'md:h-auto' : ''}`}
       >
         <div className="flex items-center gap-4 min-w-0">
           {/* Avatar — links to osu! profile */}
@@ -120,9 +125,10 @@ export default function UserProfile({ user, compact = false }) {
         </div>
       </div>
 
-      {/* Secondary stats strip: a dark, lightly frosted band over the bottom
-          of the banner, so the small labels read on any banner */}
-      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-y-3 sm:divide-x sm:divide-white/10 border-t border-white/10 bg-gray-900/75 backdrop-blur-sm ${compact ? 'px-4 py-3' : 'px-6 py-4'} sm:[&>*]:px-5 sm:[&>*:first-child]:pl-0`}>
+      {/* Secondary stats strip: a see-through dark band over the bottom of the
+          banner, the same darkness the header fades down to, so the two run
+          into each other with no lighter bar or line between them */}
+      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-y-3 sm:divide-x sm:divide-white/10 bg-gray-900/75 rounded-b-lg ${compact ? 'px-4 py-3' : 'px-6 py-4'} sm:[&>*]:px-5 sm:[&>*:first-child]:pl-0`}>
         <Stat label="Country Rank" value={countryRank} />
         <Stat label="Accuracy" value={`${user.stats.accuracy}%`} />
         <Stat label="Play Count" value={user.playcount.toLocaleString()} />
