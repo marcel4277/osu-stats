@@ -96,6 +96,48 @@ function useNearScreen() {
   return [ref, near];
 }
 
+// True while the screen is at least `minWidth` px wide; follows resizes.
+function useWideScreen(minWidth) {
+  const query = `(min-width: ${minWidth}px)`;
+  const [wide, setWide] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    const onChange = () => setWide(media.matches);
+    onChange();
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, [query]);
+  return wide;
+}
+
+// Classes and style shared by the table row and the phone card: the cover
+// behind the play, greyed outside the time filter, the pink edge bar inside an
+// active filter. A play without a cover has its content dimmed instead.
+function playStyling(score, { near, inRange, highlight, dimSelector }) {
+  const showCover = near && score.cover_url;
+  const className = [
+    'border-b border-gray-700 transition',
+    showCover ? `score-row-cover ${inRange ? '' : 'score-row-cover-muted'}` : '',
+    inRange || score.cover_url ? '' : dimSelector,
+    highlight ? 'score-row-active' : '',
+    score.url ? 'score-row-link cursor-pointer' : 'cursor-default',
+  ].join(' ');
+  const style = showCover ? { '--cover': `url("${score.cover_url}")` } : undefined;
+  return { className, style };
+}
+
+// compact: slimmer padding, for the phone card's stats line
+function LazerTag({ compact = false }) {
+  return (
+    <Tooltip
+      text="osu!lazer score (standardised, max 1,000,000)"
+      className={`chip-on-cover bg-gray-700/40 text-gray-300 border border-gray-500/50 py-0.5 rounded text-[0.65rem] leading-none font-semibold ${compact ? 'px-1' : 'px-1.5 tracking-wide'}`}
+    >
+      lazer
+    </Tooltip>
+  );
+}
+
 // A score row. The map's cover sits behind it as a darkened backdrop: full
 // colour normally, greyed out when the row is outside the time filter
 // (see .score-row-cover in App.css).
@@ -103,18 +145,9 @@ function useNearScreen() {
 function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
   const [ref, near] = useNearScreen();
   const url = score.url;
-  const showCover = near && score.cover_url;
-  // Outside the time filter: the cover in greyscale (text unchanged); a row
-  // without a cover has its text dimmed instead. Inside an active filter: pink edge bar.
+  const { className, style } = playStyling(score, { near, inRange, highlight, dimSelector: '[&>td]:opacity-60' });
   return (
-    <tr
-      ref={ref}
-      className={`border-b border-gray-700 transition ${showCover ? `score-row-cover ${inRange ? '' : 'score-row-cover-muted'}` : ''} ${
-        inRange || score.cover_url ? '' : '[&>td]:opacity-60'
-      } ${highlight ? 'score-row-active' : ''} ${url ? 'score-row-link cursor-pointer' : 'cursor-default'}`}
-      style={showCover ? { '--cover': `url("${score.cover_url}")` } : undefined}
-      onClick={() => onOpen(url)}
-    >
+    <tr ref={ref} className={className} style={style} onClick={() => onOpen(url)}>
       <td className="px-4 py-3 text-gray-400">{rank}</td>
       {/* w-full + max-w-0: the beatmap column takes the leftover width and long
           titles are cut off with "…" instead of wrapping onto a second line */}
@@ -140,18 +173,11 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
       <td className="px-4 py-3 text-center text-white font-semibold">
         <div className="flex flex-col items-center gap-0.5">
           {score.score != null ? score.score.toLocaleString() : '—'}
-          {score.is_lazer && (
-            <Tooltip
-              text="osu!lazer score (standardised, max 1,000,000)"
-              className="chip-on-cover bg-gray-700/40 text-gray-300 border border-gray-500/50 px-1.5 py-0.5 rounded text-[0.65rem] leading-none font-semibold tracking-wide"
-            >
-              lazer
-            </Tooltip>
-          )}
+          {score.is_lazer && <LazerTag />}
         </div>
       </td>
       <td className="px-4 py-3 text-center text-gray-400">
-        {score.combo}x
+        {score.combo.toLocaleString()}x
       </td>
       <td className="px-4 py-3 text-center">
         {score.pp != null
@@ -168,7 +194,61 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
   );
 }
 
+// A play on screens too narrow for the table: three lines, nothing left out.
+//   rank title ....... pp
+//   artist ........ mods
+//   acc  score  combo  date
+// The rank sits on the title line rather than in its own column, so the
+// stats line gets the full width (a lazer play's line needs every pixel).
+function ScoreCard({ score, rank, inRange, highlight, onOpen }) {
+  const [ref, near] = useNearScreen();
+  const url = score.url;
+  const { className, style } = playStyling(score, { near, inRange, highlight, dimSelector: '[&>*]:opacity-60' });
+  return (
+    <li ref={ref} className={`${className} px-3 py-2.5`} style={style} onClick={() => onOpen(url)}>
+      <div className="min-w-0">
+        <div className="flex items-baseline gap-3">
+          <p className="min-w-0 flex-1 truncate text-white font-semibold">
+            <span className="mr-2 text-sm font-normal text-gray-400 tabular-nums">{rank}</span>
+            {url
+              ? <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="hover:underline focus:underline">{score.title}</a>
+              : score.title}
+          </p>
+          <span className="shrink-0">
+            {score.pp != null
+              ? <span className="text-white font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
+              : <span className="text-gray-400">—</span>}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <p className="min-w-0 flex-1 truncate text-sm text-gray-400">{score.artist}</p>
+          <div className="shrink-0"><ModBadges mods={score.mods} /></div>
+        </div>
+        {/* wraps rather than cutting off on the narrowest phones */}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-gray-400 tabular-nums">
+          <span className="font-semibold" style={{ color: accuracyColor(score.accuracy) }}>{score.accuracy}%</span>
+          <span className="flex items-center gap-1 text-white">
+            {score.score != null ? score.score.toLocaleString() : '—'}
+            {score.is_lazer && <LazerTag compact />}
+          </span>
+          <span>{score.combo.toLocaleString()}x</span>
+          <Tooltip text={timeAgo(score.date)} placement="left" className="ml-auto whitespace-nowrap">
+            {formatDate(score.date)}
+          </Tooltip>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+// Below this width the table doesn't fit (it needs about 950px), so plays
+// are shown as cards with a sort menu instead of column headers
+const TABLE_MIN_SCREEN = 1024;
+
+const SORT_OPTIONS = [{ key: 'pp', label: 'PP' }, ...COLUMNS.filter(col => col.key !== 'pp')];
+
 export default function ScoresList({ scores, username }) {
+  const wide = useWideScreen(TABLE_MIN_SCREEN);
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState('desc');
   const [filterDays, setFilterDays] = useState(null);
@@ -206,10 +286,43 @@ export default function ScoresList({ scores, username }) {
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
       <div className="p-4 border-b border-gray-700 flex items-center justify-between gap-4 flex-wrap">
-        <h3 className="text-xl font-bold text-white">
-          Top Plays for {username}
-        </h3>
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className={`flex items-center justify-between gap-3 ${wide ? '' : 'w-full'}`}>
+          {/* narrow screens: the name is already in the player card just above,
+              and the sort menu needs the room */}
+          <h3 className={`min-w-0 truncate font-bold text-white ${wide ? 'text-xl' : 'text-lg'}`}>
+            {wide ? `Top Plays for ${username}` : 'Top Plays'}
+          </h3>
+          {/* No column headers on narrow screens, so sorting is a menu plus a
+              direction button. No sort chosen = top-play order, i.e. by pp. */}
+          {!wide && (
+            <div className="flex shrink-0 rounded-lg border border-gray-600 bg-gray-900 text-sm font-semibold">
+              {/* The visible label is just the current choice; the real menu
+                  sits invisibly on top of it (a native menu would be as wide
+                  as its longest option) and opens the phone's own picker. */}
+              <span className="relative flex items-center gap-1.5 pl-3 pr-2.5 py-1 text-gray-200 rounded-l-lg has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-osu-purple">
+                {SORT_OPTIONS.find(opt => opt.key === (sortKey ?? 'pp')).label}
+                <span aria-hidden="true" className="text-gray-400 text-xs">▾</span>
+                <select
+                  value={sortKey ?? 'pp'}
+                  onChange={e => { setSortKey(e.target.value); setSortDir('desc'); }}
+                  aria-label="Sort top plays by"
+                  className="absolute inset-0 w-full opacity-0 cursor-pointer"
+                >
+                  {SORT_OPTIONS.map(opt => <option key={opt.key} value={opt.key}>{opt.label}</option>)}
+                </select>
+              </span>
+              <button
+                type="button"
+                onClick={() => { setSortKey(k => k ?? 'pp'); setSortDir(d => d === 'desc' ? 'asc' : 'desc'); }}
+                aria-label={sortDir === 'desc' ? 'Highest first; switch to lowest first' : 'Lowest first; switch to highest first'}
+                className="px-2.5 border-l border-gray-600 text-osu-pink rounded-r-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-osu-purple"
+              >
+                {sortDir === 'desc' ? '↓' : '↑'}
+              </button>
+            </div>
+          )}
+        </div>
+        <div className={`flex items-center gap-3 flex-wrap ${wide ? "" : "w-full"}`}>
           {showModChips && (
             <div className="flex flex-wrap rounded-lg border border-gray-600">
               {modChips.map(chip => (
@@ -218,7 +331,7 @@ export default function ScoresList({ scores, username }) {
                   <button
                     onClick={() => setModFilter(chip.key)}
                     aria-pressed={modFilter === chip.key}
-                    className={`inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold transition ${
+                    className={`inline-flex items-center gap-1 py-1 text-sm font-semibold transition ${wide ? 'px-3' : 'px-2.5'} ${
                       modFilter === chip.key
                         ? chipActiveClass(chip.key)
                         : 'text-gray-400 hover:text-white hover:bg-gray-700'
@@ -230,8 +343,9 @@ export default function ScoresList({ scores, username }) {
               ))}
             </div>
           )}
-          {/* Always shown at a fixed width so changing filters doesn't shift the chips */}
-          <span className="w-20 text-right text-xs text-gray-400 tabular-nums">
+          {/* Fixed width on wide screens so changing filters doesn't shift the chips;
+              on narrow screens it sits at the end of the time-filter line */}
+          <span className={`text-right text-xs text-gray-400 tabular-nums ${wide ? 'w-20' : 'order-last ml-auto'}`}>
             {matchCount} play{matchCount !== 1 ? 's' : ''}
           </span>
           <div className="flex flex-wrap rounded-lg overflow-hidden border border-gray-600">
@@ -253,43 +367,60 @@ export default function ScoresList({ scores, username }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="scores-table w-full">
-          <thead>
-            <tr className="bg-gray-900 border-b border-gray-700">
-              <th className="px-4 py-3 text-left text-gray-400 font-semibold">#</th>
-              <th className="px-4 py-3 text-left text-gray-400 font-semibold">Beatmap</th>
-              <th className="px-4 py-3 text-center text-gray-400 font-semibold">Mods</th>
-              {COLUMNS.map(col => {
-                const direction = sortKey === col.key ? sortDir : null;
-                return (
-                  <th
-                    key={col.key}
-                    aria-sort={direction ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}
-                    className="px-4 py-3 text-center text-gray-400 font-semibold"
-                  >
-                    <button type="button" onClick={() => handleSort(col.key)} className="font-semibold select-none hover:text-white transition">
-                      {col.label}<SortIcon direction={direction} />
-                    </button>
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {visible.map(score => (
-              <ScoreRow
-                key={score.id}
-                score={score}
-                rank={rankOf.get(score.id)}
-                inRange={isInRange(score)}
-                highlight={filterDays != null && isInRange(score)}
-                onOpen={handleRowClick}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {!wide && (
+        <ul className="scores-table">
+          {visible.map(score => (
+            <ScoreCard
+              key={score.id}
+              score={score}
+              rank={rankOf.get(score.id)}
+              inRange={isInRange(score)}
+              highlight={filterDays != null && isInRange(score)}
+              onOpen={handleRowClick}
+            />
+          ))}
+        </ul>
+      )}
+
+      {wide && (
+        <div className="overflow-x-auto">
+          <table className="scores-table w-full">
+            <thead>
+              <tr className="bg-gray-900 border-b border-gray-700">
+                <th className="px-4 py-3 text-left text-gray-400 font-semibold">#</th>
+                <th className="px-4 py-3 text-left text-gray-400 font-semibold">Beatmap</th>
+                <th className="px-4 py-3 text-center text-gray-400 font-semibold">Mods</th>
+                {COLUMNS.map(col => {
+                  const direction = sortKey === col.key ? sortDir : null;
+                  return (
+                    <th
+                      key={col.key}
+                      aria-sort={direction ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+                      className="px-4 py-3 text-center text-gray-400 font-semibold"
+                    >
+                      <button type="button" onClick={() => handleSort(col.key)} className="font-semibold select-none hover:text-white transition">
+                        {col.label}<SortIcon direction={direction} />
+                      </button>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map(score => (
+                <ScoreRow
+                  key={score.id}
+                  score={score}
+                  rank={rankOf.get(score.id)}
+                  inRange={isInRange(score)}
+                  highlight={filterDays != null && isInRange(score)}
+                  onOpen={handleRowClick}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

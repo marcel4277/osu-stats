@@ -24,7 +24,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-osu-darker via-osu-dark to-osu-darker">
       <header className="border-b border-gray-700 py-6">
-        <div className={`${width} mx-auto px-6 flex items-start justify-between`}>
+        <div className={`${width} mx-auto px-4 sm:px-6 flex items-start justify-between`}>
           <div>
             <Link to="/" className="block">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-osu-purple to-osu-cyan bg-clip-text text-transparent mb-2">
@@ -45,7 +45,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className={`${width} mx-auto px-6 py-8`}>
+      <main className={`${width} mx-auto px-4 sm:px-6 py-8`}>
         <Routes>
           <Route path="/" element={<HomePage onComparingChange={setComparing} />} />
           <Route path="/:username" element={<HomePage onComparingChange={setComparing} />} />

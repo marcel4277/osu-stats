@@ -187,7 +187,44 @@ This went through several rounds; this version is "design B".
 - **Order:** pp order, like the osu! profile. Lazer plays keep their pp
   position and just show a smaller number.
 
+### On phones and tablets (narrower than 1024px)
+
+The table needs about 950px, so narrower screens show each play as a card
+instead ("B · Everything" from the mockup round). Nothing is left out:
+
+```
+1 Crystalia ................ 1,857pp
+DJ TOTTO ..................... DT HD
+97.44%  19,279,990  881x  24 Jan 2026
+```
+
+- **The rank** sits on the title line, not in its own column, so the stats
+  line gets the full width. A lazer play's stats line (with the "lazer" tag)
+  needs every pixel at 360px.
+- **Every card is the same height** at 360px and up. On even narrower
+  screens the stats line wraps rather than cutting anything off.
+- **Covers, grey and colour, the pink active bar, and the hover bar** all
+  work as on the table rows.
+  - Colour cards use a slightly stronger gradient (60% → 84%), because their
+    title and artist sit higher in a taller card. They were measured at
+    5.1:1 or better over a pure-white cover.
+- **Sorting:**
+  - a compact "PP ▾ ↓" control on the title line replaces the column
+    headers;
+  - the label shows only the current choice, and the real menu sits
+    invisibly on top of it, so it opens the phone's own picker;
+  - the arrow flips highest/lowest first.
+- **Header:**
+  - the title is just "Top Plays", since the name is in the player card
+    right above;
+  - the play count sits at the end of the time-filter line;
+  - the mod chips are a little tighter, so five fit on one line at 360px.
+- **Page gutter:** 16px on phones and 24px from 640px up.
+- **Combos use thousands separators everywhere,** e.g. "1,204x".
+
 **Rejected:**
+- **"A · Compact"** (score and combo left out). People do look at those
+  numbers, and B costs no extra height.
 - Darkening the text on the coloured rows. Only the grey rows get darker
   text, as decided.
 - A full-brightness cover with no overlay at all. White text became
@@ -322,7 +359,5 @@ This went through several rounds; this version is "design B".
 
 ## 11. Known design issues still open
 
-1. **The score table on phones** scrolls sideways and cuts off at the
-   Accuracy column. It needs a proper phone layout.
-2. **Feature:** the comparison view should highlight the differences between
+1. **Feature:** the comparison view should highlight the differences between
    the players (who has more pp, better accuracy, and so on).
