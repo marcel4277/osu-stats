@@ -108,8 +108,8 @@ export default function HomePage() {
             <ScoresList scores={player1.scores} username={player1.user.username} />
           ) : (
             <div className="rounded-3xl border border-gray-700 bg-gray-900 p-6 text-center text-gray-400">
-              <p className="font-semibold text-white">No scores found</p>
-              <p className="mt-2 text-sm text-gray-400">This user has no scores or they are not public.</p>
+              <p className="font-semibold text-white">No top plays found</p>
+              <p className="mt-2 text-sm text-gray-400">This player doesn't have any top plays yet.</p>
             </div>
           )}
         </div>

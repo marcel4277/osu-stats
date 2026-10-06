@@ -287,7 +287,7 @@ function ArchetypesModal({ onClose }) {
 
         <div className="p-6 space-y-6">
           <p className="text-gray-400 text-sm">
-            Archetypes are based on the player's most-played mod across their top scores.
+            Archetypes are based on the player's most-played mod across their top plays.
             The highest tier they qualify for within that mod is shown.
             Paragon tiers add an accuracy requirement on top.
           </p>
@@ -329,7 +329,7 @@ function ArchetypesModal({ onClose }) {
           </div>
 
           <p className="text-gray-400 text-xs text-center">
-            HDHR scores count toward HR. HDDT scores count toward DT. Pure HD is tracked separately.
+            HDHR plays count toward HR. HDDT plays count toward DT. Pure HD is tracked separately.
           </p>
         </div>
       </div>
@@ -393,7 +393,7 @@ export default function PlaystyleCard({ scores }) {
         <div className="p-5">
           <p className="text-sm text-gray-300 mb-4">{archetype.desc}</p>
 
-          <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Mod breakdown · {total} scores</p>
+          <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Mod breakdown · {total} top plays</p>
           <div className="space-y-2">
             {breakdown.map(({ mod, count, color }) => (
               <div key={mod} className="flex items-center gap-3">
