@@ -367,7 +367,11 @@ export default function PlaystyleCard({ scores, modOrder }) {
             </div>
             <div className="flex items-start gap-3 shrink-0">
               <div className="text-right">
-                <p className="text-gray-300 text-xs uppercase tracking-wider">Avg accuracy</p>
+                {/* not the same number as the player card's Accuracy (osu!'s weighted
+                    figure), so it's named differently and the tooltip says why */}
+                <Tooltip text="Average accuracy of their top plays. The profile's Accuracy is osu!'s weighted figure, so the two differ." placement="top">
+                  <p className="text-gray-300 text-xs uppercase tracking-wider">Top play acc</p>
+                </Tooltip>
                 <p className="text-white font-bold text-lg">{avgAccuracy.toFixed(1)}%</p>
               </div>
               <Tooltip text="View all archetypes" placement="left" focusable={false} className="shrink-0 mt-0.5">

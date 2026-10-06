@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { formatMonth } from './dateUtils.js';
 
 const MONTHS_SHOWN = 18;
 
@@ -10,13 +11,6 @@ function buildVerdict(daysSinceLast, last90, last180) {
   if (daysSinceLast <= 270)               return { label: 'Slowing Down',       color: 'text-yellow-400',border: 'border-yellow-400', dot: 'bg-yellow-400', tip: 'No top play in 4–9 months'                                  };
   if (daysSinceLast <= 365)               return { label: 'Plateaued',          color: 'text-orange-400',border: 'border-orange-400', dot: 'bg-orange-400', tip: 'No top play in 9–12 months'                                 };
   return                                         { label: 'Inactive',           color: 'text-red-400',   border: 'border-red-400',    dot: 'bg-red-400',    tip: 'No top play set in over a year'                            };
-}
-
-// Fixed three-letter names: the browser's own short names vary by locale
-// (UK English gives "Sept" among the three-letter rest)
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-function formatMonthLabel(year, month) {
-  return `${MONTH_NAMES[month - 1]} ${String(year).slice(-2)}`;
 }
 
 function monthKey(d) {
@@ -116,7 +110,7 @@ export default function ImprovementVelocity({ scores, scaleMax = 0 }) {
       const key = monthKey(d);
       return {
         key,
-        label: formatMonthLabel(d.getFullYear(), d.getMonth() + 1),
+        label: formatMonth(d.getFullYear(), d.getMonth() + 1),
         count: monthCounts[key] || 0,
         // every month that ties for the highest count is highlighted
         isPeak: (monthCounts[key] || 0) === peakCount,
@@ -127,7 +121,7 @@ export default function ImprovementVelocity({ scores, scaleMax = 0 }) {
     const verdict = buildVerdict(daysSinceLast, last90, last180);
     const insightText = insight(dates, now, last90, daysSinceLast);
 
-    return { daysSinceLast, peakCount, peakLabel: formatMonthLabel(peakYear, peakMonth), spanMonths, buckets, maxCount, verdict, insightText };
+    return { daysSinceLast, peakCount, peakLabel: formatMonth(peakYear, peakMonth), spanMonths, buckets, maxCount, verdict, insightText };
   }, [scores, scaleMax]);
 
   if (!stats) return null;
@@ -215,7 +209,7 @@ export default function ImprovementVelocity({ scores, scaleMax = 0 }) {
           <div className="absolute inset-x-0 top-5 bottom-0 flex flex-col justify-between pointer-events-none">
             {[maxCount, maxCount / 2].map(tick => (
               <div key={tick} className="relative ml-7 border-t border-gray-700/50">
-                <span className="absolute -left-7 w-5 -top-1.5 text-right text-[10px] leading-none text-gray-500 tabular-nums">{tick}</span>
+                <span className="absolute -left-7 w-5 -top-1.5 text-right text-[10px] leading-none text-gray-400 tabular-nums">{tick}</span>
               </div>
             ))}
             <div className="ml-7 border-t border-gray-600" />

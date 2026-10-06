@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { modMatches, buildChips, modColors, MOD_NAMES } from './modUtils.js';
+import { formatDate } from './dateUtils.js';
 import Tooltip from './Tooltip.jsx';
 
 const COLUMNS = [
@@ -159,8 +160,8 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
         }
       </td>
       <td className="px-4 py-3 text-center text-sm text-gray-400">
-        <Tooltip text={timeAgo(score.date)}>
-          {new Date(score.date).toLocaleDateString()}
+        <Tooltip text={timeAgo(score.date)} className="whitespace-nowrap">
+          {formatDate(score.date)}
         </Tooltip>
       </td>
     </tr>
