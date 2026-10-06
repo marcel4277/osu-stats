@@ -71,10 +71,11 @@ body {
 }
 
 /* Rows outside the time filter: the same cover in greyscale (luminosity blend
-   onto the dark base colour), dimmed slightly so the colour rows stand out. */
+   onto the dark base colour), darker than the colour rows at every height
+   (70% -> 85% vs 50% -> 75%) so the selected rows stand out. */
 .score-row-cover-muted {
-  --dim-top: 0.3;
-  --dim-bottom: 0.3;
+  --dim-top: 0.7;
+  --dim-bottom: 0.85;
   background-blend-mode: normal, normal, luminosity;
 }
 
