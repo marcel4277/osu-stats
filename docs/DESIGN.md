@@ -308,6 +308,11 @@ DJ TOTTO ..................... DT HD
   - The labels must be clearly different from each other, from most to least
     active: Actively Improving, Steady Progress, Still Active, Slowing Down,
     Plateaued, Inactive.
+  - **The badge and the insight line never disagree.** Both use the same
+    "usual pace" calculation. A player whose last 90 days are clearly behind
+    their usual pace (67% of it or less, where the line says "fewer than
+    their usual …") can't be "Actively Improving", however recent their last
+    top play. They get "Steady Progress" instead.
   - On phones the badge sits under the title.
 - **Stats row:** the same divided strip as the player card. On phones it
   becomes stacked rows (label left, value right), because three columns get
