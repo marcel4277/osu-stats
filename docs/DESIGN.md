@@ -282,6 +282,9 @@ This went through several rounds; this version is "design B".
 - **The logo and the cards share one left edge.**
 - **Search:** the main Search button is filled purple. The "Compare with…"
   button is a quieter **outlined** button, so the main action is obvious.
+  - The search boxes always show the players currently on screen. They
+    follow the page address, so back/forward and shared links never leave
+    an old name in a box.
 - **Comparison view:**
   - Two columns. Each row holds the matching card of each player, and both
     are stretched to the same height.
