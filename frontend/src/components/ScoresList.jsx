@@ -47,7 +47,7 @@ function timeAgo(dateStr) {
 const BADGE_BASE = 'chip-on-cover px-1.5 py-0.5 rounded text-xs font-bold border';
 
 function chipTitle(chip) {
-  if (chip.key === 'all') return 'Show all scores';
+  if (chip.key === 'all') return 'Show all top plays';
   if (chip.key === 'NM') return 'No difficulty-changing mods. NF, SD, PF etc. still count as NM';
   return MOD_NAMES[chip.key] || chip.label;
 }
@@ -206,7 +206,7 @@ export default function ScoresList({ scores, username }) {
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
       <div className="p-4 border-b border-gray-700 flex items-center justify-between gap-4 flex-wrap">
         <h3 className="text-xl font-bold text-white">
-          Best Scores for {username}
+          Top Plays for {username}
         </h3>
         <div className="flex items-center gap-3 flex-wrap">
           {showModChips && (
@@ -231,7 +231,7 @@ export default function ScoresList({ scores, username }) {
           )}
           {/* Always shown at a fixed width so changing filters doesn't shift the chips */}
           <span className="w-20 text-right text-xs text-gray-400 tabular-nums">
-            {matchCount} score{matchCount !== 1 ? 's' : ''}
+            {matchCount} play{matchCount !== 1 ? 's' : ''}
           </span>
           <div className="flex flex-wrap rounded-lg overflow-hidden border border-gray-600">
             {TIME_FILTERS.map(range => (

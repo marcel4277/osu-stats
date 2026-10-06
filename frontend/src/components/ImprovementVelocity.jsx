@@ -4,12 +4,12 @@ const MONTHS_SHOWN = 18;
 
 // Each verdict also carries a tooltip shown when hovering the badge.
 function buildVerdict(daysSinceLast, last90, last180) {
-  if (daysSinceLast <= 14 && last90  >= 5) return { label: 'Actively Improving', color: 'text-green-400',  border: 'border-green-400',  dot: 'bg-green-400',  tip: 'Top score within 14 days + 5 or more in the last 90 days'   };
-  if (daysSinceLast <= 60 && last90  >= 3) return { label: 'On the Rise',        color: 'text-osu-cyan',  border: 'border-osu-cyan',   dot: 'bg-osu-cyan',   tip: 'Top score within 60 days + 3 or more in the last 90 days'   };
-  if (daysSinceLast <= 90 && last180 >= 1) return { label: 'Still Active',       color: 'text-purple-300',border: 'border-osu-purple', dot: 'bg-osu-purple', tip: 'Top score within 90 days'                                    };
-  if (daysSinceLast <= 270)               return { label: 'Slowing Down',       color: 'text-yellow-400',border: 'border-yellow-400', dot: 'bg-yellow-400', tip: 'No top score in 4–9 months'                                  };
-  if (daysSinceLast <= 365)               return { label: 'Plateaued',          color: 'text-orange-400',border: 'border-orange-400', dot: 'bg-orange-400', tip: 'No top score in 9–12 months'                                 };
-  return                                         { label: 'Inactive',           color: 'text-red-400',   border: 'border-red-400',    dot: 'bg-red-400',    tip: 'No top score set in over a year'                            };
+  if (daysSinceLast <= 14 && last90  >= 5) return { label: 'Actively Improving', color: 'text-green-400',  border: 'border-green-400',  dot: 'bg-green-400',  tip: 'Top play within 14 days + 5 or more in the last 90 days'   };
+  if (daysSinceLast <= 60 && last90  >= 3) return { label: 'On the Rise',        color: 'text-osu-cyan',  border: 'border-osu-cyan',   dot: 'bg-osu-cyan',   tip: 'Top play within 60 days + 3 or more in the last 90 days'   };
+  if (daysSinceLast <= 90 && last180 >= 1) return { label: 'Still Active',       color: 'text-purple-300',border: 'border-osu-purple', dot: 'bg-osu-purple', tip: 'Top play within 90 days'                                    };
+  if (daysSinceLast <= 270)               return { label: 'Slowing Down',       color: 'text-yellow-400',border: 'border-yellow-400', dot: 'bg-yellow-400', tip: 'No top play in 4–9 months'                                  };
+  if (daysSinceLast <= 365)               return { label: 'Plateaued',          color: 'text-orange-400',border: 'border-orange-400', dot: 'bg-orange-400', tip: 'No top play in 9–12 months'                                 };
+  return                                         { label: 'Inactive',           color: 'text-red-400',   border: 'border-red-400',    dot: 'bg-red-400',    tip: 'No top play set in over a year'                            };
 }
 
 function formatMonthLabel(year, month) {
@@ -41,7 +41,8 @@ export default function ImprovementVelocity({ scores }) {
       monthCounts[key] = (monthCounts[key] || 0) + 1;
     }
 
-    const peakEntry = Object.entries(monthCounts).sort((a, b) => b[1] - a[1])[0];
+    // Busiest month; on a tie, the most recent one (keys are "YYYY-MM", so they sort by date)
+    const peakEntry = Object.entries(monthCounts).sort((a, b) => b[1] - a[1] || b[0].localeCompare(a[0]))[0];
     const [peakYear, peakMonth] = peakEntry[0].split('-').map(Number);
     const peakCount = peakEntry[1];
 
@@ -57,7 +58,8 @@ export default function ImprovementVelocity({ scores }) {
         key,
         label: formatMonthLabel(d.getFullYear(), d.getMonth() + 1),
         count: monthCounts[key] || 0,
-        isPeak: key === peakEntry[0],
+        // every month that ties for the highest count is highlighted
+        isPeak: (monthCounts[key] || 0) === peakCount,
         isCurrent: i === 0,
       });
     }
@@ -76,8 +78,8 @@ export default function ImprovementVelocity({ scores }) {
     : pluralise(Math.round(spanMonths / 12), 'year');
 
   const insightText = last90 > 0
-    ? `${pluralise(last90, 'top score')} set in the last 90 days — ${last90 >= 5 ? 'a strong recent push.' : 'still grinding.'}`
-    : `No top scores in the last 90 days.${daysSinceLast > 365 ? ' This player may have stepped back from competing.' : ' A return could mean new peaks soon.'}`;
+    ? `${pluralise(last90, 'top play')} set in the last 90 days — ${last90 >= 5 ? 'a strong recent push.' : 'still grinding.'}`
+    : `No top plays in the last 90 days.${daysSinceLast > 365 ? ' This player may have stepped back from competing.' : ' A return could mean new peaks soon.'}`;
 
   return (
     <div className="relative bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
@@ -90,7 +92,7 @@ export default function ImprovementVelocity({ scores }) {
         <div className="flex items-start justify-between mb-5">
           <div>
             <h3 className="text-lg font-bold text-white leading-tight">Improvement Velocity</h3>
-            <p className="text-gray-400 text-sm mt-0.5">Based on {scores.length} top scores</p>
+            <p className="text-gray-400 text-sm mt-0.5">Based on {scores.length} top plays</p>
           </div>
           <div
             tabIndex={0}
@@ -110,8 +112,8 @@ export default function ImprovementVelocity({ scores }) {
         {/* Stat strip, same style as the player card's */}
         <div className="grid grid-cols-3 divide-x divide-gray-700 border-y border-gray-700 py-3 mb-6">
           {[
-            { label: 'Last Top Score', value: lastScoreLabel },
-            { label: 'Peak Month',     value: peakLabel, sub: `${peakCount} scores` },
+            { label: 'Last Top Play', value: lastScoreLabel },
+            { label: 'Peak Month',     value: peakLabel, sub: `${peakCount} plays` },
             { label: 'Active Span',    value: spanLabel },
           ].map(({ label, value, sub }) => (
             <div key={label} className="min-w-0 px-4 first:pl-0">
@@ -125,7 +127,18 @@ export default function ImprovementVelocity({ scores }) {
         </div>
 
         {/* Chart */}
-        <p className="text-gray-400 text-sm mb-3 uppercase tracking-widest">Activity · last 18 months</p>
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <p className="text-gray-400 text-sm uppercase tracking-widest">Activity · last 18 months</p>
+          {/* What the two highlighted bar colours mean */}
+          <div className="flex items-center gap-4 text-xs text-gray-400">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-t from-osu-pink to-yellow-300" />Peak month
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-t from-osu-cyan to-blue-300" />This month
+            </span>
+          </div>
+        </div>
 
         <div className="relative">
           {/* Subtle grid lines */}
@@ -153,7 +166,7 @@ export default function ImprovementVelocity({ scores }) {
                   <div className="absolute bottom-full mb-2 hidden group-hover:block z-10 pointer-events-none">
                     <div className="bg-gray-900 border border-gray-600 text-white text-sm rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-xl">
                       <p className="font-semibold">{b.label}</p>
-                      <p className="text-gray-400">{b.count === 0 ? 'No scores' : pluralise(b.count, 'score')}</p>
+                      <p className="text-gray-400">{b.count === 0 ? 'No top plays' : pluralise(b.count, 'top play')}</p>
                     </div>
                   </div>
 
