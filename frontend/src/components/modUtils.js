@@ -55,6 +55,14 @@ export function modCounts(scores) {
     .map(([mod, count]) => ({ mod, count }));
 }
 
+// One mod order for several players (comparison view): NM first if anyone
+// has it, then every mod any of them uses, most common across all of them first
+export function sharedModOrder(scoreLists) {
+  const all = scoreLists.flat();
+  const order = all.some(isNM) ? ['NM'] : [];
+  return [...order, ...modCounts(all).map(({ mod }) => mod)];
+}
+
 // Filter chips: All, NM, then every mod that actually appears
 export function buildChips(scores) {
   const chips = [{ key: 'all', label: 'All', count: scores.length }];
