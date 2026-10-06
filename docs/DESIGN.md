@@ -127,7 +127,18 @@ This went through several rounds; this version is "design B".
   bottom-left on the banner. **Global rank and pp sit big on the bottom-right.**
   Under the banner is one strip of secondary stats (country rank, accuracy,
   play count, play time) with thin dividers between them.
-- **Height:** banner `h-36` (`h-28` in the comparison view).
+- **The banner fills the whole card,** header and stats strip together.
+  Banners are about 4:1. A header-only strip (about 7.7:1) showed only the
+  middle half of the banner's height. The whole card is about 5:1 on desktop
+  (most of the banner shows) and close to 4:1 in the comparison view (nearly
+  all of it), with no extra height.
+- **Height:** header part `h-36` (`h-28` in the comparison view).
+- **The stats strip is a see-through dark band** over the bottom of the banner
+  (`gray-900` at 75%, lightly blurred, thin `white/10` top line and
+  dividers). Its labels are `gray-300`, a step lighter than elsewhere, so
+  they pass 4.5:1 over a pure-white banner while the banner still shows
+  through. A solid enough band to keep `gray-400` labels (90%) would hide
+  the banner, which would defeat the point.
 - **Readability on any banner:**
   - Soft dark "pools" sit only in the bottom-left and bottom-right corners,
     where the text is. These are radial gradients with a fixed pixel size, so
@@ -145,7 +156,9 @@ This went through several rounds; this version is "design B".
 - **Phones:** rank and pp move into the stats strip and are listed first.
 
 **Rejected:**
-- **Banner behind the whole card with rainbow stats.** It was messy.
+- **Banner behind the whole card with rainbow stats.** It was messy. (The
+  banner covering the whole card came back later, and it works now because
+  the numbers are neutral and the strip sits on its own dark band.)
 - **A 5:1 banner strip on top with the avatar hanging off its edge.** It
   "looked like a 10-year-old made it": a loud picture, a plain box under it,
   220px of extra height that held nothing, and a muddy fade.
