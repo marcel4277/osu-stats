@@ -14,15 +14,16 @@ function RankDelta({ history, currentRank }) {
   );
 }
 
-// Big stat on the right of the banner header (global rank, pp)
-function HeroStat({ label, value, children, compact }) {
+// Big stat on the right of the banner header (global rank, pp). Every hero
+// stat has the same two lines (label, value) so their baselines line up;
+// extras like the rank change go on the label line.
+function HeroStat({ label, extra, value, compact }) {
   return (
     <div className="text-right">
-      <p className="text-gray-300 text-xs uppercase tracking-wider">{label}</p>
-      <p className={`text-white font-bold leading-tight ${compact ? 'text-xl' : 'text-3xl'}`}>
-        {value}
-        {children && <span className="ml-2 align-middle">{children}</span>}
+      <p className="flex items-center justify-end gap-1.5 text-gray-200 text-xs uppercase tracking-wider leading-5">
+        {label}{extra}
       </p>
+      <p className={`text-white font-bold leading-none ${compact ? 'text-xl' : 'text-3xl'}`}>{value}</p>
     </div>
   );
 }
@@ -48,7 +49,12 @@ export default function UserProfile({ user, compact = false }) {
   // headline stats (global rank, pp) on the right, over a gradient that
   // darkens towards the bottom. Without a banner it's a plain dark gradient.
   const headerStyle = user.cover_url
-    ? { backgroundImage: `linear-gradient(to bottom, rgb(17 24 39 / 0.15), rgb(17 24 39 / 0.9)), url("${user.cover_url}")` }
+    ? { backgroundImage: [
+        // darker at both sides, where the name and the headline stats sit
+        'linear-gradient(to right, rgb(17 24 39 / 0.6), transparent 35%, transparent 65%, rgb(17 24 39 / 0.6))',
+        'linear-gradient(to bottom, rgb(17 24 39 / 0.15), rgb(17 24 39 / 0.9))',
+        `url("${user.cover_url}")`,
+      ].join(', ') }
     : undefined;
 
   const rank = user.stats.global_rank ? `#${user.stats.global_rank.toLocaleString()}` : 'N/A';
@@ -59,7 +65,7 @@ export default function UserProfile({ user, compact = false }) {
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
       <div
-        className={`flex items-end justify-between gap-4 bg-cover bg-center bg-gradient-to-br from-gray-900 to-gray-800 [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] ${compact ? 'h-28 px-4 pb-3' : 'h-36 px-6 pb-4'}`}
+        className={`flex items-end justify-between gap-4 bg-cover bg-center bg-gradient-to-br from-gray-900 to-gray-800 [text-shadow:0_1px_2px_rgb(0_0_0/0.8),0_2px_8px_rgb(0_0_0/0.5)] ${compact ? 'h-28 px-4 pb-3' : 'h-36 px-6 pb-4'}`}
         style={headerStyle}
       >
         <div className="flex items-center gap-4 min-w-0">
@@ -81,7 +87,7 @@ export default function UserProfile({ user, compact = false }) {
 
         {/* Headline stats; on phones they move into the strip below */}
         <div className="hidden sm:flex items-end gap-6 shrink-0">
-          <HeroStat label="Global Rank" value={rank} compact={compact}>{rankDelta}</HeroStat>
+          <HeroStat label="Global Rank" extra={rankDelta} value={rank} compact={compact} />
           <HeroStat label="PP" value={pp} compact={compact} />
         </div>
       </div>
