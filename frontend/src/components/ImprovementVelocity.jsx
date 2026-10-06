@@ -16,6 +16,13 @@ function formatMonthLabel(year, month) {
   return new Date(year, month - 1).toLocaleString('default', { month: 'short', year: '2-digit' });
 }
 
+// Round the chart's top up to a clean, even number so the middle gridline is
+// a whole number too (e.g. 29 -> 30, so the gridlines read 30 / 15 / 0).
+const NICE_MAXES = [2, 4, 6, 8, 10, 12, 16, 20, 30, 40, 50, 60, 80, 100, 150, 200];
+function niceMax(n) {
+  return NICE_MAXES.find(m => m >= n) ?? Math.ceil(n / 100) * 100;
+}
+
 function pluralise(n, word) {
   return `${n} ${word}${n === 1 ? '' : 's'}`;
 }
@@ -63,7 +70,7 @@ export default function ImprovementVelocity({ scores }) {
         isCurrent: i === 0,
       });
     }
-    const maxCount = Math.max(...buckets.map(b => b.count), 1);
+    const maxCount = niceMax(Math.max(...buckets.map(b => b.count), 1));
     const verdict = buildVerdict(daysSinceLast, last90, last180);
 
     return { daysSinceLast, last90, peakCount, peakLabel: formatMonthLabel(peakYear, peakMonth), spanMonths, buckets, maxCount, verdict };
@@ -149,25 +156,29 @@ export default function ImprovementVelocity({ scores }) {
           )}
         </div>
 
-        <div className="relative h-28">
-          {/* Gridlines: faint, solid hairlines; the baseline a step brighter */}
+        <div className="relative h-28 pl-7">
+          {/* Gridlines: faint, solid hairlines; the baseline a step brighter.
+              The top and middle ones carry the scale (e.g. 30 / 15). */}
           <div className="absolute inset-x-0 top-5 bottom-0 flex flex-col justify-between pointer-events-none">
-            <div className="border-t border-gray-700/50" />
-            <div className="border-t border-gray-700/50" />
-            <div className="border-t border-gray-600" />
+            {[maxCount, maxCount / 2].map(tick => (
+              <div key={tick} className="relative ml-7 border-t border-gray-700/50">
+                <span className="absolute -left-7 w-5 -top-1.5 text-right text-[10px] leading-none text-gray-500 tabular-nums">{tick}</span>
+              </div>
+            ))}
+            <div className="ml-7 border-t border-gray-600" />
           </div>
 
           {/* Bars: capped at 24px wide with air between them, rounded at the
               top and square at the baseline. Empty months draw nothing. The
               peak month gets its count written on top. */}
-          <div className="absolute inset-x-0 top-5 bottom-0 flex items-end gap-1">
+          <div className="absolute left-7 right-0 top-5 bottom-0 flex items-end gap-1">
             {buckets.map(b => {
               const heightPct = b.count === 0 ? 0 : Math.max((b.count / maxCount) * 100, 4);
               const barColor = b.isPeak
                 ? 'bg-osu-pink'
                 : b.isCurrent
                 ? 'bg-gray-300'
-                : 'bg-osu-purple/60';
+                : 'bg-violet-500';
 
               return (
                 <div key={b.key} className="flex-1 flex flex-col items-center justify-end h-full group relative">
@@ -194,13 +205,12 @@ export default function ImprovementVelocity({ scores }) {
           </div>
         </div>
 
-        {/* Month labels */}
-        <div className="flex gap-1 mt-1.5">
+        {/* Month labels: one under every bar on wider screens, every third
+            on phones (18 don't fit). Lined up with the bars (ml-7 = scale column). */}
+        <div className="flex gap-1 mt-1.5 ml-7">
           {buckets.map((b, i) => (
-            <div key={b.key} className="flex-1 text-center">
-              {i % 3 === 0 && (
-                <span className="text-gray-400 text-sm">{b.label.split(' ')[0]}</span>
-              )}
+            <div key={b.key} className="flex-1 min-w-0 text-center">
+              <span className={`text-gray-400 text-xs ${i % 3 === 0 ? '' : 'hidden sm:inline'}`}>{b.label.split(' ')[0]}</span>
             </div>
           ))}
         </div>
