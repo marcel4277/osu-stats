@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route, Link, useMatch } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import HomePage from './pages/HomePage.jsx';
 import osuAPI from './services/api.js';
 import Tooltip from './components/Tooltip.jsx';
@@ -7,8 +7,9 @@ import './App.css';
 
 export default function App() {
   const [visitors, setVisitors] = useState(null);
-  const isCompare = !!useMatch('/:username/vs/:username2');
-  const width = isCompare ? 'max-w-[94rem]' : 'max-w-6xl';
+  // Wider page while two players are shown side by side (set by HomePage)
+  const [comparing, setComparing] = useState(false);
+  const width = comparing ? 'max-w-[94rem]' : 'max-w-6xl';
 
   useEffect(() => {
     // Count once per browser session
@@ -46,9 +47,9 @@ export default function App() {
 
       <main className={`${width} mx-auto px-6 py-8`}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/:username" element={<HomePage />} />
-          <Route path="/:username/vs/:username2" element={<HomePage />} />
+          <Route path="/" element={<HomePage onComparingChange={setComparing} />} />
+          <Route path="/:username" element={<HomePage onComparingChange={setComparing} />} />
+          <Route path="/:username/vs/:username2" element={<HomePage onComparingChange={setComparing} />} />
         </Routes>
       </main>
 

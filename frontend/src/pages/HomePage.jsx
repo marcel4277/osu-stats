@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import osuAPI from '../services/api.js';
 import UsernameInput from '../components/UsernameInput.jsx';
@@ -19,27 +19,33 @@ async function fetchPlayer(username) {
 // Loads a player whenever `username` changes. If the name changes again before
 // the request finishes, the stale response is ignored so it can't overwrite the
 // newer player.
+//
+// Results are stored with the name they belong to, so on the render right
+// after the name changes (before the effect runs) the old player isn't shown,
+// and it counts as loading until a result for the new name arrives.
 function usePlayer(username) {
-  const [player, setPlayer] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [result, setResult] = useState({ name: null, player: null, error: null });
 
   useEffect(() => {
-    setPlayer(null);
-    setError(null);
-    if (!username) { setLoading(false); return; }
+    setResult({ name: null, player: null, error: null });
+    if (!username) return;
 
     let stale = false;
-    setLoading(true);
     fetchPlayer(username)
-      .then(data => { if (!stale) setPlayer(data); })
-      .catch(err => { if (!stale) setError(err.response?.data?.message || err.message || 'Failed to fetch data'); })
-      .finally(() => { if (!stale) setLoading(false); });
+      .then(player => { if (!stale) setResult({ name: username, player, error: null }); })
+      .catch(err => {
+        if (!stale) setResult({ name: username, player: null, error: err.response?.data?.message || err.message || 'Failed to fetch data' });
+      });
 
     return () => { stale = true; };
   }, [username]);
 
-  return { player, loading, error };
+  const current = result.name === username;
+  return {
+    player: current ? result.player : null,
+    loading: !!username && !current,
+    error: current ? result.error : null,
+  };
 }
 
 function ErrorMessage({ message }) {
@@ -51,7 +57,7 @@ function ErrorMessage({ message }) {
   );
 }
 
-export default function HomePage() {
+export default function HomePage({ onComparingChange }) {
   const { username, username2 } = useParams();
   const navigate = useNavigate();
 
@@ -67,7 +73,14 @@ export default function HomePage() {
     navigate(`/${encodeURIComponent(username)}/vs/${encodeURIComponent(name.trim())}`);
   };
 
-  const isComparing = !!(player1 && player2);
+  // Split into two columns as soon as a second player is searched, with a
+  // placeholder in their column until they load. If they fail to load, the
+  // page falls back to the single-player view.
+  const isComparing = !!(player1 && username2 && !error2);
+
+  // Tell the page to widen; a layout effect so it happens before the browser
+  // paints, and the split never shows at the old width (or the other way round)
+  useLayoutEffect(() => { onComparingChange?.(isComparing); }, [isComparing, onComparingChange]);
 
   return (
     <div className="space-y-8">
@@ -87,16 +100,17 @@ export default function HomePage() {
         )}
       </div>
 
-      {error1 && <ErrorMessage message={error1} />}
-      {error2 && <ErrorMessage message={error2} />}
-
       {/* Comparison view */}
       {isComparing && (
         <ComparisonView
-          user1={player1.user}   scores1={player1.scores}
-          user2={player2.user}   scores2={player2.scores}
+          user1={player1.user}         scores1={player1.scores}
+          user2={player2?.user}        scores2={player2?.scores}
+          name2={username2}
         />
       )}
+
+      {error1 && <ErrorMessage message={error1} />}
+      {error2 && <ErrorMessage message={error2} />}
 
       {/* Single player view */}
       {player1 && !isComparing && (
@@ -128,15 +142,6 @@ export default function HomePage() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-osu-purple"></div>
           </div>
           <p className="text-gray-400 mt-4">Loading...</p>
-        </div>
-      )}
-
-      {loading2 && !player2 && (
-        <div className="text-center py-4">
-          <div className="inline-block">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-osu-purple"></div>
-          </div>
-          <p className="text-gray-400 mt-2 text-sm">Loading...</p>
         </div>
       )}
     </div>
