@@ -27,11 +27,39 @@ function PlayerCells({ user, scores, label, orders }) {
   );
 }
 
-export default function ComparisonView({ user1, scores1, user2, scores2 }) {
+// Stand-in for a player whose data is still loading, so the page splits into
+// two columns straight away. On large screens the grid rows stretch each
+// placeholder to the height of the other player's card beside it.
+function Placeholder({ text }) {
+  return (
+    <div className="relative min-h-[11rem] rounded-lg border border-gray-700 bg-gray-800/60 flex items-center justify-center p-4">
+      {text && <p className="text-sm text-gray-400 truncate">{text}</p>}
+      <div className="absolute inset-0 rounded-lg bg-gray-700/20 animate-pulse pointer-events-none" />
+    </div>
+  );
+}
+
+function LoadingCells({ name, label, orders }) {
+  return (
+    <>
+      <div className={`text-center ${orders[0]}`}>
+        <span className="text-sm text-gray-400 uppercase tracking-widest">{label}</span>
+      </div>
+      <Cell order={orders[1]}><Placeholder text={`Loading ${name}…`} /></Cell>
+      <Cell order={orders[2]}><Placeholder /></Cell>
+      <Cell order={orders[3]}><Placeholder /></Cell>
+    </>
+  );
+}
+
+// user2/scores2 are null while Player 2 is loading; name2 is shown meanwhile
+export default function ComparisonView({ user1, scores1, user2, scores2, name2 }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-4">
       <PlayerCells user={user1} scores={scores1} label="Player 1" orders={ORDERS[0]} />
-      <PlayerCells user={user2} scores={scores2} label="Player 2" orders={ORDERS[1]} />
+      {user2
+        ? <PlayerCells user={user2} scores={scores2} label="Player 2" orders={ORDERS[1]} />
+        : <LoadingCells name={name2} label="Player 2" orders={ORDERS[1]} />}
     </div>
   );
 }
