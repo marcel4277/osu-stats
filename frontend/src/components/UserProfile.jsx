@@ -8,88 +8,70 @@ function RankDelta({ history, currentRank }) {
   if (delta === 0) return null;
   const improved = delta > 0;
   return (
-    <span className={`text-sm font-semibold ${improved ? 'text-green-400' : 'text-red-400'}`}>
+    <span className={`text-xs font-semibold ${improved ? 'text-green-400' : 'text-red-400'}`}>
       {improved ? '▲' : '▼'}{Math.abs(delta).toLocaleString()}
+      <span className="text-gray-500 font-normal"> · 90d</span>
     </span>
+  );
+}
+
+function Stat({ label, value, children }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-gray-400 text-xs uppercase tracking-wider">{label}</p>
+      <p className="text-white text-xl font-bold truncate">{value}</p>
+      {children}
+    </div>
   );
 }
 
 export default function UserProfile({ user, compact = false }) {
   if (!user) return null;
 
-  const hasBanner = Boolean(user.cover_url);
+  // Header: the player's banner with their avatar, name and country on its
+  // lower half. The gradient darkens towards the bottom, where the text sits.
+  // Without a banner the header is a plain dark gradient, same layout.
+  const headerStyle = user.cover_url
+    ? { backgroundImage: `linear-gradient(to bottom, rgb(17 24 39 / 0.15), rgb(17 24 39 / 0.9)), url("${user.cover_url}")` }
+    : undefined;
+
+  const rank = user.stats.global_rank ? `#${user.stats.global_rank.toLocaleString()}` : 'N/A';
+  const countryRank = user.stats.country_rank ? `#${user.stats.country_rank.toLocaleString()}` : 'N/A';
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-      {/* Profile banner as a 5:1 strip across the top, centred; a banner of a
-          different shape is cropped a little at the edges. Fades into the
-          card at the bottom edge. */}
-      {hasBanner && (
-        <div
-          className="aspect-[5/1] bg-cover bg-center"
-          style={{ backgroundImage: `linear-gradient(to bottom, transparent 75%, rgb(31 41 55)), url("${user.cover_url}")` }}
-        />
-      )}
-
-      <div className="p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 items-center sm:items-start">
-        {/* Avatar — links to osu! profile; overlaps the bottom of the banner */}
-        <div className={`flex-shrink-0 ${hasBanner ? (compact ? '-mt-12' : '-mt-16') : ''}`}>
-          <Tooltip text={`View ${user.username}'s osu! profile`} placement="bottom" focusable={false}>
-            <a
-              href={`https://osu.ppy.sh/users/${user.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+      <div
+        className={`flex items-end bg-cover bg-center bg-gradient-to-br from-gray-900 to-gray-800 ${compact ? 'h-28 px-4 pb-3' : 'h-36 px-6 pb-4'}`}
+        style={headerStyle}
+      >
+        <div className="flex items-center gap-4 min-w-0">
+          {/* Avatar — links to osu! profile */}
+          <Tooltip text={`View ${user.username}'s osu! profile`} placement="bottom" focusable={false} className="shrink-0">
+            <a href={`https://osu.ppy.sh/users/${user.id}`} target="_blank" rel="noopener noreferrer">
               <img
                 src={user.avatar_url}
                 alt={user.username}
-                className={`rounded-full border-2 border-osu-purple hover:border-osu-pink transition cursor-pointer bg-gray-800 ring-4 ring-gray-800 ${compact ? 'w-16 h-16' : 'w-24 h-24'}`}
+                className={`rounded-full border-2 border-white/80 hover:border-osu-pink transition cursor-pointer shadow-lg ${compact ? 'w-14 h-14' : 'w-20 h-20'}`}
               />
             </a>
           </Tooltip>
-        </div>
-
-        {/* User Info */}
-        <div className="flex-1 min-w-0 w-full sm:w-auto">
-          <h2 className={`font-bold text-white mb-1 truncate ${compact ? 'text-xl' : 'text-3xl mb-2'}`}>{user.username}</h2>
-          <p className="text-gray-400 mb-3 text-sm truncate">
-            {user.country} • {user.playcount.toLocaleString()} plays
-          </p>
-
-          {/* Stats Grid */}
-          <div className={`grid grid-cols-2 gap-2 ${compact ? '' : 'md:grid-cols-4 gap-4'}`}>
-            <div className="bg-gray-900 rounded p-3">
-              <p className="text-gray-400 text-sm">Global Rank</p>
-              <div className="flex items-center gap-x-2 flex-wrap">
-                <p className="text-osu-cyan text-xl font-bold">
-                  #{user.stats.global_rank ? user.stats.global_rank.toLocaleString() : 'N/A'}
-                </p>
-                <div className="flex flex-col items-start leading-tight">
-                  <span className="text-gray-400 text-xs">90d</span>
-                  <RankDelta history={user.rank_history} currentRank={user.stats.global_rank} />
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-900 rounded p-3">
-              <p className="text-gray-400 text-sm">Country Rank</p>
-              <p className="text-osu-pink text-xl font-bold">
-                #{user.stats.country_rank ? user.stats.country_rank.toLocaleString() : 'N/A'}
-              </p>
-            </div>
-            <div className="bg-gray-900 rounded p-3">
-              <p className="text-gray-400 text-sm">PP</p>
-              <p className="text-osu-purple text-xl font-bold">
-                {user.stats.pp}
-              </p>
-            </div>
-            <div className="bg-gray-900 rounded p-3">
-              <p className="text-gray-400 text-sm">Accuracy</p>
-              <p className="text-white text-xl font-bold">
-                {user.stats.accuracy}%
-              </p>
-            </div>
+          <div className="min-w-0 [text-shadow:0_1px_3px_rgb(0_0_0/0.7)]">
+            <h2 className={`font-bold text-white truncate ${compact ? 'text-xl' : 'text-3xl'}`}>{user.username}</h2>
+            <p className="text-gray-200 text-sm truncate">
+              {user.country} • {user.playcount.toLocaleString()} plays
+            </p>
           </div>
         </div>
+      </div>
+
+      {/* Stats: neutral numbers, one row on desktop */}
+      <div className={`grid grid-cols-2 gap-x-6 gap-y-4 ${compact ? 'p-4' : 'p-6 md:grid-cols-4'}`}>
+        <Stat label="Global Rank" value={rank}>
+          <RankDelta history={user.rank_history} currentRank={user.stats.global_rank} />
+        </Stat>
+        <Stat label="Country Rank" value={countryRank} />
+        <Stat label="PP" value={Number(user.stats.pp).toLocaleString()} />
+        <Stat label="Accuracy" value={`${user.stats.accuracy}%`} />
       </div>
     </div>
   );
