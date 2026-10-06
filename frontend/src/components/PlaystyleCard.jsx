@@ -52,7 +52,7 @@ const ARCHETYPES = {
   nmParagon: {
     label: 'NM Paragon',
     desc: 'Nomod with exceptional accuracy.',
-    criteria: 'NM on 90%+ of top plays AND avg accuracy ≥ 99%',
+    criteria: 'NM on 90%+ of top plays, with 99%+ average accuracy',
     text: 'text-teal-100', border: 'border-teal-400',
   },
 
@@ -72,7 +72,7 @@ const ARCHETYPES = {
   hrParagon: {
     label: 'HR Paragon',
     desc: 'Lots of HR with elite accuracy.',
-    criteria: 'HR on 60%+ of top plays AND avg accuracy ≥ 97%',
+    criteria: 'HR on 60%+ of top plays, with 97%+ average accuracy',
     text: 'text-fuchsia-100', border: 'border-fuchsia-500',
   },
 
@@ -92,7 +92,7 @@ const ARCHETYPES = {
   dtParagon: {
     label: 'DT Paragon',
     desc: 'Lots of DT with high accuracy.',
-    criteria: 'DT on 70%+ of top plays AND avg accuracy ≥ 97%',
+    criteria: 'DT on 70%+ of top plays, with 97%+ average accuracy',
     text: 'text-amber-100', border: 'border-yellow-400',
   },
 
@@ -112,7 +112,7 @@ const ARCHETYPES = {
   hdParagon: {
     label: 'HD Paragon',
     desc: 'Hidden with exceptional accuracy.',
-    criteria: 'Pure HD on 70%+ of top plays AND avg accuracy ≥ 98%',
+    criteria: 'Pure HD on 70%+ of top plays, with 98%+ average accuracy',
     text: 'text-violet-100', border: 'border-violet-400',
   },
 
@@ -120,7 +120,7 @@ const ARCHETYPES = {
   gimmick: {
     label: 'Gimmick Player',
     desc: 'Often uses EZ, HT or FL.',
-    criteria: 'EZ / HT / FL or unknown mods on 10%+ of top plays',
+    criteria: 'EZ, HT, FL or other unusual mods on 10%+ of top plays',
     text: 'text-green-200', border: 'border-green-600',
   },
 
@@ -128,7 +128,7 @@ const ARCHETYPES = {
   allrounder: {
     label: 'All-Rounder',
     desc: 'No single mod dominates.',
-    criteria: 'No single mod exceeds its Player threshold',
+    criteria: 'No mod is on enough top plays to set the playstyle',
     text: 'text-slate-200', border: 'border-slate-500',
   },
 };
@@ -139,17 +139,17 @@ const ARCHETYPES = {
 // like the mod badges, so they don't shout.
 
 const TRAITS = {
-  accMachine:   { label: 'Acc Machine',    title: 'Exceptionally high average accuracy',            criteria: 'Avg accuracy ≥ 99% (non-Paragon)',          style: 'bg-green-400/10 text-green-300 border-green-400/30' },
-  hdStacker:    { label: 'HD Stacker',     title: 'Regularly adds Hidden on top of other mods',     criteria: 'HD on 30%+ of top plays (not primary mod)', style: modColors('HD').badge },
-  hdhrStacker:  { label: 'HDHR Stacker',   title: 'Frequently combines Hidden and Hard Rock',       criteria: 'HDHR on 20%+ of top plays',                 style: modColors('HR').badge },
-  hddtStacker:  { label: 'HDDT Stacker',   title: 'Frequently combines Hidden and Double Time',     criteria: 'HDDT on 20%+ of top plays',                 style: modColors('DT').badge },
-  modMixer:     { label: 'Mod Mixer',      title: 'No single mod dominates — plays a varied pool',  criteria: 'No mod above 50% (All-Rounder only)',       style: 'bg-slate-400/10 text-slate-300 border-slate-400/30' },
-  gimmickTouch: { label: 'Gimmick Touch',  title: 'Occasionally dips into non-standard mods',      criteria: 'EZ / HT / FL on 5–10% of top plays',        style: modColors('EZ').badge },
+  accMachine:   { label: 'Acc Machine',   title: 'Exceptionally high average accuracy',           criteria: '99%+ average accuracy (not given to Paragons)',          style: 'bg-green-400/10 text-green-300 border-green-400/30' },
+  hdStacker:    { label: 'HD Stacker',    title: 'Regularly adds Hidden on top of other mods',    criteria: "HD on 30%+ of top plays, when HD isn't the main mod",     style: modColors('HD').badge },
+  hdhrStacker:  { label: 'HDHR Stacker',  title: 'Frequently combines Hidden and Hard Rock',      criteria: 'HDHR on 20%+ of top plays',                              style: modColors('HR').badge },
+  hddtStacker:  { label: 'HDDT Stacker',  title: 'Frequently combines Hidden and Double Time',    criteria: 'HDDT on 20%+ of top plays',                              style: modColors('DT').badge },
+  modMixer:     { label: 'Mod Mixer',     title: 'No single mod dominates — plays a varied pool', criteria: 'All-Rounder with no mod on more than 50% of top plays',   style: 'bg-slate-400/10 text-slate-300 border-slate-400/30' },
+  gimmickTouch: { label: 'Gimmick Touch', title: 'Occasionally dips into non-standard mods',     criteria: 'EZ, HT or FL on 5–10% of top plays',                     style: modColors('EZ').badge },
 };
 
 // Analyse
 
-function analyse(scores) {
+function analyse(scores, modOrder) {
   const total = scores.length;
 
   const hasDT      = s => hasMod(s, 'DT');
@@ -219,11 +219,13 @@ function analyse(scores) {
   if (key === 'allrounder' && Math.max(nmRate, hrRate, dtRate, pureHDRate) < 0.50) traits.push('modMixer');
   if (gimmickRate >= 0.05 && gimmickRate < 0.10)  traits.push('gimmickTouch');
 
-  // Every mod that appears in the scores, most common first (NM always first)
-  const breakdown = [
-    { mod: 'NM', count: nmCount, color: modColors('NM').bar },
-    ...modCounts(scores).map(({ mod, count }) => ({ mod, count, color: modColors(mod).bar })),
-  ].filter(b => b.count > 0);
+  // Every mod that appears in the scores, most common first (NM always first).
+  // With modOrder (comparison view), exactly those mods in that order,
+  // including ones this player has 0 of, so both players' rows line up.
+  const counts = { NM: nmCount };
+  for (const { mod, count } of modCounts(scores)) counts[mod] = count;
+  const breakdown = (modOrder ?? Object.keys(counts).filter(mod => counts[mod] > 0))
+    .map(mod => ({ mod, count: counts[mod] || 0, color: modColors(mod).bar }));
 
   return { key, traits, breakdown, total, avgAccuracy };
 }
@@ -293,7 +295,7 @@ function ArchetypesModal({ onClose }) {
                       <div className="min-w-0">
                         <p className={`font-semibold text-sm ${archetype.text}`}>{archetype.label}</p>
                         <p className="text-gray-300 text-xs mt-0.5">{archetype.desc}</p>
-                        <p className="text-gray-400 text-xs mt-1 font-mono">{archetype.criteria}</p>
+                        <p className="text-gray-400 text-xs mt-1">{archetype.criteria}</p>
                       </div>
                     </div>
                   );
@@ -310,7 +312,7 @@ function ArchetypesModal({ onClose }) {
                   <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border shrink-0 mt-0.5 ${t.style}`}>{t.label}</span>
                   <div className="min-w-0">
                     <p className="text-gray-300 text-xs">{t.title}</p>
-                    <p className="text-gray-400 text-xs mt-0.5 font-mono">{t.criteria}</p>
+                    <p className="text-gray-400 text-xs mt-0.5">{t.criteria}</p>
                   </div>
                 </div>
               ))}
@@ -328,13 +330,14 @@ function ArchetypesModal({ onClose }) {
 
 // Component
 
-export default function PlaystyleCard({ scores }) {
+// modOrder: optional fixed list of mods for the breakdown (comparison view)
+export default function PlaystyleCard({ scores, modOrder }) {
   const [showModal, setShowModal] = useState(false);
 
   const result = useMemo(() => {
     if (!scores || scores.length === 0) return null;
-    return analyse(scores);
-  }, [scores]);
+    return analyse(scores, modOrder);
+  }, [scores, modOrder]);
 
   if (!result) return null;
 
@@ -355,8 +358,11 @@ export default function PlaystyleCard({ scores }) {
               </div>
               <div className="min-w-0">
                 <p className="text-sm text-gray-400 uppercase tracking-widest font-medium">Playstyle</p>
-                <h3 className={`text-3xl font-extrabold leading-tight ${archetype.text}`}>{archetype.label}</h3>
-                <p className="text-sm text-gray-400 mt-0.5 font-mono">{archetype.criteria}</p>
+                {/* the exact rule is in a tooltip on the name, and in the "?" popup */}
+                <Tooltip text={archetype.criteria} placement="top-start">
+                  <h3 className={`text-3xl font-extrabold leading-tight ${archetype.text}`}>{archetype.label}</h3>
+                </Tooltip>
+                <p className="text-sm text-gray-300 mt-0.5">{archetype.desc}</p>
               </div>
             </div>
             <div className="flex items-start gap-3 shrink-0">
@@ -378,8 +384,6 @@ export default function PlaystyleCard({ scores }) {
         </div>
 
         <div className="flex-1 flex flex-col p-5">
-          <p className="text-sm text-gray-300 mb-4">{archetype.desc}</p>
-
           <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">Mod breakdown · {total} top plays</p>
           <div className="space-y-2">
             {breakdown.map(({ mod, count, color }) => (

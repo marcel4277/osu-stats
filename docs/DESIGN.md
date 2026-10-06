@@ -82,6 +82,12 @@ Mod colours come in three strengths, all from the same table:
   ("HD 173"); the tooltip just names the mod ("Hidden").
 - **Long map titles and artist names stay on one line** and end in "…"; the
   full name shows on hover.
+- **No developer language on the page.** No code-style (monospace) text, no
+  "AND", "≥", or rule jargon like "Player threshold". Rules are written as
+  plain sentences, e.g. "DT on 70%+ of top plays, with 97%+ average accuracy".
+- **Month names come from a fixed list** of three-letter names (Jan … Sep …
+  Dec). The browser's own short names vary by language; UK English gives
+  "Sept".
 
 ---
 
@@ -198,13 +204,30 @@ This went through several rounds; this version is "design B".
   - Gridlines are faint solid lines; the baseline is a step brighter.
 - **Month labels:** under every bar on desktop and in the comparison view;
   every third month on phones.
+- **Comparison view:** both players' charts share one scale (the larger of
+  the two), so equal bar heights mean equal counts.
 - **Legend:** only lists a colour if that bar is actually on the chart. A
   peak month older than 18 months gets no "Peak month" entry.
 - **Status badge:** grey outline, grey text and a small coloured dot, with no
   pulsing. The tooltip explains the rule.
-- **Stats row:** the same divided strip as the player card.
+  - The labels must be clearly different from each other, from most to least
+    active: Actively Improving, Steady Progress, Still Active, Slowing Down,
+    Plateaued, Inactive.
+  - On phones the badge sits under the title.
+- **Stats row:** the same divided strip as the player card. On phones it
+  becomes stacked rows (label left, value right), because three columns get
+  cut off ("60 da…").
+- **Insight line:** compares the last 90 days with the player's own usual
+  pace, for example "15 top plays set in the last 90 days — 1.6× their usual
+  9 per 90 days."
+  - It says "in line with" or "fewer than" when that's the case.
+  - It says "most of their top plays are recent" when there isn't 90 days of
+    earlier history to compare with.
 
 **Rejected:**
+- "On the Rise" next to "Actively Improving": they couldn't be told apart.
+- An insight line that said "a strong recent push" for any number of plays,
+  so it told the reader nothing.
 - Bars filling the whole month, which read as solid blocks.
 - Purple at 60% opacity, which was too faint (2.09:1).
 - Dashed gridlines.
@@ -217,8 +240,16 @@ This went through several rounds; this version is "design B".
 
 - **Header:** the archetype icon in a coloured ring, plus the archetype name
   in its colour. There's no background wash.
+  - Under the name is the one-line plain description ("Lots of DT with high
+    accuracy.").
+  - The exact rule is in a tooltip on the name, and in the "?" popup. It
+    isn't printed on the card and isn't repeated.
 - **Mod breakdown:** a bar per mod in the mod's colour, with its count and
   percentage.
+  - On its own, a player's list is sorted by count.
+  - In the comparison view, both players get the **same mods in the same
+    order** (NM first, then by combined count), including 0 rows, so
+    matching rows sit side by side.
 - **Traits:** coloured pills (see section 2), **pinned to the bottom of the
   card**, so in the comparison view both players' traits line up even when
   one has more mod rows.
@@ -240,6 +271,7 @@ This went through several rounds; this version is "design B".
 - **Comparison view:**
   - Two columns. Each row holds the matching card of each player, and both
     are stretched to the same height.
+  - Both players share a chart scale and a mod order (see sections 7 and 8).
   - It **splits into two columns the moment you search**. Player 2's column
     shows pulsing placeholder cards ("Loading name…") until their data
     arrives. This stopped a brief stretched-out single view.
@@ -273,24 +305,7 @@ This went through several rounds; this version is "design B".
 
 ## 11. Known design issues still open
 
-From the latest review of the comparison view:
-
-1. **Shared chart scale.** When comparing, both activity charts should use the
-   same scale. Right now a 15-play month and a 30-play month can draw at the
-   same height.
-2. **Fixed mod order.** When comparing, both mod breakdowns should use one
-   fixed order. Right now each player's list is sorted by count.
-3. **Developer wording on the playstyle card.** The monospace rule line (e.g.
-   "DT on 70%+ of top plays AND avg accuracy ≥ 97%") reads like code, and it
-   repeats the description. Keep the plain sentence and move the rule into a
-   tooltip. "No single mod exceeds its Player threshold" also has a stray
-   capital.
-4. **"On the Rise" and "Actively Improving"** look and sound almost the same.
-5. **The 90-day insight line** says "a strong recent push" for both 11 and 18
-   plays, so it doesn't tell the reader anything.
-6. **Month labels:** "Sept" comes from the UK date format while every other
-   month is three letters. Use a fixed list.
-7. **A peak month outside the 18-month chart** has nothing on the chart to
+1. **A peak month outside the 18-month chart** has nothing on the chart to
    match it. A small note would help.
-8. **Feature:** the comparison view should highlight the differences between
+2. **Feature:** the comparison view should highlight the differences between
    the players (who has more pp, better accuracy, and so on).

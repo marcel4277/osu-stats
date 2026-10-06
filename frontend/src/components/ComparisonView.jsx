@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import UserProfile from './UserProfile.jsx';
-import ImprovementVelocity from './ImprovementVelocity.jsx';
+import ImprovementVelocity, { chartPeak } from './ImprovementVelocity.jsx';
 import PlaystyleCard from './PlaystyleCard.jsx';
+import { sharedModOrder } from './modUtils.js';
 
 // Small screens: Player 1's cards, then Player 2's (DOM order).
 // Large screens: `order` interleaves them so each row holds one card per player,
@@ -14,15 +16,15 @@ function Cell({ order, children }) {
   return <div className={`min-w-0 flex flex-col [&>*]:flex-1 ${order}`}>{children}</div>;
 }
 
-function PlayerCells({ user, scores, label, orders }) {
+function PlayerCells({ user, scores, label, orders, scaleMax, modOrder }) {
   return (
     <>
       <div className={`text-center ${orders[0]}`}>
         <span className="text-sm text-gray-400 uppercase tracking-widest">{label}</span>
       </div>
       <Cell order={orders[1]}><UserProfile user={user} compact /></Cell>
-      <Cell order={orders[2]}><ImprovementVelocity scores={scores} /></Cell>
-      <Cell order={orders[3]}><PlaystyleCard scores={scores} /></Cell>
+      <Cell order={orders[2]}><ImprovementVelocity scores={scores} scaleMax={scaleMax} /></Cell>
+      <Cell order={orders[3]}><PlaystyleCard scores={scores} modOrder={modOrder} /></Cell>
     </>
   );
 }
@@ -54,11 +56,21 @@ function LoadingCells({ name, label, orders }) {
 
 // user2/scores2 are null while Player 2 is loading; name2 is shown meanwhile
 export default function ComparisonView({ user1, scores1, user2, scores2, name2 }) {
+  // Once both players are in, their cards share a chart scale and a mod
+  // order, so the same height or the same row means the same thing on both sides
+  const shared = useMemo(() => {
+    if (!user2) return {};
+    return {
+      scaleMax: Math.max(chartPeak(scores1), chartPeak(scores2)),
+      modOrder: sharedModOrder([scores1 || [], scores2 || []]),
+    };
+  }, [user2, scores1, scores2]);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-4">
-      <PlayerCells user={user1} scores={scores1} label="Player 1" orders={ORDERS[0]} />
+      <PlayerCells user={user1} scores={scores1} label="Player 1" orders={ORDERS[0]} {...shared} />
       {user2
-        ? <PlayerCells user={user2} scores={scores2} label="Player 2" orders={ORDERS[1]} />
+        ? <PlayerCells user={user2} scores={scores2} label="Player 2" orders={ORDERS[1]} {...shared} />
         : <LoadingCells name={name2} label="Player 2" orders={ORDERS[1]} />}
     </div>
   );
