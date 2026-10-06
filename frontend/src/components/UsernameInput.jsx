@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+// value: the name currently on screen (from the page address). The box resets
+// to it whenever it changes, so going back/forward or opening a shared link
+// never leaves an old name in the box.
 // secondary: an outlined button, for the compare search, so the main search
 // stays the primary action
-export default function UsernameInput({ onSearch, isLoading, placeholder = 'Enter osu! username...', secondary = false }) {
-  const [username, setUsername] = useState('');
+export default function UsernameInput({ value = '', onSearch, isLoading, placeholder = 'Enter osu! username...', secondary = false }) {
+  const [username, setUsername] = useState(value);
+  useEffect(() => { setUsername(value); }, [value]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

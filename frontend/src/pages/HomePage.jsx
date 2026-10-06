@@ -86,7 +86,7 @@ export default function HomePage({ onComparingChange }) {
     <div className="space-y-8">
       {/* Search area */}
       <div className="flex flex-col items-center gap-3">
-        <UsernameInput onSearch={handleSearch1} isLoading={loading1} />
+        <UsernameInput value={username ?? ''} onSearch={handleSearch1} isLoading={loading1} />
 
         {player1 && (
           <div className="flex items-center gap-3 w-full max-w-md">
@@ -96,7 +96,7 @@ export default function HomePage({ onComparingChange }) {
           </div>
         )}
         {player1 && (
-          <UsernameInput onSearch={handleSearch2} isLoading={loading2} placeholder="Compare with..." secondary />
+          <UsernameInput value={username2 ?? ''} onSearch={handleSearch2} isLoading={loading2} placeholder="Compare with..." secondary />
         )}
       </div>
 
