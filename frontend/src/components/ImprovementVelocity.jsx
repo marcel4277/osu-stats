@@ -4,8 +4,12 @@ import { formatMonth } from './dateUtils.js';
 const MONTHS_SHOWN = 18;
 
 // Each verdict also carries a tooltip shown when hovering the badge.
-function buildVerdict(daysSinceLast, last90, last180) {
-  if (daysSinceLast <= 14 && last90  >= 5) return { label: 'Actively Improving', color: 'text-green-400',  border: 'border-green-400',  dot: 'bg-green-400',  tip: 'Top play within 14 days + 5 or more in the last 90 days'   };
+// belowPace: the last 90 days are clearly behind the player's usual pace
+// (the insight line then says "fewer than their usual …"). Such a player
+// isn't "Actively Improving" however recent their last play, so the badge
+// and the insight line never contradict each other.
+function buildVerdict(daysSinceLast, last90, last180, belowPace) {
+  if (daysSinceLast <= 14 && last90  >= 5 && !belowPace) return { label: 'Actively Improving', color: 'text-green-400',  border: 'border-green-400',  dot: 'bg-green-400',  tip: 'Top play within 14 days, 5 or more in the last 90 days, and at or above their usual pace' };
   if (daysSinceLast <= 60 && last90  >= 3) return { label: 'Steady Progress',    color: 'text-osu-cyan',  border: 'border-osu-cyan',   dot: 'bg-osu-cyan',   tip: 'Top play within 60 days + 3 or more in the last 90 days'   };
   if (daysSinceLast <= 90 && last180 >= 1) return { label: 'Still Active',       color: 'text-purple-300',border: 'border-osu-purple', dot: 'bg-osu-purple', tip: 'Top play within 90 days'                                    };
   if (daysSinceLast <= 270)               return { label: 'Slowing Down',       color: 'text-yellow-400',border: 'border-yellow-400', dot: 'bg-yellow-400', tip: 'No top play in 4–9 months'                                  };
@@ -53,16 +57,25 @@ function pluralise(n, word) {
   return `${n} ${word}${n === 1 ? '' : 's'}`;
 }
 
+// Top plays per 90 days before the last 90 days, from their oldest top play
+// on; null without at least 90 days of that earlier history.
+function usualPace(dates, now, last90) {
+  const DAY = 86400000;
+  const earlierDays = (now - 90 * DAY - Math.min(...dates)) / DAY;
+  return earlierDays >= 90 ? (dates.length - last90) / (earlierDays / 90) : null;
+}
+
+// At or under this share of their usual pace counts as "fewer than usual"
+const BELOW_PACE = 0.67;
+
+function isBelowPace(usual, last90) {
+  return usual !== null && usual >= 1 && last90 / usual <= BELOW_PACE;
+}
+
 // Compares the last 90 days with the player's usual pace, e.g.
 // "11 top plays set in the last 90 days — 2.4× their usual 5 per 90 days."
 // "No top plays in the last 90 days, against their usual 9 per 90 days."
-// Usual pace = top plays per 90 days before the last 90 days, from their
-// oldest top play on. Needs at least 90 days of that earlier history.
-function insight(dates, now, last90) {
-  const DAY = 86400000;
-  const oldest = Math.min(...dates);
-  const earlierDays = (now - 90 * DAY - oldest) / DAY;
-  const usual = earlierDays >= 90 ? (dates.length - last90) / (earlierDays / 90) : null;
+function insight(usual, last90) {
   const usualText = usual === null ? null
     : usual < 1 ? 'their usual pace of under 1 per 90 days'
     : `their usual ${Math.round(usual)} per 90 days`;
@@ -78,7 +91,7 @@ function insight(dates, now, last90) {
     const times = ratio >= 10 ? Math.round(ratio) : Math.round(ratio * 10) / 10;
     return `${recent} — ${times}× ${usualText}.`;
   }
-  if (ratio > 0.67) return `${recent} — in line with ${usualText}.`;
+  if (ratio > BELOW_PACE) return `${recent} — in line with ${usualText}.`;
   return `${recent} — fewer than ${usualText}.`;
 }
 
@@ -121,8 +134,9 @@ export default function ImprovementVelocity({ scores, scaleMax = 0 }) {
       };
     });
     const maxCount = niceMax(Math.max(...buckets.map(b => b.count), scaleMax, 1));
-    const verdict = buildVerdict(daysSinceLast, last90, last180);
-    const insightText = insight(dates, now, last90);
+    const usual = usualPace(dates, now, last90);
+    const verdict = buildVerdict(daysSinceLast, last90, last180, isBelowPace(usual, last90));
+    const insightText = insight(usual, last90);
 
     return { daysSinceLast, peakCount, peakLabel: formatMonth(peakYear, peakMonth), spanMonths, buckets, maxCount, verdict, insightText };
   }, [scores, scaleMax]);
