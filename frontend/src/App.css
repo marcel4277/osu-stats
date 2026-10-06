@@ -26,7 +26,7 @@ body {
   background: #555;
 }
 
-/* Score row with the map's cover behind it. The cover spans the left 60% of the
+/* Score row (a table row, or a card on narrow screens: li) with the map's cover behind it. The cover spans the left 60% of the
    row and fades out to the right on an eased curve, so there is no visible
    edge. (Rows are very wide and short, so stretching
    it full width would show only a thin slice.)
@@ -59,7 +59,8 @@ body {
 
 /* Colour (selected) rows: a soft drop shadow so the text lifts off the cover
    a little more, without looking heavy. */
-.score-row-cover:not(.score-row-cover-muted) > td {
+.score-row-cover:not(.score-row-cover-muted) > td,
+li.score-row-cover:not(.score-row-cover-muted) {
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.6), 0 0 4px rgb(0 0 0 / 0.3);
 }
 .score-row-cover .text-gray-400 {
@@ -69,21 +70,29 @@ body {
 /* Rows outside the time filter: text toned well down from white, and the
    coloured accents (pp, accuracy, mod badges) faded, so the selected (colour)
    rows stand out. */
-.scores-table tbody .score-row-cover-muted .text-white {
+.scores-table .score-row-cover-muted .text-white {
   color: #858c98; /* between gray-400 and gray-500 */
 }
 
-.scores-table tbody .score-row-cover-muted .text-gray-400 {
+.scores-table .score-row-cover-muted .text-gray-400 {
   color: #5b6270; /* between gray-500 and gray-600 */
 }
 
-.scores-table tbody .score-row-cover-muted .chip-on-cover {
+.scores-table .score-row-cover-muted .chip-on-cover {
   opacity: 0.6;
 }
 
 .score-row-cover .chip-on-cover {
   background-color: rgb(17 24 39 / 0.85);
   text-shadow: none;
+}
+
+/* Phone cards (li) are taller than table rows, so their title and artist sit
+   higher in the gradient, where it's lighter. A stronger gradient keeps them
+   at 4.5:1 over a pure-white cover. (Grey cards keep their own, darker one.) */
+li.score-row-cover:not(.score-row-cover-muted) {
+  --dim-top: 0.6;
+  --dim-bottom: 0.84;
 }
 
 /* Rows outside the time filter: the same cover in greyscale (luminosity blend
@@ -97,12 +106,14 @@ body {
 
 /* Rows inside an active time filter: a pink bar on the left edge, matching the
    selected filter chip */
-.score-row-active > td:first-child {
+.score-row-active > td:first-child,
+li.score-row-active {
   box-shadow: inset 3px 0 0 #ff6b9d;
 }
 
 /* Hover: an accent bar on the left instead of lightening the row, which
    would push text contrast below AA on bright covers. */
-.score-row-link:hover > td:first-child {
+.score-row-link:hover > td:first-child,
+li.score-row-link:hover {
   box-shadow: inset 3px 0 0 #b84ed6;
 }
