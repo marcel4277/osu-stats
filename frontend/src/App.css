@@ -123,24 +123,52 @@ li.score-row-link:hover {
    so all of it shows (desktop and comparison view). Below that the card is
    too tall for its width, so the banner stays behind the header only, which
    shows more of it (about 60-100% depending on width). 768px is where the two
-   cross over. The header's shade (corner pools and gradient) sits on top of
-   the banner either way.
+   cross over.
+   Shading, painted as one continuous layer with no band edges (on the
+   whole card from 768px up, on the header on phones):
+   - soft dark pools in the header's bottom corners, behind the name and the
+     headline stats (fixed pixel sizes, so they cover the text on narrow
+     cards too);
+   - a shadow rising from the bottom of the card: darkest behind the stats
+     strip, fading out towards the top, so the top of the art stays bright.
+     Its stops are in px from the bottom, so the strip is covered the same
+     way whatever the card's height.
    Only set when the player has a banner, so the plain gradient stays otherwise. */
 .player-card {
+  --corner-pools:
+    radial-gradient(ellipse 560px 170px at 0% 100%, rgb(17 24 39 / 0.8), transparent),
+    radial-gradient(ellipse 620px 180px at 100% 100%, rgb(17 24 39 / 0.85), transparent);
   background-size: cover;
   background-position: center;
 }
+/* Phones: banner behind the header only, darkening towards its bottom; the
+   stats strip sits below on the plain card */
 .player-card-header {
-  background-image: var(--header-shade), var(--banner);
+  background-image:
+    var(--corner-pools),
+    linear-gradient(to bottom, rgb(17 24 39 / 0.15), rgb(17 24 39 / 0.75)),
+    var(--banner);
   background-size: cover;
   background-position: center;
 }
 @media (min-width: 768px) {
+  /* Everything is painted on the card itself (painting the pools in the
+     header made them stop dead at the header's bottom edge, a visible line).
+     The pools are centred a strip's height up from the bottom, where the
+     name and the headline stats sit, and fade out into the strip. */
   .player-card {
-    background-image: var(--banner);
+    background-image:
+      radial-gradient(ellipse 560px 190px at 0% calc(100% - 75px), rgb(17 24 39 / 0.8), transparent),
+      radial-gradient(ellipse 620px 200px at 100% calc(100% - 75px), rgb(17 24 39 / 0.85), transparent),
+      /* eased, so there's no kink in the fade for the eye to read as a line */
+      linear-gradient(to top,
+        rgb(17 24 39 / 0.85) 0px, rgb(17 24 39 / 0.82) 50px,
+        rgb(17 24 39 / 0.74) 90px, rgb(17 24 39 / 0.6) 125px,
+        rgb(17 24 39 / 0.42) 160px, rgb(17 24 39 / 0.25) 200px,
+        rgb(17 24 39 / 0.12) 240px, rgb(17 24 39 / 0.08) 100%),
+      var(--banner);
   }
   .player-card-header {
-    background-image: var(--header-shade);
+    background-image: none;
   }
 }
-
