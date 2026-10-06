@@ -64,16 +64,16 @@ body {
    coloured accents (pp, accuracy, mod badges) faded, so the selected (colour)
    rows stand out. */
 .scores-table tbody .score-row-cover-muted .text-white {
-  color: #9ca3af; /* gray-400 */
+  color: #858c98; /* between gray-400 and gray-500 */
 }
 
 .scores-table tbody .score-row-cover-muted .text-gray-400 {
-  color: #6b7280; /* gray-500 */
+  color: #5b6270; /* between gray-500 and gray-600 */
 }
 
 .scores-table tbody .score-row-cover-muted .text-osu-cyan,
 .scores-table tbody .score-row-cover-muted .chip-on-cover {
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .score-row-cover .chip-on-cover {
