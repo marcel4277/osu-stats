@@ -136,6 +136,8 @@ export class OsuApiService {
       id: data.id,
       username: data.username,
       avatar_url: data.avatar_url,
+      // Profile banner; osu! gives everyone one (a default if they haven't set their own)
+      cover_url: data.cover?.url ?? data.cover_url ?? null,
       country: data.country?.code || 'Unknown',
       playcount: data.statistics?.play_count || 0,
       stats: {
