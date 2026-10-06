@@ -62,16 +62,12 @@ body {
 }
 
 .score-row-cover .text-gray-400 {
-  color: #d1d5db; /* gray-300 */
-}
-
-/* Score table text is toned down a step from pure white so the stats don't
-   shout; rows outside the time filter go down one more step. Coloured
-   accents (pp, accuracy, mod badges) keep their colours. */
-.scores-table tbody .text-white {
   color: #e5e7eb; /* gray-200 */
 }
 
+/* Rows outside the time filter: text toned down from white so the selected
+   (colour) rows stand out. Coloured accents (pp, accuracy, mod badges) keep
+   their colours. */
 .scores-table tbody .score-row-cover-muted .text-white {
   color: #d1d5db; /* gray-300 */
 }
