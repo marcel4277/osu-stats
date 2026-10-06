@@ -72,6 +72,11 @@ export default function ImprovementVelocity({ scores }) {
   if (!stats) return null;
   const { daysSinceLast, last90, peakCount, peakLabel, spanMonths, buckets, maxCount, verdict } = stats;
 
+  // Legend entries only for colours actually on the chart: the peak month can
+  // be older than the 18 months shown, and this month may have no plays yet.
+  const showPeak = buckets.some(b => b.isPeak && b.count > 0);
+  const showCurrent = buckets[buckets.length - 1].count > 0;
+
   const lastScoreLabel = daysSinceLast === 0 ? 'Today' : pluralise(daysSinceLast, 'day') + ' ago';
   const spanLabel = spanMonths < 1 ? '< 1 month'
     : spanMonths < 12 ? pluralise(spanMonths, 'month')
@@ -127,15 +132,21 @@ export default function ImprovementVelocity({ scores }) {
         {/* Chart */}
         <div className="flex items-center justify-between gap-4 mb-3">
           <p className="text-gray-400 text-sm uppercase tracking-widest">Activity · last 18 months</p>
-          {/* What the two highlighted bar colours mean */}
-          <div className="flex items-center gap-4 text-xs text-gray-400">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-osu-pink" />Peak month
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-gray-300" />This month
-            </span>
-          </div>
+          {/* What the highlighted bar colours mean */}
+          {(showPeak || showCurrent) && (
+            <div className="flex items-center gap-4 text-xs text-gray-400">
+              {showPeak && (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-osu-pink" />Peak month
+                </span>
+              )}
+              {showCurrent && (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-gray-300" />This month
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="relative">
