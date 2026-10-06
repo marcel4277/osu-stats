@@ -8,7 +8,7 @@ function RankDelta({ history, currentRank }) {
   if (delta === 0) return null;
   const improved = delta > 0;
   return (
-    <Tooltip text="Change over the last 90 days" className={`text-xs font-semibold ${improved ? 'text-green-400' : 'text-red-400'}`}>
+    <Tooltip text="Change over the last 90 days" className={`text-xs font-semibold rounded px-1 bg-gray-900/80 [text-shadow:none] ${improved ? 'text-green-400' : 'text-red-400'}`}>
       {improved ? '▲' : '▼'}{Math.abs(delta).toLocaleString()}
     </Tooltip>
   );
@@ -57,8 +57,11 @@ export default function UserProfile({ user, compact = false }) {
   // darkens towards the bottom. Without a banner it's a plain dark gradient.
   const headerStyle = user.cover_url
     ? { backgroundImage: [
-        // darker at both sides, where the name and the headline stats sit
-        'linear-gradient(to right, rgb(17 24 39 / 0.6), transparent 35%, transparent 65%, rgb(17 24 39 / 0.6))',
+        // soft dark pools in the bottom corners, where the name and the
+        // headline stats sit; the middle and top of the art stay untouched
+        // (fixed pixel sizes, so they cover the text on narrow cards too)
+        'radial-gradient(ellipse 560px 170px at 0% 100%, rgb(17 24 39 / 0.8), transparent)',
+        'radial-gradient(ellipse 620px 180px at 100% 100%, rgb(17 24 39 / 0.85), transparent)',
         'linear-gradient(to bottom, rgb(17 24 39 / 0.15), rgb(17 24 39 / 0.9))',
         `url("${user.cover_url}")`,
       ].join(', ') }
@@ -90,7 +93,12 @@ export default function UserProfile({ user, compact = false }) {
             <h2 className={`font-bold text-white truncate ${compact ? 'text-xl' : 'text-3xl'}`}>{user.username}</h2>
             <p className="flex items-center gap-1.5 text-gray-200 text-sm min-w-0">
               {/^[A-Za-z]{2}$/.test(user.country) && (
-                <img src={flagUrl(user.country)} alt="" className="h-3.5 w-auto rounded-sm shrink-0" />
+                <img
+                  src={flagUrl(user.country)}
+                  alt=""
+                  className="h-3.5 w-auto rounded-sm shrink-0"
+                  onError={e => { e.currentTarget.style.display = 'none'; }}
+                />
               )}
               <span className="truncate">{user.country_name || user.country}</span>
             </p>
