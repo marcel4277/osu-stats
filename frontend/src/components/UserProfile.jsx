@@ -8,40 +8,58 @@ function RankDelta({ history, currentRank }) {
   if (delta === 0) return null;
   const improved = delta > 0;
   return (
-    <span className={`text-xs font-semibold ${improved ? 'text-green-400' : 'text-red-400'}`}>
+    <Tooltip text="Change over the last 90 days" className={`text-xs font-semibold ${improved ? 'text-green-400' : 'text-red-400'}`}>
       {improved ? '▲' : '▼'}{Math.abs(delta).toLocaleString()}
-      <span className="text-gray-500 font-normal"> · 90d</span>
-    </span>
+    </Tooltip>
   );
 }
 
-function Stat({ label, value, children }) {
+// Big stat on the right of the banner header (global rank, pp)
+function HeroStat({ label, value, children, compact }) {
   return (
-    <div className="min-w-0">
-      <p className="text-gray-400 text-xs uppercase tracking-wider">{label}</p>
-      <p className="text-white text-xl font-bold truncate">{value}</p>
-      {children}
+    <div className="text-right">
+      <p className="text-gray-300 text-xs uppercase tracking-wider">{label}</p>
+      <p className={`text-white font-bold leading-tight ${compact ? 'text-xl' : 'text-3xl'}`}>
+        {value}
+        {children && <span className="ml-2 align-middle">{children}</span>}
+      </p>
     </div>
   );
+}
+
+// Small stat in the strip under the header
+function Stat({ label, value, className = '' }) {
+  return (
+    <div className={`min-w-0 ${className}`}>
+      <p className="text-gray-400 text-xs uppercase tracking-wider">{label}</p>
+      <p className="text-white text-lg font-semibold truncate">{value}</p>
+    </div>
+  );
+}
+
+function formatHours(seconds) {
+  return `${Math.round(seconds / 3600).toLocaleString()}h`;
 }
 
 export default function UserProfile({ user, compact = false }) {
   if (!user) return null;
 
-  // Header: the player's banner with their avatar, name and country on its
-  // lower half. The gradient darkens towards the bottom, where the text sits.
-  // Without a banner the header is a plain dark gradient, same layout.
+  // Header: the player's banner, with avatar + name on the left and the
+  // headline stats (global rank, pp) on the right, over a gradient that
+  // darkens towards the bottom. Without a banner it's a plain dark gradient.
   const headerStyle = user.cover_url
     ? { backgroundImage: `linear-gradient(to bottom, rgb(17 24 39 / 0.15), rgb(17 24 39 / 0.9)), url("${user.cover_url}")` }
     : undefined;
 
   const rank = user.stats.global_rank ? `#${user.stats.global_rank.toLocaleString()}` : 'N/A';
   const countryRank = user.stats.country_rank ? `#${user.stats.country_rank.toLocaleString()}` : 'N/A';
+  const pp = Math.round(user.stats.pp).toLocaleString();
+  const rankDelta = <RankDelta history={user.rank_history} currentRank={user.stats.global_rank} />;
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
       <div
-        className={`flex items-end bg-cover bg-center bg-gradient-to-br from-gray-900 to-gray-800 ${compact ? 'h-28 px-4 pb-3' : 'h-36 px-6 pb-4'}`}
+        className={`flex items-end justify-between gap-4 bg-cover bg-center bg-gradient-to-br from-gray-900 to-gray-800 [text-shadow:0_1px_3px_rgb(0_0_0/0.7)] ${compact ? 'h-28 px-4 pb-3' : 'h-36 px-6 pb-4'}`}
         style={headerStyle}
       >
         <div className="flex items-center gap-4 min-w-0">
@@ -55,23 +73,29 @@ export default function UserProfile({ user, compact = false }) {
               />
             </a>
           </Tooltip>
-          <div className="min-w-0 [text-shadow:0_1px_3px_rgb(0_0_0/0.7)]">
+          <div className="min-w-0">
             <h2 className={`font-bold text-white truncate ${compact ? 'text-xl' : 'text-3xl'}`}>{user.username}</h2>
-            <p className="text-gray-200 text-sm truncate">
-              {user.country} • {user.playcount.toLocaleString()} plays
-            </p>
+            <p className="text-gray-200 text-sm truncate">{user.country}</p>
           </div>
+        </div>
+
+        {/* Headline stats; on phones they move into the strip below */}
+        <div className="hidden sm:flex items-end gap-6 shrink-0">
+          <HeroStat label="Global Rank" value={rank} compact={compact}>{rankDelta}</HeroStat>
+          <HeroStat label="PP" value={pp} compact={compact} />
         </div>
       </div>
 
-      {/* Stats: neutral numbers, one row on desktop */}
-      <div className={`grid grid-cols-2 gap-x-6 gap-y-4 ${compact ? 'p-4' : 'p-6 md:grid-cols-4'}`}>
-        <Stat label="Global Rank" value={rank}>
-          <RankDelta history={user.rank_history} currentRank={user.stats.global_rank} />
-        </Stat>
+      {/* Secondary stats strip */}
+      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-y-3 sm:divide-x sm:divide-gray-700 ${compact ? 'px-4 py-3' : 'px-6 py-4'} sm:[&>*]:px-5 sm:[&>*:first-child]:pl-0`}>
         <Stat label="Country Rank" value={countryRank} />
-        <Stat label="PP" value={Number(user.stats.pp).toLocaleString()} />
         <Stat label="Accuracy" value={`${user.stats.accuracy}%`} />
+        <Stat label="Play Count" value={user.playcount.toLocaleString()} />
+        <Stat label="Play Time" value={formatHours(user.play_time || 0)} />
+        {/* Phone only, shown first: on wider screens these are in the header.
+            Kept last in the markup so the desktop dividers start at Country Rank. */}
+        <Stat label="Global Rank" value={rank} className="sm:hidden order-first" />
+        <Stat label="PP" value={pp} className="sm:hidden order-first" />
       </div>
     </div>
   );

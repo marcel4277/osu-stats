@@ -140,6 +140,7 @@ export class OsuApiService {
       cover_url: data.cover?.url ?? data.cover_url ?? null,
       country: data.country?.code || 'Unknown',
       playcount: data.statistics?.play_count || 0,
+      play_time: data.statistics?.play_time || 0, // seconds
       stats: {
         global_rank: data.statistics?.global_rank || null,
         country_rank: data.statistics?.country_rank || null,
