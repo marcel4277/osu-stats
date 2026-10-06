@@ -117,3 +117,29 @@ li.score-row-active {
 li.score-row-link:hover {
   box-shadow: inset 3px 0 0 #b84ed6;
 }
+
+/* Player card banner (UserProfile). Banners are about 4:1.
+   From 640px up it fills the whole card (about 5:1 on desktop, close to 4:1
+   in the comparison view), so 80-100% of it shows. On phones the card is
+   nearly square, so the banner stays behind the header only (about 2.5:1),
+   which shows more of it there. The header's shade (corner pools and
+   gradient) sits on top of the banner either way.
+   Only set when the player has a banner, so the plain gradient stays otherwise. */
+.player-card {
+  background-size: cover;
+  background-position: center;
+}
+.player-card-header {
+  background-image: var(--header-shade), var(--banner);
+  background-size: cover;
+  background-position: center;
+}
+@media (min-width: 640px) {
+  .player-card {
+    background-image: var(--banner);
+  }
+  .player-card-header {
+    background-image: var(--header-shade);
+  }
+}
+

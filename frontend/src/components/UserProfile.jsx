@@ -29,10 +29,12 @@ function HeroStat({ label, extra, value, compact }) {
 }
 
 // Small stat in the strip under the header
+// (labels a step lighter than elsewhere: they sit on the see-through band
+// over the banner)
 function Stat({ label, value, className = '' }) {
   return (
     <div className={`min-w-0 ${className}`}>
-      <p className="text-gray-400 text-xs uppercase tracking-wider">{label}</p>
+      <p className="text-gray-300 text-xs uppercase tracking-wider">{label}</p>
       <p className="text-white text-lg font-semibold truncate">{value}</p>
     </div>
   );
@@ -52,19 +54,23 @@ function formatHours(seconds) {
 export default function UserProfile({ user, compact = false }) {
   if (!user) return null;
 
-  // Header: the player's banner, with avatar + name on the left and the
-  // headline stats (global rank, pp) on the right, over a gradient that
-  // darkens towards the bottom. Without a banner it's a plain dark gradient.
-  const headerStyle = user.cover_url
-    ? { backgroundImage: [
-        // soft dark pools in the bottom corners, where the name and the
-        // headline stats sit; the middle and top of the art stay untouched
-        // (fixed pixel sizes, so they cover the text on narrow cards too)
-        'radial-gradient(ellipse 560px 170px at 0% 100%, rgb(17 24 39 / 0.8), transparent)',
-        'radial-gradient(ellipse 620px 180px at 100% 100%, rgb(17 24 39 / 0.85), transparent)',
-        'linear-gradient(to bottom, rgb(17 24 39 / 0.15), rgb(17 24 39 / 0.9))',
-        `url("${user.cover_url}")`,
-      ].join(', ') }
+  // Where the banner goes depends on the card's shape (see .player-card in
+  // App.css): behind the whole card from 640px up, where that shows more of
+  // it, and behind the header only on phones, where the card is nearly
+  // square and the whole-card version would crop the banner's sides hard.
+  // The header always gets soft dark pools in its bottom corners, where the
+  // name and the headline stats sit (fixed pixel sizes, so they cover the
+  // text on narrow cards too), and a gradient darkening towards the bottom.
+  // Without a banner it's a plain dark gradient.
+  const bannerVars = user.cover_url
+    ? {
+        '--banner': `url("${user.cover_url}")`,
+        '--header-shade': [
+          'radial-gradient(ellipse 560px 170px at 0% 100%, rgb(17 24 39 / 0.8), transparent)',
+          'radial-gradient(ellipse 620px 180px at 100% 100%, rgb(17 24 39 / 0.85), transparent)',
+          'linear-gradient(to bottom, rgb(17 24 39 / 0.15), rgb(17 24 39 / 0.9))',
+        ].join(', '),
+      }
     : undefined;
 
   const rank = user.stats.global_rank ? `#${user.stats.global_rank.toLocaleString()}` : 'N/A';
@@ -73,10 +79,12 @@ export default function UserProfile({ user, compact = false }) {
   const rankDelta = <RankDelta history={user.rank_history} currentRank={user.stats.global_rank} />;
 
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+    <div
+      className={`rounded-lg border border-gray-700 overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 ${user.cover_url ? 'player-card' : ''}`}
+      style={bannerVars}
+    >
       <div
-        className={`flex items-end justify-between gap-4 bg-cover bg-center bg-gradient-to-br from-gray-900 to-gray-800 [text-shadow:0_1px_2px_rgb(0_0_0/0.8),0_2px_8px_rgb(0_0_0/0.5)] ${compact ? 'h-28 px-4 pb-3' : 'h-36 px-6 pb-4'}`}
-        style={headerStyle}
+        className={`flex items-end justify-between gap-4 [text-shadow:0_1px_2px_rgb(0_0_0/0.8),0_2px_8px_rgb(0_0_0/0.5)] ${user.cover_url ? 'player-card-header' : ''} ${compact ? 'h-28 px-4 pb-3' : 'h-36 px-6 pb-4'}`}
       >
         <div className="flex items-center gap-4 min-w-0">
           {/* Avatar — links to osu! profile */}
@@ -112,8 +120,9 @@ export default function UserProfile({ user, compact = false }) {
         </div>
       </div>
 
-      {/* Secondary stats strip */}
-      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-y-3 sm:divide-x sm:divide-gray-700 ${compact ? 'px-4 py-3' : 'px-6 py-4'} sm:[&>*]:px-5 sm:[&>*:first-child]:pl-0`}>
+      {/* Secondary stats strip: a dark, lightly frosted band over the bottom
+          of the banner, so the small labels read on any banner */}
+      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-y-3 sm:divide-x sm:divide-white/10 border-t border-white/10 bg-gray-900/75 backdrop-blur-sm ${compact ? 'px-4 py-3' : 'px-6 py-4'} sm:[&>*]:px-5 sm:[&>*:first-child]:pl-0`}>
         <Stat label="Country Rank" value={countryRank} />
         <Stat label="Accuracy" value={`${user.stats.accuracy}%`} />
         <Stat label="Play Count" value={user.playcount.toLocaleString()} />
