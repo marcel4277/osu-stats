@@ -262,8 +262,7 @@ This went through several rounds; this version is "design B".
   play was set, and that column has room. On its own line, and grey, it
   reads apart from the mods at a glance. Its tooltip explains that a lazer
   play's score is the standardised one.
-  - Rows stay the same height (75px): the two lines in the Mods column are
-    no taller than the title and artist.
+  - It's line 2 of the row (see below), so rows stay the same height.
   - An earlier lazer badge in the Mods column was removed: it was blue,
     styled like a mod (blue is NM's colour), and repeated the tag next to
     the score. Now it's the only lazer marker, and neutral.
@@ -271,20 +270,26 @@ This went through several rounds; this version is "design B".
     mod at a glance.
 - **Order:** pp order, like the osu! profile. Lazer plays keep their pp
   position and just show a smaller number.
-- **Hit counts** (300s, 100s, 50s, misses) run along a second line under
-  Accuracy, Score and Combo, like the osu! website: "300 1,218  100 16
-  50 0  ✕ 1".
-  - Those three values share one cell, whose grid uses the header's column
-    widths (`STATS_WIDTHS`), so each value still sits under its heading.
-  - Each count has a fixed-width slot, and the whole line is centred, so
-    it starts at the same place on every row and the counts line up down
-    the table. The slots have 16px between them (12px with a lazer slot
-    looked cramped).
-  - Labels are small and grey, numbers white. Misses are red (`red-400`)
-    only when there are any, the one count that marks a play as not clean.
-    Measured over a pure-white cover: numbers 15.7:1 or better, labels
-    11.8:1, red 6.4:1. On grey rows the red fades to 60% like the other
-    coloured accents.
+- **Every row is two lines, the same in every column:** line 1 holds the
+  main values (title, mods, accuracy, score, combo, pp, date), line 2 the
+  details (artist, the lazer tag, the hit counts). Line 1 is 24px, line 2
+  20px, rows 69px. Before this, accuracy, score and combo moved up to make
+  room for the counts while pp and date stayed centred, and hung between
+  the two levels.
+- **Hit counts** (300s, 100s, 50s, misses) are line 2 under the score:
+  "300 2,481  100 44  50 0  × 0".
+  - Accuracy, score and combo share one cell whose grid uses the header's
+    column widths, so each still sits under its heading.
+  - The line is **centred under the score**, like every value in the table
+    is centred on its column, and sized to its numbers: each label tight to
+    its number, the same 12px between counts.
+  - The miss cross is a drawn icon. The "✕" character isn't in the site's
+    font, so the browser borrowed a thinner one from another font.
+  - Numbers white; labels a step dimmer (`gray-400`, kept grey on covers,
+    where other grey text is lightened, or they'd be almost as bright as
+    the numbers). Misses red (`red-400`) only when there are any, faded to
+    60% on grey rows. Measured over a pure-white cover: numbers 17.0:1,
+    labels 6.5:1, red 6.4:1.
 
 ### On phones and tablets (narrower than 1024px)
 
@@ -303,8 +308,10 @@ DJ TOTTO ..................... DT HD
 - **The "lazer" tag** ends the hit-count line, at the right: under the
   mods and the date, as in the table it's under the mods. (Directly under
   the mods is where the date is.)
-- **Hit counts get their own fourth line,** with small grey labels. Each
-  card is 105px tall.
+- **Hit counts get their own fourth line.** Each card is 105px tall. The
+  labels are `gray-300` here: `gray-400` measured 3.4:1 over a pure-white
+  cover, because the line sits higher in the cover's fade than in a table
+  row. Now 5.9:1.
 - **Every card is the same height** (105px) at 360px and up. On narrower
   screens the stats and hit lines wrap rather than cutting anything off.
 - **Covers, grey and colour, the pink active bar, and the hover bar** all
@@ -332,6 +339,10 @@ DJ TOTTO ..................... DT HD
 - **Hit counts as their own column** (labels in the header, numbers in
   slots). It needed 24px more than the table has at 1024px, and the
   header labels ran together.
+- **Hit counts in fixed-width slots across the three columns.** Slots sized
+  for the worst case ("12,345") left holes after short numbers ("50 0"
+  floated far from "100 44"), and the line started partway into Accuracy,
+  tied to nothing above it.
 - **"A · Compact"** (score and combo left out). People do look at those
   numbers, and B costs no extra height.
 - Darkening the text on the coloured rows. Only the grey rows get darker

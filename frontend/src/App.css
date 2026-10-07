@@ -66,6 +66,16 @@ li.score-row-cover:not(.score-row-cover-muted) {
 .score-row-cover .text-gray-400 {
   color: #e5e7eb; /* gray-200 */
 }
+/* Except the hit-count labels ("300", "100"...): lightened, they were almost
+   as bright as their numbers. They stay a step below. On phone cards that
+   step is gray-300: gray-400 measured 3.4:1 over a pure-white cover there
+   (the line sits higher in the cover's fade than in a table row). */
+.score-row-cover .hit-label {
+  color: #9ca3af; /* gray-400 */
+}
+li.score-row-cover .hit-label {
+  color: #d1d5db; /* gray-300 */
+}
 
 /* Rows outside the time filter: text toned well down from white, and the
    coloured accents (pp, accuracy, mod badges, red miss counts) faded, so the

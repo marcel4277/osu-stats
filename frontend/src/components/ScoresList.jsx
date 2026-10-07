@@ -57,24 +57,17 @@ function chipActiveClass(key) {
   return key === 'all' ? 'bg-gray-600 text-white' : modColors(key).chip;
 }
 
-// isLazer (table): the grey "lazer" tag goes on its own line under the mods.
-// It isn't a mod, but like them it says how the play was set; on a line of
-// its own (and grey) it reads apart from the mods at a glance.
-function ModBadges({ mods, isLazer = false }) {
+// The "lazer" tag isn't one of these: it isn't a mod, so it goes on a line
+// of its own (under the mods in the table, at the end of the hit counts on a
+// phone card), where it reads apart from them at a glance.
+function ModBadges({ mods }) {
   const shown = (mods || []).filter(mod => mod !== 'NF' && mod !== 'CL');
   const list = shown.length === 0 ? ['NM'] : shown;
-  const badges = (
+  return (
     <div className="flex flex-nowrap justify-center gap-1">
       {list.map(mod => (
         <span key={mod} className={`${BADGE_BASE} ${modColors(mod).badge}`}>{mod}</span>
       ))}
-    </div>
-  );
-  if (!isLazer) return badges;
-  return (
-    <div className="flex flex-col items-center gap-1">
-      {badges}
-      <LazerTag />
     </div>
   );
 }
@@ -136,8 +129,8 @@ function playStyling(score, { near, inRange, highlight, dimSelector }) {
   return { className, style };
 }
 
-// Shown with the mods. The tooltip explains the score too, which for a lazer
-// play is osu!'s standardised one.
+// "lazer": on its own line, under the mods. The tooltip explains the score
+// too, which for a lazer play is osu!'s standardised one.
 function LazerTag() {
   return (
     <Tooltip
@@ -151,11 +144,21 @@ function LazerTag() {
 
 // Hit counts: 300s, 100s, 50s and misses. Misses are red only when there
 // are any (the one count that marks a play as not clean); the rest stay white.
+// A cross drawn to match the labels: the "✕" character isn't in the site's
+// font, so the browser borrowed a thinner one from another font
+function MissIcon() {
+  return (
+    <svg viewBox="0 0 10 10" aria-label="misses" className="w-2 h-2 self-center" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+      <path d="M1.5 1.5l7 7M8.5 1.5l-7 7" />
+    </svg>
+  );
+}
+
 const HIT_TYPES = [
   { key: 'great', label: '300' },
   { key: 'ok',    label: '100' },
   { key: 'meh',   label: '50'  },
-  { key: 'miss',  label: '✕'   },
+  { key: 'miss',  label: <MissIcon /> },
 ];
 
 function hitClass(hits, key) {
@@ -167,42 +170,39 @@ function hitClass(hits, key) {
 // those three must stay first there.
 const STATS_WIDTHS = ['w-[7.75rem]', 'w-[7.5rem]', 'w-[6.5rem]'];
 const STATS_GRID = 'grid-cols-[7.75rem_7.5rem_6.5rem]';
+// The hit counts are centred under the score. They span all three columns,
+// whose middle is (7.75 - 6.5) / 2 = 0.625rem left of the score's; 1.25rem of
+// left padding moves it there.
+const UNDER_SCORE = 'pl-[1.25rem]';
 
-// The hit counts with their labels, "300 1,218  100 16  50 0  ✕ 1".
-// Phone card: one line of its own, wrapping between counts on the narrowest
-// screens. Table (slots): each count in a fixed-width slot, so the counts
-// start at the same place on every row.
-const HIT_SLOTS = 'grid grid-cols-[4.25rem_3.25rem_2.5rem_2.25rem] gap-x-4';
-
-// extra (phone card): something to put at the right-hand end of the line.
-// The line is drawn for it even without counts (a saved copy from before
-// they were added).
-function HitLine({ hits, slots = false, extra = null, className = '' }) {
+// The hit counts, "300 1,218  100 16  50 0  ✕ 1": each label tight to its
+// number, the same gap between every count, sized to the numbers (no fixed
+// slots, so no holes when a count is short).
+// extra (phone card): something for the right-hand end of the line; the line
+// is drawn for it even without counts (a saved copy from before they were
+// added).
+function HitLine({ hits, extra = null, className = '' }) {
   if (!hits && !extra) return null;
-  const counts = !hits ? [] : HIT_TYPES.map(t => (
-    <span key={t.key} className="inline-flex items-baseline gap-1 whitespace-nowrap">
-      <span className="text-gray-400">{t.label}</span>
-      <span className={hitClass(hits, t.key)}>{hits[t.key].toLocaleString()}</span>
-    </span>
-  ));
-  if (slots) {
-    return (
-      <div className={`${HIT_SLOTS} items-center justify-self-center tabular-nums text-xs ${className}`}>
-        {counts}
-      </div>
-    );
-  }
   return (
-    // Like the stats line, it wraps (between counts, never inside one) on
-    // screens narrower than 360px rather than cutting anything off
     <div className={`flex flex-wrap items-baseline gap-x-3 gap-y-0.5 tabular-nums text-xs ${className}`}>
-      {counts}
+      {hits && HIT_TYPES.map(t => (
+        <span key={t.key} className="inline-flex items-baseline gap-1 whitespace-nowrap">
+          <span className="hit-label inline-flex text-gray-400">{t.label}</span>
+          <span className={hitClass(hits, t.key)}>{hits[t.key].toLocaleString()}</span>
+        </span>
+      ))}
       {/* -my-px: the tag is 2px taller than a line of text; without this,
           cards with it were 1px taller than the rest */}
       {extra && <span className="ml-auto self-center -my-px">{extra}</span>}
     </div>
   );
 }
+
+// Table rows are two lines, the same in every column, so nothing hangs
+// between them: line 1 the main values (title, mods, accuracy, score, combo,
+// pp, date), line 2 the details (artist, lazer tag, hit counts).
+const LINE_1 = 'h-6 flex items-center';
+const LINE_2 = 'h-5 flex items-center';
 
 // A score row. The map's cover sits behind it as a darkened backdrop: full
 // colour normally, greyed out when the row is outside the time filter
@@ -213,47 +213,53 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
   const url = score.url;
   const { className, style } = playStyling(score, { near, inRange, highlight, dimSelector: '[&>td]:opacity-60' });
   return (
-    <tr ref={ref} className={className} style={style} onClick={() => onOpen(url)}>
-      <td className="px-4 py-3 text-gray-400">{rank}</td>
+    <tr ref={ref} className={`${className} [&>td]:align-top`} style={style} onClick={() => onOpen(url)}>
+      <td className="px-4 py-3 text-gray-400"><div className={LINE_1}>{rank}</div></td>
       {/* w-full + max-w-0: the beatmap column takes the leftover width and long
           titles are cut off with "…" instead of wrapping onto a second line */}
       <td className="px-4 py-3 w-full max-w-0 min-w-[10rem]">
-        <p className="text-white font-semibold">
+        <p className="h-6 leading-6 text-white font-semibold">
           {url
             ? <Tooltip text={<>{score.title}<br /><span className="text-gray-400">View score on osu!</span></>} focusable={false} className="max-w-full">
                 <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="min-w-0 truncate hover:underline focus:underline">{score.title}</a>
               </Tooltip>
             : <span className="block truncate">{score.title}</span>}
         </p>
-        <p className="text-sm text-gray-400 truncate">{score.artist}</p>
+        <p className="h-5 leading-5 text-sm text-gray-400 truncate">{score.artist}</p>
       </td>
-      <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} isLazer={score.is_lazer} /></td>
+      <td className="px-4 py-3">
+        <div className={`${LINE_1} justify-center`}><ModBadges mods={score.mods} /></div>
+        {score.is_lazer && <div className={`${LINE_2} justify-center`}><LazerTag /></div>}
+      </td>
       {/* Accuracy, score and combo share one cell, so the hit counts can run
           underneath all three. Its grid uses the header's column widths, so
           each value still sits under its own heading. */}
       <td colSpan={3} className="py-3">
-        <div className={`grid ${STATS_GRID} items-center justify-items-center gap-y-1.5`}>
+        <div className={`grid ${STATS_GRID} grid-rows-[1.5rem_1.25rem] items-center justify-items-center`}>
           <span
-            className="chip-on-cover px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
+            className="chip-on-cover px-3 py-0.5 rounded text-sm font-semibold bg-black bg-opacity-20"
             style={{ color: accuracyColor(score.accuracy) }}
           >
             {score.accuracy}%
           </span>
           <span className="text-white font-semibold">{score.score != null ? score.score.toLocaleString() : '—'}</span>
           <span className="text-gray-400">{score.combo.toLocaleString()}x</span>
-          <HitLine hits={score.hits} slots className="col-span-3" />
+          <div className={`col-span-3 ${UNDER_SCORE}`}><HitLine hits={score.hits} className="flex-nowrap" /></div>
         </div>
       </td>
-      <td className="px-4 py-3 text-center">
-        {score.pp != null
-          ? <span className="text-white font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
-          : <span className="text-gray-400">—</span>
-        }
+      <td className="px-4 py-3">
+        <div className={`${LINE_1} justify-center`}>
+          {score.pp != null
+            ? <span className="text-white font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
+            : <span className="text-gray-400">—</span>}
+        </div>
       </td>
-      <td className="px-4 py-3 text-center text-sm text-gray-400">
-        <Tooltip text={timeAgo(score.date)} className="whitespace-nowrap">
-          {formatDate(score.date)}
-        </Tooltip>
+      <td className="px-4 py-3 text-sm text-gray-400">
+        <div className={`${LINE_1} justify-center`}>
+          <Tooltip text={timeAgo(score.date)} className="whitespace-nowrap">
+            {formatDate(score.date)}
+          </Tooltip>
+        </div>
       </td>
     </tr>
   );
