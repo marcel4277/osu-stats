@@ -68,8 +68,8 @@ li.score-row-cover:not(.score-row-cover-muted) {
 }
 
 /* Rows outside the time filter: text toned well down from white, and the
-   coloured accents (pp, accuracy, mod badges) faded, so the selected (colour)
-   rows stand out. */
+   coloured accents (pp, accuracy, mod badges, red miss counts) faded, so the
+   selected (colour) rows stand out. */
 .scores-table .score-row-cover-muted .text-white {
   color: #858c98; /* between gray-400 and gray-500 */
 }
@@ -78,7 +78,8 @@ li.score-row-cover:not(.score-row-cover-muted) {
   color: #5b6270; /* between gray-500 and gray-600 */
 }
 
-.scores-table .score-row-cover-muted .chip-on-cover {
+.scores-table .score-row-cover-muted .chip-on-cover,
+.scores-table .score-row-cover-muted .hit-miss {
   opacity: 0.6;
 }
 

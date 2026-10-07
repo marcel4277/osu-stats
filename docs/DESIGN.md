@@ -261,21 +261,41 @@ This went through several rounds; this version is "design B".
   the Mods column; that was tried and removed.
 - **Order:** pp order, like the osu! profile. Lazer plays keep their pp
   position and just show a smaller number.
+- **Hit counts** (300s, 100s, 50s, misses) have their own column, right
+  after Accuracy, which they explain.
+  - The labels "300 100 50 ✕" are in the header once; the rows hold only
+    numbers, right-aligned in fixed slots, so a column (say, misses) reads
+    straight down. The header labels are smaller than the other headers,
+    because at full size "300" and "100" ran together.
+  - Numbers are white. Misses are red (`red-400`) only when there are any,
+    the one count that marks a play as not clean. Measured over a
+    pure-white cover: numbers 11.6:1 or better, red 6.1:1 or better. On
+    grey rows the red fades to 60% like the other coloured accents.
+  - Slot widths fit the widest real counts ("12,345" 300s, three-digit
+    100s, 50s and misses).
+- **Cell padding is 12px a side** (it was 16px), and the title column's
+  minimum width is 9rem (it was 10rem). That's what lets the hit-count
+  column fit: the table is exactly 974px wide at a 1024px screen, so the
+  switch to cards stays at 1024.
 
 ### On phones and tablets (narrower than 1024px)
 
-The table needs about 950px, so narrower screens show each play as a card
+The table needs 974px, so narrower screens show each play as a card
 instead ("B · Everything" from the mockup round). Nothing is left out:
 
 ```
 1 Crystalia ................ 1,857pp
 DJ TOTTO ..................... DT HD
 97.44%  19,279,990  881x  24 Jan 2026
+300 1,218  100 16  50 0  ✕ 1
 ```
 
 - **The rank** sits on the title line, not in its own column, so the stats
   line gets the full width. A lazer play's stats line (with the "lazer" tag)
   needs every pixel at 360px.
+- **Hit counts get their own fourth line,** with small grey labels, because
+  the stats line above already needs every pixel at 360px. Each card is
+  105px tall.
 - **Every card is the same height** at 360px and up. On even narrower
   screens the stats line wraps rather than cutting anything off.
 - **Covers, grey and colour, the pink active bar, and the hover bar** all
@@ -298,6 +318,9 @@ DJ TOTTO ..................... DT HD
 - **Combos use thousands separators everywhere,** e.g. "1,204x".
 
 **Rejected:**
+- **Hit counts squeezed under the accuracy** (no new column). The tiny
+  labels repeated on every row were noise, and there was no room for the
+  300s, which players want to see.
 - **"A · Compact"** (score and combo left out). People do look at those
   numbers, and B costs no extra height.
 - Darkening the text on the coloured rows. Only the grey rows get darker

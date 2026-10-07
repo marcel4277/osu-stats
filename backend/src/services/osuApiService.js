@@ -135,6 +135,8 @@ export class OsuApiService {
   //             total_score, the standardised score the osu! website shows.
   //   accuracy: rounded down to 2 decimals, like the osu! website and client.
   //   url:      /scores/{id} works for stable and lazer scores alike.
+  //   hits:     300s, 100s, 50s and misses. osu! leaves out any count
+  //             that's zero, so a missing one means 0.
   _mapScore(score) {
     const isLazer = score.legacy_score_id == null;
     return {
@@ -152,6 +154,12 @@ export class OsuApiService {
       score: isLazer ? score.total_score : score.legacy_total_score,
       is_lazer: isLazer,
       combo: score.max_combo,
+      hits: {
+        great: score.statistics?.great ?? 0,
+        ok: score.statistics?.ok ?? 0,
+        meh: score.statistics?.meh ?? 0,
+        miss: score.statistics?.miss ?? 0,
+      },
       mods: (score.mods || []).map(mod => mod.acronym),
       date: score.ended_at,
     };
