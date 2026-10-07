@@ -51,9 +51,11 @@ router.get('/visits', async (_req, res) => {
   res.json({ count: Number(count) });
 });
 
-// POST /api/visits — increment and return new count
-router.post('/visits', async (_req, res) => {
-  const count = await redisCommand('incr/visits') ?? 0;
+// POST /api/visits — increment and return new count.
+// Only visits to the live site count; preview builds just read the number.
+router.post('/visits', async (req, res) => {
+  const command = req.get('Origin') === config.FRONTEND_URL ? 'incr/visits' : 'get/visits';
+  const count = await redisCommand(command) ?? 0;
   res.json({ count: Number(count) });
 });
 
