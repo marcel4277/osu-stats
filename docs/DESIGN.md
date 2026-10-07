@@ -261,26 +261,25 @@ This went through several rounds; this version is "design B".
   the Mods column; that was tried and removed.
 - **Order:** pp order, like the osu! profile. Lazer plays keep their pp
   position and just show a smaller number.
-- **Hit counts** (300s, 100s, 50s, misses) have their own column, right
-  after Accuracy, which they explain.
-  - The labels "300 100 50 ✕" are in the header once; the rows hold only
-    numbers, right-aligned in fixed slots, so a column (say, misses) reads
-    straight down. The header labels are smaller than the other headers,
-    because at full size "300" and "100" ran together.
-  - Numbers are white. Misses are red (`red-400`) only when there are any,
-    the one count that marks a play as not clean. Measured over a
-    pure-white cover: numbers 11.6:1 or better, red 6.1:1 or better. On
-    grey rows the red fades to 60% like the other coloured accents.
-  - Slot widths fit the widest real counts ("12,345" 300s, three-digit
-    100s, 50s and misses).
-- **Cell padding is 12px a side** (it was 16px), and the title column's
-  minimum width is 9rem (it was 10rem). That's what lets the hit-count
-  column fit: the table is exactly 974px wide at a 1024px screen, so the
-  switch to cards stays at 1024.
+- **Hit counts** (300s, 100s, 50s, misses) run along a second line under
+  Accuracy, Score and Combo, like the osu! website: "300 1,218  100 16
+  50 0  ✕ 1".
+  - Those three values share one cell, whose grid uses the header's column
+    widths (`STATS_WIDTHS`), so each value still sits under its heading.
+  - Each count has a fixed-width slot, and the whole line is centred, so
+    it starts at the same place on every row and the counts line up down
+    the table.
+  - The "lazer" tag moved from under the score to a reserved last slot on
+    this line. Next to the score it would push the number off centre.
+  - Labels are small and grey, numbers white. Misses are red (`red-400`)
+    only when there are any, the one count that marks a play as not clean.
+    Measured over a pure-white cover: numbers 15.7:1 or better, labels
+    11.8:1, red 6.4:1. On grey rows the red fades to 60% like the other
+    coloured accents.
 
 ### On phones and tablets (narrower than 1024px)
 
-The table needs 974px, so narrower screens show each play as a card
+The table needs about 950px, so narrower screens show each play as a card
 instead ("B · Everything" from the mockup round). Nothing is left out:
 
 ```
@@ -318,9 +317,11 @@ DJ TOTTO ..................... DT HD
 - **Combos use thousands separators everywhere,** e.g. "1,204x".
 
 **Rejected:**
-- **Hit counts squeezed under the accuracy** (no new column). The tiny
-  labels repeated on every row were noise, and there was no room for the
+- **Hit counts squeezed under the accuracy column alone.** No room for the
   300s, which players want to see.
+- **Hit counts as their own column** (labels in the header, numbers in
+  slots). It needed 24px more than the table has at 1024px, and the
+  header labels ran together.
 - **"A · Compact"** (score and combo left out). People do look at those
   numbers, and B costs no extra height.
 - Darkening the text on the coloured rows. Only the grey rows get darker

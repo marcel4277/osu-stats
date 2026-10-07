@@ -141,43 +141,51 @@ function LazerTag({ compact = false }) {
 // Hit counts: 300s, 100s, 50s and misses. Misses are red only when there
 // are any (the one count that marks a play as not clean); the rest stay white.
 const HIT_TYPES = [
-  { key: 'great', label: '300', name: '300s'   },
-  { key: 'ok',    label: '100', name: '100s'   },
-  { key: 'meh',   label: '50',  name: '50s'    },
-  { key: 'miss',  label: '✕',   name: 'Misses' },
+  { key: 'great', label: '300' },
+  { key: 'ok',    label: '100' },
+  { key: 'meh',   label: '50'  },
+  { key: 'miss',  label: '✕'   },
 ];
 
 function hitClass(hits, key) {
   return key === 'miss' && hits.miss > 0 ? 'hit-miss text-red-400 font-semibold' : 'text-white';
 }
 
-// Table: one number per slot, lined up under the labels in the header, so a
-// column (say, misses) can be read straight down
-function HitCells({ hits }) {
-  if (!hits) return null;
-  return (
-    <div className={HIT_GRID}>
-      {HIT_TYPES.map(t => <span key={t.key} className={hitClass(hits, t.key)}>{hits[t.key].toLocaleString()}</span>)}
-    </div>
-  );
-}
-// Slot widths fit the widest real counts: "12,345" 300s (49px) and three-digit
-// 100s, 50s or misses (27px)
-const HIT_GRID = 'grid grid-cols-[3.125rem_1.75rem_1.75rem_1.75rem] gap-x-1.5 justify-center tabular-nums text-right';
+// The accuracy, score and combo columns: fixed widths, shared by the header
+// cells and the grid inside each row's combined cell. In COLUMNS order, so
+// those three must stay first there.
+const STATS_WIDTHS = ['w-[7.75rem]', 'w-[7.5rem]', 'w-[6.5rem]'];
+const STATS_GRID = 'grid-cols-[7.75rem_7.5rem_6.5rem]';
 
-// Phone card: one line with its labels, "300 1,218  100 16  50 0  ✕ 1"
-function HitLine({ hits, className = '' }) {
-  if (!hits) return null;
+// The hit counts with their labels, "300 1,218  100 16  50 0  ✕ 1".
+// Phone card: one line of its own, wrapping between counts on the narrowest
+// screens. Table (slots): each count in a fixed-width slot, plus one reserved
+// for the lazer tag, so the counts start at the same place on every row.
+// The table line is drawn even without counts (a saved copy from before they
+// were added), so the lazer tag never goes missing.
+const HIT_SLOTS = 'grid grid-cols-[4rem_3rem_2.25rem_2rem_2.5rem] gap-x-3';
+
+function HitLine({ hits, slots = false, extra = null, className = '' }) {
+  if (!hits && !slots) return null;
+  const counts = HIT_TYPES.map(t => !hits ? <span key={t.key} /> : (
+    <span key={t.key} className="inline-flex items-baseline gap-1 whitespace-nowrap">
+      <span className="text-gray-400">{t.label}</span>
+      <span className={hitClass(hits, t.key)}>{hits[t.key].toLocaleString()}</span>
+    </span>
+  ));
+  if (slots) {
+    return (
+      <div className={`${HIT_SLOTS} items-center justify-self-center tabular-nums text-xs ${className}`}>
+        {counts}
+        <span>{extra}</span>
+      </div>
+    );
+  }
   return (
     // Like the stats line, it wraps (between counts, never inside one) on
     // screens narrower than 360px rather than cutting anything off
     <p className={`flex flex-wrap items-baseline gap-x-3 gap-y-0.5 tabular-nums text-xs ${className}`}>
-      {HIT_TYPES.map(t => (
-        <span key={t.key} className="inline-flex items-baseline gap-1 whitespace-nowrap">
-          <span className="text-gray-400">{t.label}</span>
-          <span className={hitClass(hits, t.key)}>{hits[t.key].toLocaleString()}</span>
-        </span>
-      ))}
+      {counts}
     </p>
   );
 }
@@ -192,10 +200,10 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
   const { className, style } = playStyling(score, { near, inRange, highlight, dimSelector: '[&>td]:opacity-60' });
   return (
     <tr ref={ref} className={className} style={style} onClick={() => onOpen(url)}>
-      <td className="px-3 py-3 text-gray-400">{rank}</td>
+      <td className="px-4 py-3 text-gray-400">{rank}</td>
       {/* w-full + max-w-0: the beatmap column takes the leftover width and long
           titles are cut off with "…" instead of wrapping onto a second line */}
-      <td className="px-3 py-3 w-full max-w-0 min-w-[9rem]">
+      <td className="px-4 py-3 w-full max-w-0 min-w-[10rem]">
         <p className="text-white font-semibold">
           {url
             ? <Tooltip text={<>{score.title}<br /><span className="text-gray-400">View score on osu!</span></>} focusable={false} className="max-w-full">
@@ -205,32 +213,30 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
         </p>
         <p className="text-sm text-gray-400 truncate">{score.artist}</p>
       </td>
-      <td className="px-3 py-3 text-center"><ModBadges mods={score.mods} /></td>
-      <td className="px-3 py-3 text-center">
-        <span
-          className="chip-on-cover px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
-          style={{ color: accuracyColor(score.accuracy) }}
-        >
-          {score.accuracy}%
-        </span>
-      </td>
-      <td className="px-3 py-3 text-sm"><HitCells hits={score.hits} /></td>
-      <td className="px-3 py-3 text-center text-white font-semibold">
-        <div className="flex flex-col items-center gap-0.5">
-          {score.score != null ? score.score.toLocaleString() : '—'}
-          {score.is_lazer && <LazerTag />}
+      <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} /></td>
+      {/* Accuracy, score and combo share one cell, so the hit counts can run
+          underneath all three. Its grid uses the header's column widths, so
+          each value still sits under its own heading. */}
+      <td colSpan={3} className="py-3">
+        <div className={`grid ${STATS_GRID} items-center justify-items-center gap-y-1`}>
+          <span
+            className="chip-on-cover px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
+            style={{ color: accuracyColor(score.accuracy) }}
+          >
+            {score.accuracy}%
+          </span>
+          <span className="text-white font-semibold">{score.score != null ? score.score.toLocaleString() : '—'}</span>
+          <span className="text-gray-400">{score.combo.toLocaleString()}x</span>
+          <HitLine hits={score.hits} slots extra={score.is_lazer && <LazerTag compact />} className="col-span-3" />
         </div>
       </td>
-      <td className="px-3 py-3 text-center text-gray-400">
-        {score.combo.toLocaleString()}x
-      </td>
-      <td className="px-3 py-3 text-center">
+      <td className="px-4 py-3 text-center">
         {score.pp != null
           ? <span className="text-white font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
           : <span className="text-gray-400">—</span>
         }
       </td>
-      <td className="px-3 py-3 text-center text-sm text-gray-400">
+      <td className="px-4 py-3 text-center text-sm text-gray-400">
         <Tooltip text={timeAgo(score.date)} className="whitespace-nowrap">
           {formatDate(score.date)}
         </Tooltip>
@@ -287,7 +293,7 @@ function ScoreCard({ score, rank, inRange, highlight, onOpen }) {
   );
 }
 
-// Below this width the table doesn't fit (it needs 974px), so plays
+// Below this width the table doesn't fit (it needs about 950px), so plays
 // are shown as cards with a sort menu instead of column headers
 const TABLE_MIN_SCREEN = 1024;
 
@@ -433,35 +439,22 @@ export default function ScoresList({ scores, username }) {
           <table className="scores-table w-full">
             <thead>
               <tr className="bg-gray-900 border-b border-gray-700">
-                <th className="px-3 py-3 text-left text-gray-400 font-semibold">#</th>
-                <th className="px-3 py-3 text-left text-gray-400 font-semibold">Beatmap</th>
-                <th className="px-3 py-3 text-center text-gray-400 font-semibold">Mods</th>
-                {COLUMNS.flatMap(col => {
+                <th className="px-4 py-3 text-left text-gray-400 font-semibold">#</th>
+                <th className="px-4 py-3 text-left text-gray-400 font-semibold">Beatmap</th>
+                <th className="px-4 py-3 text-center text-gray-400 font-semibold">Mods</th>
+                {COLUMNS.map((col, i) => {
                   const direction = sortKey === col.key ? sortDir : null;
-                  const th = (
+                  return (
                     <th
                       key={col.key}
                       aria-sort={direction ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}
-                      className="px-3 py-3 text-center text-gray-400 font-semibold"
+                      className={`px-4 py-3 text-center text-gray-400 font-semibold ${STATS_WIDTHS[i] ?? ''}`}
                     >
                       <button type="button" onClick={() => handleSort(col.key)} className="font-semibold select-none hover:text-white transition">
                         {col.label}<SortIcon direction={direction} />
                       </button>
                     </th>
                   );
-                  if (col.key !== 'accuracy') return [th];
-                  // Hit counts sit right after accuracy, which they explain
-                  return [th, (
-                    <th key="hits" className="px-3 py-3 text-gray-400 font-semibold">
-                      {/* Smaller than the other headers: at full size "300" and
-                          "100" ran together. Still lined up with their numbers. */}
-                      <div className={`${HIT_GRID} text-xs`}>
-                        {HIT_TYPES.map(t => (
-                          <Tooltip key={t.key} text={t.name} className="justify-end">{t.label}</Tooltip>
-                        ))}
-                      </div>
-                    </th>
-                  )];
                 })}
               </tr>
             </thead>
