@@ -57,14 +57,24 @@ function chipActiveClass(key) {
   return key === 'all' ? 'bg-gray-600 text-white' : modColors(key).chip;
 }
 
-function ModBadges({ mods }) {
+// isLazer (table): the grey "lazer" tag goes on its own line under the mods.
+// It isn't a mod, but like them it says how the play was set; on a line of
+// its own (and grey) it reads apart from the mods at a glance.
+function ModBadges({ mods, isLazer = false }) {
   const shown = (mods || []).filter(mod => mod !== 'NF' && mod !== 'CL');
   const list = shown.length === 0 ? ['NM'] : shown;
-  return (
+  const badges = (
     <div className="flex flex-nowrap justify-center gap-1">
       {list.map(mod => (
         <span key={mod} className={`${BADGE_BASE} ${modColors(mod).badge}`}>{mod}</span>
       ))}
+    </div>
+  );
+  if (!isLazer) return badges;
+  return (
+    <div className="flex flex-col items-center gap-1">
+      {badges}
+      <LazerTag />
     </div>
   );
 }
@@ -126,15 +136,71 @@ function playStyling(score, { near, inRange, highlight, dimSelector }) {
   return { className, style };
 }
 
-// compact: slimmer padding, for the phone card's stats line
-function LazerTag({ compact = false }) {
+// Shown with the mods. The tooltip explains the score too, which for a lazer
+// play is osu!'s standardised one.
+function LazerTag() {
   return (
     <Tooltip
-      text="osu!lazer score (standardised, max 1,000,000)"
-      className={`chip-on-cover bg-gray-700/40 text-gray-300 border border-gray-500/50 py-0.5 rounded text-[0.65rem] leading-none font-semibold ${compact ? 'px-1' : 'px-1.5 tracking-wide'}`}
+      text="Set on osu!lazer. Its score is the standardised one (max 1,000,000)"
+      className="chip-on-cover bg-gray-700/40 text-gray-300 border border-gray-500/50 py-0.5 px-1.5 rounded text-[0.65rem] leading-none font-semibold tracking-wide"
     >
       lazer
     </Tooltip>
+  );
+}
+
+// Hit counts: 300s, 100s, 50s and misses. Misses are red only when there
+// are any (the one count that marks a play as not clean); the rest stay white.
+const HIT_TYPES = [
+  { key: 'great', label: '300' },
+  { key: 'ok',    label: '100' },
+  { key: 'meh',   label: '50'  },
+  { key: 'miss',  label: '✕'   },
+];
+
+function hitClass(hits, key) {
+  return key === 'miss' && hits.miss > 0 ? 'hit-miss text-red-400 font-semibold' : 'text-white';
+}
+
+// The accuracy, score and combo columns: fixed widths, shared by the header
+// cells and the grid inside each row's combined cell. In COLUMNS order, so
+// those three must stay first there.
+const STATS_WIDTHS = ['w-[7.75rem]', 'w-[7.5rem]', 'w-[6.5rem]'];
+const STATS_GRID = 'grid-cols-[7.75rem_7.5rem_6.5rem]';
+
+// The hit counts with their labels, "300 1,218  100 16  50 0  ✕ 1".
+// Phone card: one line of its own, wrapping between counts on the narrowest
+// screens. Table (slots): each count in a fixed-width slot, so the counts
+// start at the same place on every row.
+const HIT_SLOTS = 'grid grid-cols-[4.25rem_3.25rem_2.5rem_2.25rem] gap-x-4';
+
+// extra (phone card): something to put at the right-hand end of the line.
+// The line is drawn for it even without counts (a saved copy from before
+// they were added).
+function HitLine({ hits, slots = false, extra = null, className = '' }) {
+  if (!hits && !extra) return null;
+  const counts = !hits ? [] : HIT_TYPES.map(t => (
+    <span key={t.key} className="inline-flex items-baseline gap-1 whitespace-nowrap">
+      <span className="text-gray-400">{t.label}</span>
+      <span className={hitClass(hits, t.key)}>{hits[t.key].toLocaleString()}</span>
+    </span>
+  ));
+  if (slots) {
+    return (
+      <div className={`${HIT_SLOTS} items-center justify-self-center tabular-nums text-xs ${className}`}>
+        {counts}
+      </div>
+    );
+  }
+  return (
+    // Like the stats line, it wraps (between counts, never inside one) on
+    // screens narrower than 360px rather than cutting anything off
+    <div className={`flex flex-wrap items-baseline gap-x-3 gap-y-0.5 tabular-nums text-xs ${className}`}>
+      {counts}
+      {/* -my-px: the tag is 2px taller than a line of text; without this,
+          cards with it were 1px taller than the rest */}
+      {extra && <span className="ml-auto self-center -my-px">{extra}</span>}
+    </div>
   );
 }
 
@@ -161,23 +227,22 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
         </p>
         <p className="text-sm text-gray-400 truncate">{score.artist}</p>
       </td>
-      <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} /></td>
-      <td className="px-4 py-3 text-center">
-        <span
-          className="chip-on-cover px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
-          style={{ color: accuracyColor(score.accuracy) }}
-        >
-          {score.accuracy}%
-        </span>
-      </td>
-      <td className="px-4 py-3 text-center text-white font-semibold">
-        <div className="flex flex-col items-center gap-0.5">
-          {score.score != null ? score.score.toLocaleString() : '—'}
-          {score.is_lazer && <LazerTag />}
+      <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} isLazer={score.is_lazer} /></td>
+      {/* Accuracy, score and combo share one cell, so the hit counts can run
+          underneath all three. Its grid uses the header's column widths, so
+          each value still sits under its own heading. */}
+      <td colSpan={3} className="py-3">
+        <div className={`grid ${STATS_GRID} items-center justify-items-center gap-y-1.5`}>
+          <span
+            className="chip-on-cover px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
+            style={{ color: accuracyColor(score.accuracy) }}
+          >
+            {score.accuracy}%
+          </span>
+          <span className="text-white font-semibold">{score.score != null ? score.score.toLocaleString() : '—'}</span>
+          <span className="text-gray-400">{score.combo.toLocaleString()}x</span>
+          <HitLine hits={score.hits} slots className="col-span-3" />
         </div>
-      </td>
-      <td className="px-4 py-3 text-center text-gray-400">
-        {score.combo.toLocaleString()}x
       </td>
       <td className="px-4 py-3 text-center">
         {score.pp != null
@@ -229,13 +294,14 @@ function ScoreCard({ score, rank, inRange, highlight, onOpen }) {
           <span className="font-semibold" style={{ color: accuracyColor(score.accuracy) }}>{score.accuracy}%</span>
           <span className="flex items-center gap-1 text-white">
             {score.score != null ? score.score.toLocaleString() : '—'}
-            {score.is_lazer && <LazerTag compact />}
           </span>
           <span>{score.combo.toLocaleString()}x</span>
           <Tooltip text={timeAgo(score.date)} placement="left" className="ml-auto whitespace-nowrap">
             {formatDate(score.date)}
           </Tooltip>
         </div>
+        {/* The lazer tag ends this line, under the mods and date on the right */}
+        <HitLine hits={score.hits} extra={score.is_lazer && <LazerTag />} className="mt-0.5" />
       </div>
     </li>
   );
@@ -390,13 +456,13 @@ export default function ScoresList({ scores, username }) {
                 <th className="px-4 py-3 text-left text-gray-400 font-semibold">#</th>
                 <th className="px-4 py-3 text-left text-gray-400 font-semibold">Beatmap</th>
                 <th className="px-4 py-3 text-center text-gray-400 font-semibold">Mods</th>
-                {COLUMNS.map(col => {
+                {COLUMNS.map((col, i) => {
                   const direction = sortKey === col.key ? sortDir : null;
                   return (
                     <th
                       key={col.key}
                       aria-sort={direction ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}
-                      className="px-4 py-3 text-center text-gray-400 font-semibold"
+                      className={`px-4 py-3 text-center text-gray-400 font-semibold ${STATS_WIDTHS[i] ?? ''}`}
                     >
                       <button type="button" onClick={() => handleSort(col.key)} className="font-semibold select-none hover:text-white transition">
                         {col.label}<SortIcon direction={direction} />

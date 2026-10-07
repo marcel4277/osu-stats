@@ -14,7 +14,7 @@ const MIN_REFRESH_MS = 60 * 1000;
 // The `v1` in the names: change it whenever the stored shape changes, so old
 // copies in Redis are ignored instead of reaching the site.
 const userCache = createCache({ name: 'user:v1', ttlMs: CACHE_TTL_MS, minRefreshMs: MIN_REFRESH_MS, maxEntries: 200 });
-const scoreCache = createCache({ name: 'scores:v1', ttlMs: CACHE_TTL_MS, minRefreshMs: MIN_REFRESH_MS, maxEntries: 100 });
+const scoreCache = createCache({ name: 'scores:v2', ttlMs: CACHE_TTL_MS, minRefreshMs: MIN_REFRESH_MS, maxEntries: 100 });
 
 // osu! usernames are case-insensitive, so "Cookiezi" and "cookiezi" share an entry.
 // The frontend asks for the profile and the scores at the same time; both go

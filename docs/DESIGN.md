@@ -256,11 +256,35 @@ This went through several rounds; this version is "design B".
   because that would hurt readability on bright covers.
 - **Every row is the same height:** titles are cut to one line, and mod
   badges never wrap onto a second line.
-- **Lazer plays:** a small grey "lazer" tag sits **under** the score, so the
-  number stays centred like every other row. There's **no** lazer badge in
-  the Mods column; that was tried and removed.
+- **Lazer plays:** a small grey "lazer" tag sits in the Mods column, **on
+  its own line under the mods**. It isn't a mod (stable plays are the ones
+  osu! marks, with a hidden "CL" mod), but like the mods it says how the
+  play was set, and that column has room. On its own line, and grey, it
+  reads apart from the mods at a glance. Its tooltip explains that a lazer
+  play's score is the standardised one.
+  - Rows stay the same height (75px): the two lines in the Mods column are
+    no taller than the title and artist.
+  - An earlier lazer badge in the Mods column was removed: it was blue,
+    styled like a mod (blue is NM's colour), and repeated the tag next to
+    the score. Now it's the only lazer marker, and neutral.
+  - Rejected: the tag in the same line as the mods. It read as one more
+    mod at a glance.
 - **Order:** pp order, like the osu! profile. Lazer plays keep their pp
   position and just show a smaller number.
+- **Hit counts** (300s, 100s, 50s, misses) run along a second line under
+  Accuracy, Score and Combo, like the osu! website: "300 1,218  100 16
+  50 0  ✕ 1".
+  - Those three values share one cell, whose grid uses the header's column
+    widths (`STATS_WIDTHS`), so each value still sits under its heading.
+  - Each count has a fixed-width slot, and the whole line is centred, so
+    it starts at the same place on every row and the counts line up down
+    the table. The slots have 16px between them (12px with a lazer slot
+    looked cramped).
+  - Labels are small and grey, numbers white. Misses are red (`red-400`)
+    only when there are any, the one count that marks a play as not clean.
+    Measured over a pure-white cover: numbers 15.7:1 or better, labels
+    11.8:1, red 6.4:1. On grey rows the red fades to 60% like the other
+    coloured accents.
 
 ### On phones and tablets (narrower than 1024px)
 
@@ -271,13 +295,18 @@ instead ("B · Everything" from the mockup round). Nothing is left out:
 1 Crystalia ................ 1,857pp
 DJ TOTTO ..................... DT HD
 97.44%  19,279,990  881x  24 Jan 2026
+300 1,218  100 16  50 0  ✕ 1   lazer
 ```
 
 - **The rank** sits on the title line, not in its own column, so the stats
-  line gets the full width. A lazer play's stats line (with the "lazer" tag)
-  needs every pixel at 360px.
-- **Every card is the same height** at 360px and up. On even narrower
-  screens the stats line wraps rather than cutting anything off.
+  line gets the full width.
+- **The "lazer" tag** ends the hit-count line, at the right: under the
+  mods and the date, as in the table it's under the mods. (Directly under
+  the mods is where the date is.)
+- **Hit counts get their own fourth line,** with small grey labels. Each
+  card is 105px tall.
+- **Every card is the same height** (105px) at 360px and up. On narrower
+  screens the stats and hit lines wrap rather than cutting anything off.
 - **Covers, grey and colour, the pink active bar, and the hover bar** all
   work as on the table rows.
   - Colour cards use a slightly stronger gradient (60% → 84%), because their
@@ -298,6 +327,11 @@ DJ TOTTO ..................... DT HD
 - **Combos use thousands separators everywhere,** e.g. "1,204x".
 
 **Rejected:**
+- **Hit counts squeezed under the accuracy column alone.** No room for the
+  300s, which players want to see.
+- **Hit counts as their own column** (labels in the header, numbers in
+  slots). It needed 24px more than the table has at 1024px, and the
+  header labels ran together.
 - **"A · Compact"** (score and combo left out). People do look at those
   numbers, and B costs no extra height.
 - Darkening the text on the coloured rows. Only the grey rows get darker

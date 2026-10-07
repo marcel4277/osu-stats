@@ -30,6 +30,9 @@ backend/src/
   services/osuApiService.js   everything that talks to osu! (login, profile, top plays)
   services/rateLimiter.js     keeps requests to osu! within 60 a minute
   services/cache.js      the cache: memory first, then Upstash, then osu!
+                         (the version in each cache name, e.g. scores:v2, goes
+                         up whenever the saved shape changes, so old copies
+                         are ignored)
   services/store.js      talks to Upstash (saved osu! results, visit counter)
 
 frontend/src/
@@ -102,6 +105,9 @@ These were checked against osu-web's source code, not guessed.
   - lazer plays show `total_score`, the "standardised" number the osu!
     website shows (capped near 1,000,000).
   - That's why lazer plays drop to the bottom when you sort by Score.
+- **Hit counts** come in each play's `statistics` as `great` (300s), `ok`
+  (100s), `meh` (50s) and `miss`. osu! leaves out any count that's zero, so
+  a missing one means 0.
 - **Accuracy is rounded down to 2 decimals,** exactly like osu!. 99.746%
   shows as 99.74%.
 - **Every play links to `osu.ppy.sh/scores/{id}`,** which works for stable
