@@ -12,7 +12,7 @@ how changes get from an idea to the live site. For how things *look*, see
 |---|---|---|---|
 | **Frontend** (`frontend/`) | The website itself: React 18, Vite, Tailwind CSS | Vercel | `master` |
 | **Backend** (`backend/`) | A small Node/Express server that talks to osu! for us | Render | `master` |
-| **Visit counter** | One number stored in Upstash Redis | Upstash | (no code) |
+| **Saved osu! results and the visit counter** | Upstash Redis | Upstash | (no code) |
 
 - **The site:** osustats.app.
 - **Why the website doesn't talk to osu! directly:** the osu! API needs a
@@ -26,9 +26,11 @@ how changes get from an idea to the live site. For how things *look*, see
 backend/src/
   server.js              starts the server (security headers, rate limit, CORS)
   config/env.js          reads settings like the osu! key from the .env file
-  routes/api.js          the web addresses the frontend calls, plus caching
+  routes/api.js          the web addresses the frontend calls, caching, error messages
   services/osuApiService.js   everything that talks to osu! (login, profile, top plays)
-  services/cache.js      a small memory cache, shared by everyone searching
+  services/rateLimiter.js     keeps requests to osu! within 60 a minute
+  services/cache.js      the cache: memory first, then Upstash, then osu!
+  services/store.js      talks to Upstash (saved osu! results, visit counter)
 
 frontend/src/
   App.jsx                page frame: header, footer, page width
@@ -41,6 +43,7 @@ frontend/src/
     ComparisonView.jsx   two players side by side
     Tooltip.jsx          the one tooltip used everywhere
     UsernameInput.jsx    a search box and its button
+    UpdatedNote.jsx      "Updated 12 min ago · Refresh" above each player card
     modUtils.js          mod rules and mod colours (one place only)
     dateUtils.js         how dates and months are written ("18 Nov 2024", "Apr 2026")
   services/api.js        how the frontend calls the backend
@@ -61,15 +64,28 @@ docs/
    both at the same time.
 3. The backend looks the player up **once**, and both requests share that one
    lookup.
-4. It fetches the 200 top plays from osu! as 4 pages of 50, all at once.
-5. Results are kept in memory for **5 minutes**, so a repeat search within
-   that time costs nothing.
+4. It fetches the 200 top plays from osu! as 2 pages of 100, both at once.
+   So a new search costs **3 osu! requests** (a comparison costs 6).
+5. Results are kept for **30 minutes**: in memory, and in Upstash so they
+   survive the server restarting or going to sleep. A repeat search within
+   that time costs nothing. If Upstash is down, the site works without it.
 6. If two people search the same player at the same moment, they share one
    fetch.
 7. Failed lookups (for example a typo) are **not** cached, so trying again
    really tries again.
 8. If a slow answer for an old search arrives after a newer search, it's
    thrown away, so you never see the wrong player.
+9. **Refresh:** each player card says how old its data is ("Updated 12 min
+   ago") and has a Refresh button. It asks osu! for new data, but only once
+   the data is more than a minute old, so it can't be used to burn through
+   the request budget.
+10. **When things go wrong, the visitor gets a plain sentence,** never a
+    technical error: the player doesn't exist; osu! is busy ("Try again in a
+    minute"); osu! isn't answering; or the server took too long.
+11. **The website waits up to 60 seconds for an answer.** The free Render
+    plan puts the backend to sleep, and waking it takes 30–50 seconds. (It
+    used to give up after 10 seconds, so the first visit after a quiet spell
+    failed.)
 
 ---
 
@@ -99,11 +115,16 @@ These were checked against osu-web's source code, not guessed.
   rejects it, the backend gets a new one and retries **once**. If many
   requests arrive while it's fetching a token, they wait for that one token.
 - **Rate limit:**
-  - osu-web's code allows **1,200 requests a minute** per key.
-  - osu!'s guidance is to keep to about 60 a minute and to talk to them
-    before going far above that. That guidance is from memory, so check
-    the current API terms.
-  - **One new player search costs 5 calls.** A comparison costs 10.
+  - osu!'s API terms (in their API docs) say **no more than 60 requests a
+    minute**, with some bursting allowed. Going over can get the API key
+    revoked. osu-web's code would technically allow 1,200, but the terms
+    are what count.
+  - The backend paces itself (`rateLimiter.js`): a burst of 20, then one a
+    second. Requests queue for their turn. If one would wait more than 10
+    seconds, the visitor is told osu! is busy instead.
+  - If osu! still answers "too many requests", every request pauses for as
+    long as osu! asks, and the request is tried once more.
+  - **One new player search costs 3 calls.** A comparison costs 6.
 
 ---
 
@@ -175,28 +196,23 @@ The rules (they exist so the history stays clean and in Marcel's name):
 
 ### Before promoting the site publicly
 
-1. **Fewer osu! calls:** fetch top plays as 2 pages of 100 instead of 4 of 50
-   (5 calls per search becomes 3).
-2. **Longer cache:** 30–60 minutes, stored in Upstash so it survives
-   restarts, plus a "refresh" button.
-3. **Handle "too many requests" from osu!:** wait, retry, and show a friendly
-   "busy" message.
-4. **Queue requests during traffic spikes,** so people wait instead of
-   getting errors.
-5. **Check the Render plan:** the free plan sleeps, so the first visit can
-   take 30+ seconds.
-6. **Other game modes:** add a mode selector, or say clearly that the site is
+1. **Check the Render plan:** the free plan sleeps, so the first visit after
+   a quiet spell takes 30–50 seconds. The website now waits that long instead
+   of failing, and saved results survive the sleep (they're in Upstash), but
+   the wait itself only goes away on a paid plan.
+2. **Other game modes:** add a mode selector, or say clearly that the site is
    osu!standard only.
-7. **Link previews:** a title, description and image when someone pastes a
+3. **Link previews:** a title, description and image when someone pastes a
    player link into Discord or Twitter.
-8. **Check everything on a real phone.** The phone layout (cards instead of
+4. **Check everything on a real phone.** The phone layout (cards instead of
    the table, header-only banner, stacked stats) is built and tested in a
    phone-sized browser, but not yet on an actual device, and the comparison
    view hasn't been looked at on a phone at all.
-9. **Friendly error pages** for restricted players, players with no plays,
-   and osu! being down.
-10. **Read osu!'s API terms, check the name doesn't clash with an existing
-    site,** and talk to the osu! team before a big launch.
+5. **Friendly error pages** for restricted players and players with no
+   plays. (osu! being busy or down already gets a plain message.)
+6. **Check the name doesn't clash with an existing site,** and talk to the
+   osu! team before a big launch. Their API terms are 60 requests a minute;
+   the backend keeps to that (section 4).
 
 ### Features
 

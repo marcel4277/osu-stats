@@ -16,11 +16,17 @@ function Cell({ order, children }) {
   return <div className={`min-w-0 flex flex-col [&>*]:flex-1 ${order}`}>{children}</div>;
 }
 
-function PlayerCells({ user, scores, label, orders, scaleMax, modOrder }) {
+// note: "Updated … ago · Refresh", on its own line right above the player
+// card as in the single view (sharing the label's line, it got cut off on
+// narrow columns). -mb-2 brings it to the same 8px from the card.
+function PlayerCells({ user, scores, label, orders, scaleMax, modOrder, note }) {
   return (
     <>
-      <div className={`text-center ${orders[0]}`}>
-        <span className="text-sm text-gray-400 uppercase tracking-widest">{label}</span>
+      <div className={orders[0]}>
+        <div className="text-center">
+          <span className="text-sm text-gray-400 uppercase tracking-widest">{label}</span>
+        </div>
+        {note && <div className="mt-1 -mb-2">{note}</div>}
       </div>
       <Cell order={orders[1]}><UserProfile user={user} compact /></Cell>
       <Cell order={orders[2]}><ImprovementVelocity scores={scores} scaleMax={scaleMax} /></Cell>
@@ -55,7 +61,7 @@ function LoadingCells({ name, label, orders }) {
 }
 
 // user2/scores2 are null while Player 2 is loading; name2 is shown meanwhile
-export default function ComparisonView({ user1, scores1, user2, scores2, name2 }) {
+export default function ComparisonView({ user1, scores1, user2, scores2, name2, note1, note2 }) {
   // Once both players are in, their cards share a chart scale and a mod
   // order, so the same height or the same row means the same thing on both sides
   const shared = useMemo(() => {
@@ -68,9 +74,9 @@ export default function ComparisonView({ user1, scores1, user2, scores2, name2 }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-4">
-      <PlayerCells user={user1} scores={scores1} label="Player 1" orders={ORDERS[0]} {...shared} />
+      <PlayerCells user={user1} scores={scores1} label="Player 1" orders={ORDERS[0]} note={note1} {...shared} />
       {user2
-        ? <PlayerCells user={user2} scores={scores2} label="Player 2" orders={ORDERS[1]} {...shared} />
+        ? <PlayerCells user={user2} scores={scores2} label="Player 2" orders={ORDERS[1]} note={note2} {...shared} />
         : <LoadingCells name={name2} label="Player 2" orders={ORDERS[1]} />}
     </div>
   );

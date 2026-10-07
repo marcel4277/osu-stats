@@ -25,7 +25,7 @@ export default function UsernameInput({ value = '', onSearch, isLoading, placeho
           onChange={(e) => setUsername(e.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}
-          className="flex-1 px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-osu-purple focus:outline-none transition"
+          className="flex-1 min-w-0 px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-osu-purple focus:outline-none transition"
           disabled={isLoading}
         />
         <button
