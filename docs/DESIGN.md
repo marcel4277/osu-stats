@@ -126,8 +126,9 @@ This went through several rounds; this version is "design B".
 - **Layout:** the banner is the header. The avatar, name, flag and country sit
   bottom-left on the banner. **Global rank and pp sit big on the bottom-right.**
   Along the bottom is one strip of secondary stats (country rank, accuracy,
-  play count, play time) with thin dividers between them, on a see-through
-  band over the banner (on phones, under it).
+  play count, play time) with thin dividers between them. From 768px up it
+  sits over the bottom of the banner, on the card's shadow; on phones it sits
+  under the banner.
 - **The banner, and how much of it shows** (`.player-card` in `App.css`).
   Banners are about 4:1.
   - **From 768px up the card is 4:1** (as a minimum: it grows if its content
@@ -192,7 +193,7 @@ This went through several rounds; this version is "design B".
   of the banner. Going to a full 4:1 card shows all of it for 53px more.
 - **Banner behind the whole card with rainbow stats.** It was messy. (The
   banner covering the whole card came back later, and it works now because
-  the numbers are neutral and the strip sits on its own dark band.)
+  the numbers are neutral and a smooth shadow sits behind the stats.)
 - **A 5:1 banner strip on top with the avatar hanging off its edge.** It
   "looked like a 10-year-old made it": a loud picture, a plain box under it,
   220px of extra height that held nothing, and a muddy fade.
@@ -221,7 +222,11 @@ This went through several rounds; this version is "design B".
     bottom), so the coloured rows stand out;
   - text is toned down (titles and numbers `#858c98`, small text `#5b6270`);
   - pp, accuracy and mod badges are faded to 60%;
-  - no text shadow, because a shadow made grey text look brighter.
+  - no text shadow, because a shadow made grey text look brighter;
+  - **this text is deliberately below the 4.5:1 target** on bright covers
+    (as low as about 1.3:1 on a pure-white one). These are the plays the
+    reader filtered out, so they're meant to recede.
+    Only the colour rows have to pass.
 - **Badges on covers** (mods, accuracy, lazer tag) get a solid dark backing,
   so they read on any image.
 - **Hover:** a purple bar on the left edge. The row does **not** get lighter,
