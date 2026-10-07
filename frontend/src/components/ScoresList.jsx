@@ -165,22 +165,11 @@ function hitClass(hits, key) {
   return key === 'miss' && hits.miss > 0 ? 'hit-miss text-red-400 font-semibold' : 'text-white';
 }
 
-// The accuracy, score and combo columns: fixed widths, shared by the header
-// cells and the grid inside each row's combined cell. In COLUMNS order, so
-// those three must stay first there.
-const STATS_WIDTHS = ['w-[7.75rem]', 'w-[7.5rem]', 'w-[6.5rem]'];
-const STATS_GRID = 'grid-cols-[7.75rem_7.5rem_6.5rem]';
-// The hit counts are centred under the score. They span all three columns,
-// whose middle is (7.75 - 6.5) / 2 = 0.625rem left of the score's; 1.25rem of
-// left padding moves it there.
-const UNDER_SCORE = 'pl-[1.25rem]';
-
-// The hit counts, "300 1,218  100 16  50 0  ✕ 1": each label tight to its
-// number, the same gap between every count, sized to the numbers (no fixed
-// slots, so no holes when a count is short).
-// extra (phone card): something for the right-hand end of the line; the line
-// is drawn for it even without counts (a saved copy from before they were
-// added).
+// Phone card: the hit counts on a line of their own, "300 1,218  100 16  50 0
+// × 1": each label tight to its number, the same gap between every count.
+// extra: something for the right-hand end of the line (the lazer tag); the
+// line is drawn for it even without counts (a saved copy from before they
+// were added).
 function HitLine({ hits, extra = null, className = '' }) {
   if (!hits && !extra) return null;
   return (
@@ -198,11 +187,24 @@ function HitLine({ hits, extra = null, className = '' }) {
   );
 }
 
-// Table rows are two lines, the same in every column, so nothing hangs
-// between them: line 1 the main values (title, mods, accuracy, score, combo,
-// pp, date), line 2 the details (artist, lazer tag, hit counts).
-const LINE_1 = 'h-6 flex items-center';
-const LINE_2 = 'h-5 flex items-center';
+// Desktop: the hit counts open on hovering (or focusing) the accuracy, which
+// they explain. Labels on top, numbers under them. Colours are set inline:
+// the row restyles grey and white text (lighter on covers, dimmed on grey
+// rows), and the tooltip sits inside the row but must read the same on all.
+function HitTooltip({ hits }) {
+  return (
+    <span className="grid grid-cols-4 gap-x-4 gap-y-0.5 text-center tabular-nums [text-shadow:none]">
+      {HIT_TYPES.map(t => (
+        <span key={t.key} className="inline-flex justify-center" style={{ color: '#9ca3af' }}>{t.label}</span>
+      ))}
+      {HIT_TYPES.map(t => (
+        <span key={t.key} className="text-sm font-semibold" style={{ color: t.key === 'miss' && hits.miss > 0 ? '#f87171' : '#ffffff' }}>
+          {hits[t.key].toLocaleString()}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 // A score row. The map's cover sits behind it as a darkened backdrop: full
 // colour normally, greyed out when the row is outside the time filter
@@ -212,54 +214,56 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
   const [ref, near] = useNearScreen();
   const url = score.url;
   const { className, style } = playStyling(score, { near, inRange, highlight, dimSelector: '[&>td]:opacity-60' });
+  const accuracyChip = (
+    <span
+      className="chip-on-cover px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
+      style={{ color: accuracyColor(score.accuracy) }}
+    >
+      {score.accuracy}%
+    </span>
+  );
   return (
-    <tr ref={ref} className={`${className} [&>td]:align-top`} style={style} onClick={() => onOpen(url)}>
-      <td className="px-4 py-3 text-gray-400"><div className={LINE_1}>{rank}</div></td>
+    <tr ref={ref} className={className} style={style} onClick={() => onOpen(url)}>
+      <td className="px-4 py-3 text-gray-400">{rank}</td>
       {/* w-full + max-w-0: the beatmap column takes the leftover width and long
           titles are cut off with "…" instead of wrapping onto a second line */}
       <td className="px-4 py-3 w-full max-w-0 min-w-[10rem]">
-        <p className="h-6 leading-6 text-white font-semibold">
+        <p className="text-white font-semibold">
           {url
             ? <Tooltip text={<>{score.title}<br /><span className="text-gray-400">View score on osu!</span></>} focusable={false} className="max-w-full">
                 <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="min-w-0 truncate hover:underline focus:underline">{score.title}</a>
               </Tooltip>
             : <span className="block truncate">{score.title}</span>}
         </p>
-        <p className="h-5 leading-5 text-sm text-gray-400 truncate">{score.artist}</p>
+        <p className="text-sm text-gray-400 truncate">{score.artist}</p>
       </td>
       <td className="px-4 py-3">
-        <div className={`${LINE_1} justify-center`}><ModBadges mods={score.mods} /></div>
-        {score.is_lazer && <div className={`${LINE_2} justify-center`}><LazerTag /></div>}
-      </td>
-      {/* Accuracy, score and combo share one cell, so the hit counts can run
-          underneath all three. Its grid uses the header's column widths, so
-          each value still sits under its own heading. */}
-      <td colSpan={3} className="py-3">
-        <div className={`grid ${STATS_GRID} grid-rows-[1.5rem_1.25rem] items-center justify-items-center`}>
-          <span
-            className="chip-on-cover px-3 py-0.5 rounded text-sm font-semibold bg-black bg-opacity-20"
-            style={{ color: accuracyColor(score.accuracy) }}
-          >
-            {score.accuracy}%
-          </span>
-          <span className="text-white font-semibold">{score.score != null ? score.score.toLocaleString() : '—'}</span>
-          <span className="text-gray-400">{score.combo.toLocaleString()}x</span>
-          <div className={`col-span-3 ${UNDER_SCORE}`}><HitLine hits={score.hits} className="flex-nowrap" /></div>
+        <div className="flex flex-col items-center gap-1">
+          <ModBadges mods={score.mods} />
+          {score.is_lazer && <LazerTag />}
         </div>
       </td>
-      <td className="px-4 py-3">
-        <div className={`${LINE_1} justify-center`}>
-          {score.pp != null
-            ? <span className="text-white font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
-            : <span className="text-gray-400">—</span>}
-        </div>
+      <td className="px-4 py-3 text-center">
+        {score.hits
+          ? <Tooltip text={<HitTooltip hits={score.hits} />}>{accuracyChip}</Tooltip>
+          : accuracyChip}
       </td>
-      <td className="px-4 py-3 text-sm text-gray-400">
-        <div className={`${LINE_1} justify-center`}>
-          <Tooltip text={timeAgo(score.date)} className="whitespace-nowrap">
-            {formatDate(score.date)}
-          </Tooltip>
-        </div>
+      <td className="px-4 py-3 text-center text-white font-semibold">
+        {score.score != null ? score.score.toLocaleString() : '—'}
+      </td>
+      <td className="px-4 py-3 text-center text-gray-400">
+        {score.combo.toLocaleString()}x
+      </td>
+      <td className="px-4 py-3 text-center">
+        {score.pp != null
+          ? <span className="text-white font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
+          : <span className="text-gray-400">—</span>
+        }
+      </td>
+      <td className="px-4 py-3 text-center text-sm text-gray-400">
+        <Tooltip text={timeAgo(score.date)} className="whitespace-nowrap">
+          {formatDate(score.date)}
+        </Tooltip>
       </td>
     </tr>
   );
@@ -462,13 +466,13 @@ export default function ScoresList({ scores, username }) {
                 <th className="px-4 py-3 text-left text-gray-400 font-semibold">#</th>
                 <th className="px-4 py-3 text-left text-gray-400 font-semibold">Beatmap</th>
                 <th className="px-4 py-3 text-center text-gray-400 font-semibold">Mods</th>
-                {COLUMNS.map((col, i) => {
+                {COLUMNS.map(col => {
                   const direction = sortKey === col.key ? sortDir : null;
                   return (
                     <th
                       key={col.key}
                       aria-sort={direction ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}
-                      className={`px-4 py-3 text-center text-gray-400 font-semibold ${STATS_WIDTHS[i] ?? ''}`}
+                      className="px-4 py-3 text-center text-gray-400 font-semibold"
                     >
                       <button type="button" onClick={() => handleSort(col.key)} className="font-semibold select-none hover:text-white transition">
                         {col.label}<SortIcon direction={direction} />

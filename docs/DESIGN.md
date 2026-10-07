@@ -262,7 +262,8 @@ This went through several rounds; this version is "design B".
   play was set, and that column has room. On its own line, and grey, it
   reads apart from the mods at a glance. Its tooltip explains that a lazer
   play's score is the standardised one.
-  - It's line 2 of the row (see below), so rows stay the same height.
+  - Rows stay the same height (69px): the mods and the tag together are no
+    taller than the title and artist.
   - An earlier lazer badge in the Mods column was removed: it was blue,
     styled like a mod (blue is NM's colour), and repeated the tag next to
     the score. Now it's the only lazer marker, and neutral.
@@ -270,26 +271,17 @@ This went through several rounds; this version is "design B".
     mod at a glance.
 - **Order:** pp order, like the osu! profile. Lazer plays keep their pp
   position and just show a smaller number.
-- **Every row is two lines, the same in every column:** line 1 holds the
-  main values (title, mods, accuracy, score, combo, pp, date), line 2 the
-  details (artist, the lazer tag, the hit counts). Line 1 is 24px, line 2
-  20px, rows 69px. Before this, accuracy, score and combo moved up to make
-  room for the counts while pp and date stayed centred, and hung between
-  the two levels.
-- **Hit counts** (300s, 100s, 50s, misses) are line 2 under the score:
-  "300 2,481  100 44  50 0  × 0".
-  - Accuracy, score and combo share one cell whose grid uses the header's
-    column widths, so each still sits under its heading.
-  - The line is **centred under the score**, like every value in the table
-    is centred on its column, and sized to its numbers: each label tight to
-    its number, the same 12px between counts.
-  - The miss cross is a drawn icon. The "✕" character isn't in the site's
-    font, so the browser borrowed a thinner one from another font.
-  - Numbers white; labels a step dimmer (`gray-400`, kept grey on covers,
-    where other grey text is lightened, or they'd be almost as bright as
-    the numbers). Misses red (`red-400`) only when there are any, faded to
-    60% on grey rows. Measured over a pure-white cover: numbers 17.0:1,
-    labels 6.5:1, red 6.4:1.
+- **Hit counts** (300s, 100s, 50s, misses) open on **hovering the accuracy**
+  (or focusing it with Tab, or tapping it on a touch screen), in the
+  standard tooltip: labels on top, numbers under them.
+  - The accuracy is where they belong: they're what the accuracy is made of.
+  - In a tooltip they get room to be laid out properly, and the row stays
+    one clean line of values.
+  - Numbers white, labels `gray-400`, misses red (`red-400`) only when there
+    are any. Measured on the tooltip's `gray-900`: 17:1, 6.9:1, 5.6:1.
+  - Its colours are set directly, not with the usual text classes, because
+    the row restyles those (lighter on covers, dimmed on grey rows) and the
+    tooltip must read the same on every row.
 
 ### On phones and tablets (narrower than 1024px)
 
@@ -334,15 +326,18 @@ DJ TOTTO ..................... DT HD
 - **Combos use thousands separators everywhere,** e.g. "1,204x".
 
 **Rejected:**
-- **Hit counts squeezed under the accuracy column alone.** No room for the
-  300s, which players want to see.
-- **Hit counts as their own column** (labels in the header, numbers in
-  slots). It needed 24px more than the table has at 1024px, and the
-  header labels ran together.
-- **Hit counts in fixed-width slots across the three columns.** Slots sized
-  for the worst case ("12,345") left holes after short numbers ("50 0"
-  floated far from "100 44"), and the line started partway into Accuracy,
-  tied to nothing above it.
+- **Hit counts always on show in the table.** Every attempt was cramped:
+  - squeezed under the accuracy alone: no room for the 300s, which players
+    want to see;
+  - as their own column (labels in the header, numbers in slots): it needed
+    24px more than the table has at 1024px, and the header labels ran
+    together;
+  - a second line under accuracy, score and combo: in fixed slots it left
+    holes after short numbers and started partway into Accuracy; sized to
+    its numbers it still crowded the row, which also needed a two-line
+    layout so pp and date didn't hang between levels; centred exactly on
+    the accuracy it ran into the lazer tag, being wider than the column.
+  Phones keep the counts on their own line, where there is room.
 - **"A · Compact"** (score and combo left out). People do look at those
   numbers, and B costs no extra height.
 - Darkening the text on the coloured rows. Only the grey rows get darker

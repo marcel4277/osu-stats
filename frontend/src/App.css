@@ -66,13 +66,10 @@ li.score-row-cover:not(.score-row-cover-muted) {
 .score-row-cover .text-gray-400 {
   color: #e5e7eb; /* gray-200 */
 }
-/* Except the hit-count labels ("300", "100"...): lightened, they were almost
-   as bright as their numbers. They stay a step below. On phone cards that
-   step is gray-300: gray-400 measured 3.4:1 over a pure-white cover there
-   (the line sits higher in the cover's fade than in a table row). */
-.score-row-cover .hit-label {
-  color: #9ca3af; /* gray-400 */
-}
+/* Except the hit-count labels ("300", "100"...) on phone cards: lightened
+   to gray-200 they were almost as bright as their numbers. gray-300 keeps
+   them a step below and passes (5.9:1 over a pure-white cover; gray-400
+   measured 3.4:1 there). */
 li.score-row-cover .hit-label {
   color: #d1d5db; /* gray-300 */
 }
