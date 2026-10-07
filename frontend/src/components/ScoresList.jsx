@@ -57,17 +57,24 @@ function chipActiveClass(key) {
   return key === 'all' ? 'bg-gray-600 text-white' : modColors(key).chip;
 }
 
-// isLazer: the grey "lazer" tag goes after the mods. It isn't a mod, but like
-// them it says how the play was set. Grey, so it doesn't pass for one.
+// isLazer (table): the grey "lazer" tag goes on its own line under the mods.
+// It isn't a mod, but like them it says how the play was set; on a line of
+// its own (and grey) it reads apart from the mods at a glance.
 function ModBadges({ mods, isLazer = false }) {
   const shown = (mods || []).filter(mod => mod !== 'NF' && mod !== 'CL');
   const list = shown.length === 0 ? ['NM'] : shown;
-  return (
-    <div className="flex flex-nowrap items-center justify-center gap-1">
+  const badges = (
+    <div className="flex flex-nowrap justify-center gap-1">
       {list.map(mod => (
         <span key={mod} className={`${BADGE_BASE} ${modColors(mod).badge}`}>{mod}</span>
       ))}
-      {isLazer && <LazerTag />}
+    </div>
+  );
+  if (!isLazer) return badges;
+  return (
+    <div className="flex flex-col items-center gap-1">
+      {badges}
+      <LazerTag />
     </div>
   );
 }
@@ -167,9 +174,12 @@ const STATS_GRID = 'grid-cols-[7.75rem_7.5rem_6.5rem]';
 // start at the same place on every row.
 const HIT_SLOTS = 'grid grid-cols-[4.25rem_3.25rem_2.5rem_2.25rem] gap-x-4';
 
-function HitLine({ hits, slots = false, className = '' }) {
-  if (!hits) return null;
-  const counts = HIT_TYPES.map(t => (
+// extra (phone card): something to put at the right-hand end of the line.
+// The line is drawn for it even without counts (a saved copy from before
+// they were added).
+function HitLine({ hits, slots = false, extra = null, className = '' }) {
+  if (!hits && !extra) return null;
+  const counts = !hits ? [] : HIT_TYPES.map(t => (
     <span key={t.key} className="inline-flex items-baseline gap-1 whitespace-nowrap">
       <span className="text-gray-400">{t.label}</span>
       <span className={hitClass(hits, t.key)}>{hits[t.key].toLocaleString()}</span>
@@ -185,9 +195,12 @@ function HitLine({ hits, slots = false, className = '' }) {
   return (
     // Like the stats line, it wraps (between counts, never inside one) on
     // screens narrower than 360px rather than cutting anything off
-    <p className={`flex flex-wrap items-baseline gap-x-3 gap-y-0.5 tabular-nums text-xs ${className}`}>
+    <div className={`flex flex-wrap items-baseline gap-x-3 gap-y-0.5 tabular-nums text-xs ${className}`}>
       {counts}
-    </p>
+      {/* -my-px: the tag is 2px taller than a line of text; without this,
+          cards with it were 1px taller than the rest */}
+      {extra && <span className="ml-auto self-center -my-px">{extra}</span>}
+    </div>
   );
 }
 
@@ -274,7 +287,7 @@ function ScoreCard({ score, rank, inRange, highlight, onOpen }) {
         </div>
         <div className="flex items-center gap-3">
           <p className="min-w-0 flex-1 truncate text-sm text-gray-400">{score.artist}</p>
-          <div className="shrink-0"><ModBadges mods={score.mods} isLazer={score.is_lazer} /></div>
+          <div className="shrink-0"><ModBadges mods={score.mods} /></div>
         </div>
         {/* wraps rather than cutting off on the narrowest phones */}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-gray-400 tabular-nums">
@@ -287,7 +300,8 @@ function ScoreCard({ score, rank, inRange, highlight, onOpen }) {
             {formatDate(score.date)}
           </Tooltip>
         </div>
-        <HitLine hits={score.hits} className="mt-0.5" />
+        {/* The lazer tag ends this line, under the mods and date on the right */}
+        <HitLine hits={score.hits} extra={score.is_lazer && <LazerTag />} className="mt-0.5" />
       </div>
     </li>
   );

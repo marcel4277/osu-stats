@@ -256,16 +256,19 @@ This went through several rounds; this version is "design B".
   because that would hurt readability on bright covers.
 - **Every row is the same height:** titles are cut to one line, and mod
   badges never wrap onto a second line.
-- **Lazer plays:** a small grey "lazer" tag sits **after the mods**, in the
-  Mods column. It isn't a mod (stable plays are the ones osu! marks, with a
-  hidden "CL" mod), but like the mods it says how the play was set, and
-  that column has room. It stays grey so it can't pass for a mod. Its
-  tooltip explains that a lazer play's score is the standardised one.
+- **Lazer plays:** a small grey "lazer" tag sits in the Mods column, **on
+  its own line under the mods**. It isn't a mod (stable plays are the ones
+  osu! marks, with a hidden "CL" mod), but like the mods it says how the
+  play was set, and that column has room. On its own line, and grey, it
+  reads apart from the mods at a glance. Its tooltip explains that a lazer
+  play's score is the standardised one.
+  - Rows stay the same height (75px): the two lines in the Mods column are
+    no taller than the title and artist.
   - An earlier lazer badge in the Mods column was removed: it was blue,
     styled like a mod (blue is NM's colour), and repeated the tag next to
     the score. Now it's the only lazer marker, and neutral.
-  - Worst case at 1024px (HD HR DT + lazer) fits; the title is cut off a
-    little sooner.
+  - Rejected: the tag in the same line as the mods. It read as one more
+    mod at a glance.
 - **Order:** pp order, like the osu! profile. Lazer plays keep their pp
   position and just show a smaller number.
 - **Hit counts** (300s, 100s, 50s, misses) run along a second line under
@@ -290,17 +293,19 @@ instead ("B · Everything" from the mockup round). Nothing is left out:
 
 ```
 1 Crystalia ................ 1,857pp
-DJ TOTTO ............... DT HD lazer
+DJ TOTTO ..................... DT HD
 97.44%  19,279,990  881x  24 Jan 2026
-300 1,218  100 16  50 0  ✕ 1
+300 1,218  100 16  50 0  ✕ 1   lazer
 ```
 
 - **The rank** sits on the title line, not in its own column, so the stats
   line gets the full width.
-- **The "lazer" tag** sits after the mods, as in the table.
+- **The "lazer" tag** ends the hit-count line, at the right: under the
+  mods and the date, as in the table it's under the mods. (Directly under
+  the mods is where the date is.)
 - **Hit counts get their own fourth line,** with small grey labels. Each
   card is 105px tall.
-- **Every card is the same height,** measured down to 320px. On narrower
+- **Every card is the same height** (105px) at 360px and up. On narrower
   screens the stats and hit lines wrap rather than cutting anything off.
 - **Covers, grey and colour, the pink active bar, and the hover bar** all
   work as on the table rows.
