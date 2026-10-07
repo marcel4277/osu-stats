@@ -256,9 +256,16 @@ This went through several rounds; this version is "design B".
   because that would hurt readability on bright covers.
 - **Every row is the same height:** titles are cut to one line, and mod
   badges never wrap onto a second line.
-- **Lazer plays:** a small grey "lazer" tag sits **under** the score, so the
-  number stays centred like every other row. There's **no** lazer badge in
-  the Mods column; that was tried and removed.
+- **Lazer plays:** a small grey "lazer" tag sits **after the mods**, in the
+  Mods column. It isn't a mod (stable plays are the ones osu! marks, with a
+  hidden "CL" mod), but like the mods it says how the play was set, and
+  that column has room. It stays grey so it can't pass for a mod. Its
+  tooltip explains that a lazer play's score is the standardised one.
+  - An earlier lazer badge in the Mods column was removed: it was blue,
+    styled like a mod (blue is NM's colour), and repeated the tag next to
+    the score. Now it's the only lazer marker, and neutral.
+  - Worst case at 1024px (HD HR DT + lazer) fits; the title is cut off a
+    little sooner.
 - **Order:** pp order, like the osu! profile. Lazer plays keep their pp
   position and just show a smaller number.
 - **Hit counts** (300s, 100s, 50s, misses) run along a second line under
@@ -268,9 +275,8 @@ This went through several rounds; this version is "design B".
     widths (`STATS_WIDTHS`), so each value still sits under its heading.
   - Each count has a fixed-width slot, and the whole line is centred, so
     it starts at the same place on every row and the counts line up down
-    the table.
-  - The "lazer" tag moved from under the score to a reserved last slot on
-    this line. Next to the score it would push the number off centre.
+    the table. The slots have 16px between them (12px with a lazer slot
+    looked cramped).
   - Labels are small and grey, numbers white. Misses are red (`red-400`)
     only when there are any, the one count that marks a play as not clean.
     Measured over a pure-white cover: numbers 15.7:1 or better, labels
@@ -284,19 +290,18 @@ instead ("B · Everything" from the mockup round). Nothing is left out:
 
 ```
 1 Crystalia ................ 1,857pp
-DJ TOTTO ..................... DT HD
+DJ TOTTO ............... DT HD lazer
 97.44%  19,279,990  881x  24 Jan 2026
 300 1,218  100 16  50 0  ✕ 1
 ```
 
 - **The rank** sits on the title line, not in its own column, so the stats
-  line gets the full width. A lazer play's stats line (with the "lazer" tag)
-  needs every pixel at 360px.
-- **Hit counts get their own fourth line,** with small grey labels, because
-  the stats line above already needs every pixel at 360px. Each card is
-  105px tall.
-- **Every card is the same height** at 360px and up. On even narrower
-  screens the stats line wraps rather than cutting anything off.
+  line gets the full width.
+- **The "lazer" tag** sits after the mods, as in the table.
+- **Hit counts get their own fourth line,** with small grey labels. Each
+  card is 105px tall.
+- **Every card is the same height,** measured down to 320px. On narrower
+  screens the stats and hit lines wrap rather than cutting anything off.
 - **Covers, grey and colour, the pink active bar, and the hover bar** all
   work as on the table rows.
   - Colour cards use a slightly stronger gradient (60% → 84%), because their

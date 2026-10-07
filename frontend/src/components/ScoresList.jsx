@@ -57,14 +57,17 @@ function chipActiveClass(key) {
   return key === 'all' ? 'bg-gray-600 text-white' : modColors(key).chip;
 }
 
-function ModBadges({ mods }) {
+// isLazer: the grey "lazer" tag goes after the mods. It isn't a mod, but like
+// them it says how the play was set. Grey, so it doesn't pass for one.
+function ModBadges({ mods, isLazer = false }) {
   const shown = (mods || []).filter(mod => mod !== 'NF' && mod !== 'CL');
   const list = shown.length === 0 ? ['NM'] : shown;
   return (
-    <div className="flex flex-nowrap justify-center gap-1">
+    <div className="flex flex-nowrap items-center justify-center gap-1">
       {list.map(mod => (
         <span key={mod} className={`${BADGE_BASE} ${modColors(mod).badge}`}>{mod}</span>
       ))}
+      {isLazer && <LazerTag />}
     </div>
   );
 }
@@ -126,12 +129,13 @@ function playStyling(score, { near, inRange, highlight, dimSelector }) {
   return { className, style };
 }
 
-// compact: slimmer padding, for the phone card's stats line
-function LazerTag({ compact = false }) {
+// Shown with the mods. The tooltip explains the score too, which for a lazer
+// play is osu!'s standardised one.
+function LazerTag() {
   return (
     <Tooltip
-      text="osu!lazer score (standardised, max 1,000,000)"
-      className={`chip-on-cover bg-gray-700/40 text-gray-300 border border-gray-500/50 py-0.5 rounded text-[0.65rem] leading-none font-semibold ${compact ? 'px-1' : 'px-1.5 tracking-wide'}`}
+      text="Set on osu!lazer. Its score is the standardised one (max 1,000,000)"
+      className="chip-on-cover bg-gray-700/40 text-gray-300 border border-gray-500/50 py-0.5 px-1.5 rounded text-[0.65rem] leading-none font-semibold tracking-wide"
     >
       lazer
     </Tooltip>
@@ -159,15 +163,13 @@ const STATS_GRID = 'grid-cols-[7.75rem_7.5rem_6.5rem]';
 
 // The hit counts with their labels, "300 1,218  100 16  50 0  ✕ 1".
 // Phone card: one line of its own, wrapping between counts on the narrowest
-// screens. Table (slots): each count in a fixed-width slot, plus one reserved
-// for the lazer tag, so the counts start at the same place on every row.
-// The table line is drawn even without counts (a saved copy from before they
-// were added), so the lazer tag never goes missing.
-const HIT_SLOTS = 'grid grid-cols-[4rem_3rem_2.25rem_2rem_2.5rem] gap-x-3';
+// screens. Table (slots): each count in a fixed-width slot, so the counts
+// start at the same place on every row.
+const HIT_SLOTS = 'grid grid-cols-[4.25rem_3.25rem_2.5rem_2.25rem] gap-x-4';
 
-function HitLine({ hits, slots = false, extra = null, className = '' }) {
-  if (!hits && !slots) return null;
-  const counts = HIT_TYPES.map(t => !hits ? <span key={t.key} /> : (
+function HitLine({ hits, slots = false, className = '' }) {
+  if (!hits) return null;
+  const counts = HIT_TYPES.map(t => (
     <span key={t.key} className="inline-flex items-baseline gap-1 whitespace-nowrap">
       <span className="text-gray-400">{t.label}</span>
       <span className={hitClass(hits, t.key)}>{hits[t.key].toLocaleString()}</span>
@@ -177,7 +179,6 @@ function HitLine({ hits, slots = false, extra = null, className = '' }) {
     return (
       <div className={`${HIT_SLOTS} items-center justify-self-center tabular-nums text-xs ${className}`}>
         {counts}
-        <span>{extra}</span>
       </div>
     );
   }
@@ -213,12 +214,12 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
         </p>
         <p className="text-sm text-gray-400 truncate">{score.artist}</p>
       </td>
-      <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} /></td>
+      <td className="px-4 py-3 text-center"><ModBadges mods={score.mods} isLazer={score.is_lazer} /></td>
       {/* Accuracy, score and combo share one cell, so the hit counts can run
           underneath all three. Its grid uses the header's column widths, so
           each value still sits under its own heading. */}
       <td colSpan={3} className="py-3">
-        <div className={`grid ${STATS_GRID} items-center justify-items-center gap-y-1`}>
+        <div className={`grid ${STATS_GRID} items-center justify-items-center gap-y-1.5`}>
           <span
             className="chip-on-cover px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
             style={{ color: accuracyColor(score.accuracy) }}
@@ -227,7 +228,7 @@ function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
           </span>
           <span className="text-white font-semibold">{score.score != null ? score.score.toLocaleString() : '—'}</span>
           <span className="text-gray-400">{score.combo.toLocaleString()}x</span>
-          <HitLine hits={score.hits} slots extra={score.is_lazer && <LazerTag compact />} className="col-span-3" />
+          <HitLine hits={score.hits} slots className="col-span-3" />
         </div>
       </td>
       <td className="px-4 py-3 text-center">
@@ -273,14 +274,13 @@ function ScoreCard({ score, rank, inRange, highlight, onOpen }) {
         </div>
         <div className="flex items-center gap-3">
           <p className="min-w-0 flex-1 truncate text-sm text-gray-400">{score.artist}</p>
-          <div className="shrink-0"><ModBadges mods={score.mods} /></div>
+          <div className="shrink-0"><ModBadges mods={score.mods} isLazer={score.is_lazer} /></div>
         </div>
         {/* wraps rather than cutting off on the narrowest phones */}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-gray-400 tabular-nums">
           <span className="font-semibold" style={{ color: accuracyColor(score.accuracy) }}>{score.accuracy}%</span>
           <span className="flex items-center gap-1 text-white">
             {score.score != null ? score.score.toLocaleString() : '—'}
-            {score.is_lazer && <LazerTag compact />}
           </span>
           <span>{score.combo.toLocaleString()}x</span>
           <Tooltip text={timeAgo(score.date)} placement="left" className="ml-auto whitespace-nowrap">
