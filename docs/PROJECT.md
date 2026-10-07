@@ -148,12 +148,18 @@ The rules (they exist so the history stays clean and in Marcel's name):
    what caused a merge conflict once.
 5. **The "Unverified" label** on branch commits is expected and harmless.
    The squashed commit on `master` is signed by GitHub.
-6. **Every pull request gets a Vercel preview link** in its comments, but
-   **for now it can't load players.** The backend only accepts requests from
-   osustats.app (the CORS setting in `backend/src/server.js`), and a preview
-   runs on a different address. Until that's changed (see the to-do list),
-   visual changes are checked in the dev browser with fake data, and live
-   after merging.
+6. **Every pull request gets a Vercel preview link** in its comments, and it
+   loads real players. The backend accepts the live site plus this project's
+   own preview addresses (`osu-stats-…-marcel4277s-projects.vercel.app`,
+   the CORS setting in `backend/src/server.js`), and nothing else.
+   - A preview is only the *website* part of the change. It talks to the live
+     backend, so backend changes can't be seen on a preview until they're
+     merged.
+   - The preview needs `VITE_API_URL` switched on for the **Preview**
+     environment in Vercel (Settings → Environment Variables), not just
+     Production. Without it, a preview asks itself for players and fails.
+   - Visits to a preview don't add to the visit counter; only the live site
+     counts.
 
 **Checks before any change goes up:**
 - **The build must pass:** `cd frontend && npx vite build`.
@@ -198,12 +204,6 @@ The rules (they exist so the history stays clean and in Marcel's name):
 - **Click a month in the activity chart** to filter the table to it.
 - **Star rating per play:** no-mod first. Mod-adjusted needs extra osu!
   calls and a long cache.
-
-### Workflow
-
-- **Working Vercel previews:** let the backend accept this project's Vercel
-  preview addresses (only those, not every site), so every pull request can
-  be checked with real players before merging.
 
 ### Small fixes
 

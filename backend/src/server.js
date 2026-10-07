@@ -22,9 +22,21 @@ const limiter = rateLimit({
   message: { error: 'Too Many Requests', message: 'Rate limit exceeded. Try again in a minute.' },
 });
 
-// CORS — locked to the configured frontend URL
+// CORS — the live site, plus this project's own Vercel preview builds, so every
+// pull request can be checked with real players. Preview addresses look like
+// osu-stats-<hash or git-branch>-marcel4277s-projects.vercel.app; the team name
+// at the end is what keeps other people's Vercel sites out.
+const PREVIEW_ORIGIN = /^https:\/\/osu-stats-[a-z0-9-]+-marcel4277s-projects\.vercel\.app$/;
+
+function allowedOrigin(origin) {
+  if (origin && PREVIEW_ORIGIN.test(origin)) return origin;
+  return config.FRONTEND_URL;
+}
+
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', config.FRONTEND_URL);
+  res.header('Access-Control-Allow-Origin', allowedOrigin(req.get('Origin')));
+  // The answer depends on who's asking, so caches must keep one copy per origin
+  res.header('Vary', 'Origin');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
