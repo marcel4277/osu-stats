@@ -42,8 +42,13 @@ frontend/src/
     Tooltip.jsx          the one tooltip used everywhere
     UsernameInput.jsx    a search box and its button
     modUtils.js          mod rules and mod colours (one place only)
+    dateUtils.js         how dates and months are written ("18 Nov 2024", "Apr 2026")
   services/api.js        how the frontend calls the backend
-  App.css                page background, score-row cover styling
+  App.css                page background, score-row covers, player-card banner
+
+docs/
+  DESIGN.md              how the site looks and why (rules, values, rejected ideas)
+  PROJECT.md             this file
 ```
 
 ---
@@ -143,8 +148,12 @@ The rules (they exist so the history stays clean and in Marcel's name):
    what caused a merge conflict once.
 5. **The "Unverified" label** on branch commits is expected and harmless.
    The squashed commit on `master` is signed by GitHub.
-6. **Every pull request gets a Vercel preview link** in its comments, so you
-   can check a change with real osu! data before merging.
+6. **Every pull request gets a Vercel preview link** in its comments, but
+   **for now it can't load players.** The backend only accepts requests from
+   osustats.app (the CORS setting in `backend/src/server.js`), and a preview
+   runs on a different address. Until that's changed (see the to-do list),
+   visual changes are checked in the dev browser with fake data, and live
+   after merging.
 
 **Checks before any change goes up:**
 - **The build must pass:** `cd frontend && npx vite build`.
@@ -174,7 +183,10 @@ The rules (they exist so the history stays clean and in Marcel's name):
    osu!standard only.
 7. **Link previews:** a title, description and image when someone pastes a
    player link into Discord or Twitter.
-8. **Check everything on a real phone,** especially the score table.
+8. **Check everything on a real phone.** The phone layout (cards instead of
+   the table, header-only banner, stacked stats) is built and tested in a
+   phone-sized browser, but not yet on an actual device, and the comparison
+   view hasn't been looked at on a phone at all.
 9. **Friendly error pages** for restricted players, players with no plays,
    and osu! being down.
 10. **Read osu!'s API terms, check the name doesn't clash with an existing
@@ -187,13 +199,42 @@ The rules (they exist so the history stays clean and in Marcel's name):
 - **Star rating per play:** no-mod first. Mod-adjusted needs extra osu!
   calls and a long cache.
 
+### Workflow
+
+- **Working Vercel previews:** let the backend accept this project's Vercel
+  preview addresses (only those, not every site), so every pull request can
+  be checked with real players before merging.
+
+### Small fixes
+
+- **Filtered-out rows still open their score when clicked.** It's arguably
+  fine, but it's never been decided.
+- **The API sends accuracy as text and game mode as a number.** It was left
+  alone on purpose: changing the format means deploying the backend and
+  frontend together, or pages break in between.
+
 ### Nice to have
 
 - **Error monitoring.**
-- **Automated tests** for the playstyle maths, lazer scores and caching.
+- **Automated tests** for the playstyle maths, lazer scores and caching,
+  plus linting and a CI check on every pull request.
 - **Vite upgrade:** clears the remaining warnings in the dev tools only.
 - **A real site icon.**
 
 ### Design issues
 
 See DESIGN.md, section 11.
+
+---
+
+## 8. Starting a new piece of work
+
+1. Read [DESIGN.md](DESIGN.md) (anything visual) and this file (anything
+   else) first. Most "obvious" improvements were already tried, and the
+   rejected lists say why they didn't work.
+2. Follow section 6 exactly: the `cleanup` branch, commits in Marcel's name
+   with no extra lines, and squash merges.
+3. Fix problems properly when you spot them, and measure rather than guess.
+4. When a change alters a rule or a value in DESIGN.md, update the doc in
+   the same commit.
+
