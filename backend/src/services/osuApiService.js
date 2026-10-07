@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { createRateLimiter, busyError } from './rateLimiter.js';
 
 const OSU_API_BASE = 'https://osu.ppy.sh/api/v2';
 const OSU_OAUTH_TOKEN_URL = 'https://osu.ppy.sh/oauth/token';
@@ -9,6 +10,24 @@ const REQUEST_TIMEOUT_MS = 10000;
 // set on lazer. Any version from 20220705 on switches to the current format.
 const SCORE_FORMAT_HEADERS = { 'x-api-version': '20220705' };
 const RULESET_NAMES = ['osu', 'taiko', 'fruits', 'mania'];
+
+// osu!'s API terms: no more than 60 requests a minute (about one a second),
+// with some bursting allowed. A search costs 3 requests, so a burst of 20
+// covers a few searches at once. A request that would wait more than 10
+// seconds for its turn gets a "busy" answer instead (a search makes two
+// requests one after the other, so a visitor waits 20 seconds at most).
+const limiter = createRateLimiter({ perMinute: 60, burst: 20, maxWaitMs: 10_000 });
+
+// When osu! answers "too many requests", wait as long as it asks (within
+// reason) and try once more.
+const DEFAULT_RETRY_AFTER_MS = 10_000;
+const MAX_RETRY_AFTER_MS = 60_000;
+
+function retryAfterMs(response) {
+  const seconds = Number(response.headers?.['retry-after']);
+  if (!Number.isFinite(seconds) || seconds <= 0) return DEFAULT_RETRY_AFTER_MS;
+  return Math.min(seconds * 1000, MAX_RETRY_AFTER_MS);
+}
 
 // Errors carry the osu! HTTP status so callers can check `error.status === 404`
 function apiError(status, message) {
@@ -68,8 +87,10 @@ export class OsuApiService {
   }
 
   // A cached token can be revoked before it expires. On a 401 the token is
-  // dropped and the request is retried once with a fresh one.
+  // dropped and the request is retried once with a fresh one. On a 429 every
+  // request pauses for as long as osu! asks, and this one is retried once.
   async _request(method, endpoint, config = {}, isRetry = false) {
+    await limiter.take();
     try {
       const token = await this.getAccessToken();
 
@@ -95,6 +116,12 @@ export class OsuApiService {
           this.accessToken = null;
           this.tokenExpiresAt = null;
           if (!isRetry) return this._request(method, endpoint, config, true);
+        }
+        if (status === 429) {
+          console.warn(`[OsuApiService] osu! said too many requests (${endpoint})`);
+          limiter.pause(retryAfterMs(error.response));
+          if (!isRetry) return this._request(method, endpoint, config, true);
+          throw busyError();
         }
         throw apiError(status, message);
       }

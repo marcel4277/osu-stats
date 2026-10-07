@@ -180,6 +180,23 @@ This went through several rounds; this version is "design B".
   not an emoji, because Windows shows emoji flags as letters. If the image
   fails to load, it hides itself and just the country name shows.
 - **Phones:** rank and pp move into the stats strip and are listed first.
+- **"Updated 12 min ago · ↻ Refresh"** (`UpdatedNote.jsx`) sits on its own
+  line **above** the card, right-aligned, 8px from it. The word "Refresh"
+  ends exactly on the card's right edge.
+  - It's there because the backend keeps osu! data for 30 minutes. Without
+    it, a play set a few minutes ago could be missing with no hint why.
+  - Small `gray-400` text with a `gray-300` button (no accent colour: it's
+    a quiet utility, not a main action). Measured 7.8:1 and 13.4:1 on the
+    page background.
+  - The button only appears once the data is a minute old ("Updated just
+    now" has none): the backend won't fetch anything newer before then.
+  - While it works: "Refreshing…" with a spinning icon, and the player stays
+    on screen. If it fails: "Couldn't refresh. Try again in a minute." in
+    `red-300` (10.7:1), and the old data stays. Short on purpose: the
+    advice is the same whatever went wrong, and a long message wrapped to
+    four lines on phones.
+  - **Comparison view:** the same line under each "PLAYER 1 / PLAYER 2"
+    label, right above that player's card.
 
 **Rejected:**
 - **A frosted (blurred) stats band.** It smeared the banner into fog, and the
@@ -199,6 +216,12 @@ This went through several rounds; this version is "design B".
   220px of extra height that held nothing, and a muddy fade.
 - **Dark bands down both sides.** They didn't protect the corner text on
   bright banners.
+- **The "Updated … · Refresh" note in a dark box on the banner's top-right
+  corner.** A patch on the artwork, covering the part of the banner that's
+  meant to stay bright.
+- **The note on the same line as the centred "PLAYER 1" label.** On
+  narrower comparison columns (1024px) it got cut off ("Updated 12 min a…"),
+  and on phones the error message wrapped to four lines.
 
 ---
 
@@ -379,6 +402,9 @@ DJ TOTTO ..................... DT HD
   - The search boxes always show the players currently on screen. They
     follow the page address, so back/forward and shared links never leave
     an old name in a box.
+  - On phones the box shrinks to fit (`min-w-0`). Without that it kept its
+    natural width and pushed the Search button 20–50px off the screen at
+    390 and 360px.
 - **Comparison view:**
   - Two columns. Each row holds the matching card of each player, and both
     are stretched to the same height.
