@@ -17,13 +17,23 @@ function ageText(ms) {
   return `Updated ${hours} hour${hours === 1 ? '' : 's'} ago`;
 }
 
-// Re-renders every 30 seconds so the age keeps counting up
-function useNow() {
+// Re-renders each time the data's age reaches a new whole minute, so the
+// text and the button change at the right moment (a fixed 30-second tick
+// could be up to 30 seconds late)
+function useNow(fetchedAt) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 30 * 1000);
-    return () => clearInterval(id);
-  }, []);
+    if (!fetchedAt) return undefined;
+    const start = new Date(fetchedAt).getTime();
+    let id;
+    const schedule = () => {
+      const age = Math.max(0, Date.now() - start);
+      id = setTimeout(() => { setNow(Date.now()); schedule(); }, MINUTE - (age % MINUTE) + 50);
+    };
+    setNow(Date.now());
+    schedule();
+    return () => clearTimeout(id);
+  }, [fetchedAt]);
   return now;
 }
 
@@ -37,7 +47,7 @@ function RefreshIcon({ spinning }) {
 }
 
 export default function UpdatedNote({ fetchedAt, onRefresh, refreshing, error, className = '' }) {
-  const now = useNow();
+  const now = useNow(fetchedAt);
   if (!fetchedAt) return null;
   const age = Math.max(0, now - new Date(fetchedAt).getTime());
 
