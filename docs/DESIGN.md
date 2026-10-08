@@ -52,9 +52,16 @@ here too and say why.
 | **Activity status** | a small coloured dot inside a grey outlined badge | `ImprovementVelocity.jsx` → `buildVerdict` |
 | **Archetype** | the icon ring and the title in the archetype's colour | `PlaystyleCard.jsx` → `ARCHETYPES` |
 | **Traits** | the same colour as the mod they're about (HD Stacker = HD indigo, HDDT Stacker = DT amber, HDHR Stacker = HR rose) | `PlaystyleCard.jsx` → `TRAITS` |
+| **Hit counts** | osu!'s judgement colours on the labels: 300 blue, 100 green, 50 yellow, miss red | `ScoresList.jsx` → `HIT_TYPES` |
+
+The hit-count colours share hues with the accuracy and mod colours (a green
+"100" near green accuracy text), which this guide would normally rule out.
+They're kept on purpose: they're osu!'s own judgement colours, which players
+read without thinking, and they're confined to small labels on one line.
+With grey labels, "300 2,481 100 44 50 0" ran together into one grey string.
 
 Mod colours come in three strengths, all from the same table:
-- `badge`: a faint tint with an outline (score table).
+- `badge`: a faint tint with an outline (top plays).
 - `chip`: stronger (selected filter chip).
 - `bar`: solid (playstyle breakdown bars).
 
@@ -65,7 +72,7 @@ Mod colours come in three strengths, all from the same table:
 - **Neon gradients and pulsing animations** (the old chart bars, the pulsing status badge).
 - **A colour wash behind the playstyle header.** On warm colours (amber, green, rose) it turned a muddy olive-brown.
 - **Grey trait badges.** That was tried to cut down colour and was **wrong**: the trait colours carry meaning because they match the mods. The loud part was the *neon solid fill*, not the colour itself. Traits use the muted tinted-outline style.
-- **Cyan pp and blue lazer tag** in the score table. pp is white, and the lazer tag is neutral grey.
+- **Cyan pp and blue lazer tag** in the top plays. pp is white, and the lazer tag is neutral grey.
 
 ---
 
@@ -74,7 +81,7 @@ Mod colours come in three strengths, all from the same table:
 - **Say "top plays" everywhere,** never "scores" or "top scores", because they
   mean the same thing. For example: "Based on 200 top plays", "Mod breakdown ·
   200 top plays", "Top Plays for {name}", "NM on 90%+ of top plays".
-  - Exception: the **Score** column, because that's the actual score number.
+  - Exception: the **score**, because that's the actual score number.
 - **Plurals are correct:** "1 month ago", not "1 months ago"; "1 play".
 - **Talk about the player as "the player" or "they",** never "you".
 - **Archetype descriptions are one short line,** e.g. "Almost only plays nomod."
@@ -225,68 +232,86 @@ This went through several rounds; this version is "design B".
 
 ---
 
-## 6. Score table rows (map covers)
+## 6. Top plays (map covers)
 
+On wide screens each play is one row laid out like osu!'s own profile list.
+There's no table and no column headings:
+
+```
+1  Sweets Weekend by Primary          HD     99.50%  1,204x            700pp
+   ★ 5.07  Insane  6 days ago         lazer  300 2,481  100 44  50 0  × 0   207,201,876
+```
+
+- **Title block:** "Title by Artist", then the star rating (a neutral grey
+  chip; nomod, as on osu!'s profile list), the difficulty name, and how long
+  ago the play was set ("6 days ago", with the date on hover).
+- **Mods,** with the "lazer" tag under them (see below).
+- **Stats block:** accuracy (in its accuracy colour) and combo on top, the
+  hit counts underneath, the way osu! shows them.
+- **pp,** large, on the right, with the score small underneath.
+- **Sorting** is the same "PP ▾ ↓" menu as on phones (there are no column
+  headings to click).
+- **Every row is the same height (69px).** Long titles end in "…" and mods
+  never wrap.
 - **Cover image:** the map's `card@2x` cover (800×280).
   - It covers only the **left 60%** of the row and fades out on an eased
     curve, so there's no visible edge.
   - Stretching it across the full row showed only a thin slice of the image,
     because the row is too wide and short.
   - Covers load only as rows come near the screen.
-- **Rows inside the time filter, or all rows when the filter is "All":**
-  - the cover is in **full colour** under a dark overlay that goes from 50%
-    at the top to 75% at the bottom;
+- **Plays inside the time filter, or all plays when the filter is "All":**
+  - the cover is in **full colour** under a dark overlay that goes from 60%
+    at the top to 84% at the bottom. (50% → 75% was enough for the old
+    one-line table; the title and "by artist" sit higher in a play and
+    measured 3.3:1);
   - text stays white;
   - the text has a soft shadow, light enough that you mostly notice it on
     bright covers;
+  - the rank is `gray-100` on covers: it sits in the brightest corner, where
+    `gray-200` measured 4.2:1;
+  - everything measured over a pure-white cover at 1500, 1024, 390 and
+    360px: 4.5:1 or better (the lowest is "by artist" at 4.52:1);
   - a **pink bar** marks the left edge (only when a filter is active).
-- **Rows outside the time filter:**
+- **Plays outside the time filter:**
   - the same cover in **greyscale**, darker (70% at the top to 85% at the
-    bottom), so the coloured rows stand out;
+    bottom), so the coloured plays stand out;
   - text is toned down (titles and numbers `#858c98`, small text `#5b6270`);
-  - pp, accuracy and mod badges are faded to 60%;
+  - pp, accuracy, mod badges and red miss counts are faded to 60%;
   - no text shadow, because a shadow made grey text look brighter;
   - **this text is deliberately below the 4.5:1 target** on bright covers
     (as low as about 1.3:1 on a pure-white one). These are the plays the
     reader filtered out, so they're meant to recede.
-    Only the colour rows have to pass.
-- **Badges on covers** (mods, accuracy, lazer tag) get a solid dark backing,
-  so they read on any image.
+    Only the colour plays have to pass.
+- **Badges on covers** (mods, star rating, lazer tag) get a solid dark
+  backing, so they read on any image.
 - **Hover:** a purple bar on the left edge. The row does **not** get lighter,
   because that would hurt readability on bright covers.
-- **Every row is the same height:** titles are cut to one line, and mod
-  badges never wrap onto a second line.
-- **Lazer plays:** a small grey "lazer" tag sits in the Mods column, **on
-  its own line under the mods**. It isn't a mod (stable plays are the ones
-  osu! marks, with a hidden "CL" mod), but like the mods it says how the
-  play was set, and that column has room. On its own line, and grey, it
-  reads apart from the mods at a glance. Its tooltip explains that a lazer
-  play's score is the standardised one.
-  - Rows stay the same height (69px): the mods and the tag together are no
-    taller than the title and artist.
+- **Lazer plays:** a small grey "lazer" tag sits **on its own line under the
+  mods**. It isn't a mod (stable plays are the ones osu! marks, with a
+  hidden "CL" mod), but like the mods it says how the play was set. On its
+  own line, and grey, it reads apart from the mods at a glance. Its tooltip
+  explains that a lazer play's score is the standardised one.
   - An earlier lazer badge in the Mods column was removed: it was blue,
-    styled like a mod (blue is NM's colour), and repeated the tag next to
+    styled like a mod (blue is NM's colour), and repeated a tag next to
     the score. Now it's the only lazer marker, and neutral.
   - Rejected: the tag in the same line as the mods. It read as one more
     mod at a glance.
 - **Order:** pp order, like the osu! profile. Lazer plays keep their pp
   position and just show a smaller number.
-- **Hit counts** (300s, 100s, 50s, misses) open on **hovering the accuracy**
-  (or focusing it with Tab, or tapping it on a touch screen), in the
-  standard tooltip: labels on top, numbers under them.
-  - The accuracy is where they belong: they're what the accuracy is made of.
-  - In a tooltip they get room to be laid out properly, and the row stays
-    one clean line of values.
-  - Numbers white, labels `gray-400`, misses red (`red-400`) only when there
-    are any. Measured on the tooltip's `gray-900`: 17:1, 6.9:1, 5.6:1.
-  - Its colours are set directly, not with the usual text classes, because
-    the row restyles those (lighter on covers, dimmed on grey rows) and the
-    tooltip must read the same on every row.
+- **Hit counts** (300s, 100s, 50s, misses): "300 2,481  100 44  50 0  × 0".
+  - Labels in osu!'s judgement colours (see section 2 for why that rule is
+    broken here); numbers white; a miss count red only when there are any.
+  - Each label is tight to its number, with the same gap between counts.
+  - The miss cross is a drawn icon. The "✕" character isn't in the site's
+    font, so the browser borrowed a thinner one from another font.
+  - Measured over a pure-white cover: label colours 10.6:1 or better, red
+    6.4:1, numbers 17:1.
 
 ### On phones and tablets (narrower than 1024px)
 
-The table needs about 950px, so narrower screens show each play as a card
-instead ("B · Everything" from the mockup round). Nothing is left out:
+A wide row needs about 950px, so narrower screens show each play as a
+four-line card instead ("B · Everything" from the mockup round). Nothing is
+left out except the difficulty name and star rating, which don't fit:
 
 ```
 1 Crystalia ................ 1,857pp
@@ -298,24 +323,18 @@ DJ TOTTO ..................... DT HD
 - **The rank** sits on the title line, not in its own column, so the stats
   line gets the full width.
 - **The "lazer" tag** ends the hit-count line, at the right: under the
-  mods and the date, as in the table it's under the mods. (Directly under
+  mods and the date, as on wide rows it's under the mods. (Directly under
   the mods is where the date is.)
-- **Hit counts get their own fourth line.** Each card is 105px tall. The
-  labels are `gray-300` here: `gray-400` measured 3.4:1 over a pure-white
-  cover, because the line sits higher in the cover's fade than in a table
-  row. Now 5.9:1.
+- **Hit counts get their own fourth line,** coloured as on wide rows. Each
+  card is 105px tall.
 - **Every card is the same height** (105px) at 360px and up. On narrower
   screens the stats and hit lines wrap rather than cutting anything off.
 - **Covers, grey and colour, the pink active bar, and the hover bar** all
-  work as on the table rows.
-  - Colour cards use a slightly stronger gradient (60% → 84%), because their
-    title and artist sit higher in a taller card. They were measured at
-    5.1:1 or better over a pure-white cover.
-- **Sorting:**
-  - a compact "PP ▾ ↓" control on the title line replaces the column
-    headers;
+  work as on wide rows.
+- **Sorting** (same control on wide screens):
+  - a compact "PP ▾ ↓" control on the title line;
   - the label shows only the current choice, and the real menu sits
-    invisibly on top of it, so it opens the phone's own picker;
+    invisibly on top of it, so on a phone it opens the phone's own picker;
   - the arrow flips highest/lowest first.
 - **Header:**
   - the title is just "Top Plays", since the name is in the player card
@@ -326,18 +345,14 @@ DJ TOTTO ..................... DT HD
 - **Combos use thousands separators everywhere,** e.g. "1,204x".
 
 **Rejected:**
-- **Hit counts always on show in the table.** Every attempt was cramped:
-  - squeezed under the accuracy alone: no room for the 300s, which players
-    want to see;
-  - as their own column (labels in the header, numbers in slots): it needed
-    24px more than the table has at 1024px, and the header labels ran
-    together;
-  - a second line under accuracy, score and combo: in fixed slots it left
-    holes after short numbers and started partway into Accuracy; sized to
-    its numbers it still crowded the row, which also needed a two-line
-    layout so pp and date didn't hang between levels; centred exactly on
-    the accuracy it ran into the lazer tag, being wider than the column.
-  Phones keep the counts on their own line, where there is room.
+- **A table with column headings** (the desktop layout until October 2026).
+  Hit counts never fitted it: a column of their own was too wide at 1024px;
+  a second line under accuracy, score and combo had nothing in the grid to
+  line up with and crowded the row; hidden in a tooltip on the accuracy, they
+  were a chore to read. Rows laid out like osu!'s list fit them naturally.
+- **Wide rows with grey hit-count labels and the date instead of "x days
+  ago"** (variant A of the row mockups). Calmer, but the counts ran together
+  into one grey string, and it showed less.
 - **"A · Compact"** (score and combo left out). People do look at those
   numbers, and B costs no extra height.
 - Darkening the text on the coloured rows. Only the grey rows get darker
@@ -470,7 +485,8 @@ DJ TOTTO ..................... DT HD
 | Chart bars | 3 : 1 against the card |
 
 - **Score titles are real links:** middle-click and "open in new tab" work.
-- **Sort headers are buttons:** the first click sorts highest/newest first.
+- **Sorting is a real menu** (a `select`) plus a direction button, both
+  usable from the keyboard. A new sort starts highest/newest first.
 - **The archetypes popup:**
   - it closes with Escape;
   - screen readers announce it as a dialog;
@@ -482,8 +498,9 @@ DJ TOTTO ..................... DT HD
 
 ## 11. Known design issues still open
 
-1. **A faint edge on the score table at 80% browser zoom** (Windows Chrome,
-   seen near the table's left edge). Parked as a tiny edge case. It doesn't
+1. **A faint edge on the old score table at 80% browser zoom** (Windows
+   Chrome, seen near the table's left edge). The table has since been
+   replaced by rows, so check whether it still happens. It didn't
    reproduce on Linux Chromium: there are no seams and no 1px overflow at any
    width from 1024 to 2100px. Needs a close-up screenshot to pin down.
 2. **Feature:** the comparison view should highlight the differences between

@@ -137,6 +137,9 @@ export class OsuApiService {
   //   url:      /scores/{id} works for stable and lazer scores alike.
   //   hits:     300s, 100s, 50s and misses. osu! leaves out any count
   //             that's zero, so a missing one means 0.
+  //   version:  the difficulty's name ("Insane", "wkyik's Extra").
+  //   stars:    the difficulty's star rating without mods, as osu! shows it
+  //             in a profile's list (with mods it would cost extra requests).
   _mapScore(score) {
     const isLazer = score.legacy_score_id == null;
     return {
@@ -148,6 +151,8 @@ export class OsuApiService {
       // Map background (800x280), used as a muted backdrop on the score row
       cover_url: score.beatmapset?.covers?.['card@2x'] ?? null,
       title: score.beatmapset?.title || 'Unknown',
+      version: score.beatmap?.version ?? null,
+      stars: score.beatmap?.difficulty_rating ?? null,
       artist: score.beatmapset?.artist || 'Unknown',
       pp: score.pp ? Math.round(score.pp) : null,
       accuracy: (Math.floor(score.accuracy * 10000) / 100).toFixed(2),
