@@ -42,7 +42,7 @@ frontend/src/
     UserProfile.jsx      player card with banner
     ImprovementVelocity.jsx  activity card and chart
     PlaystyleCard.jsx    archetype, mod breakdown, traits, "?" popup
-    ScoresList.jsx       top plays table, filters, map covers
+    ScoresList.jsx       top plays (rows on wide screens, cards on phones), filters, map covers
     ComparisonView.jsx   two players side by side
     Tooltip.jsx          the one tooltip used everywhere
     UsernameInput.jsx    a search box and its button
@@ -105,6 +105,9 @@ These were checked against osu-web's source code, not guessed.
   - lazer plays show `total_score`, the "standardised" number the osu!
     website shows (capped near 1,000,000).
   - That's why lazer plays drop to the bottom when you sort by Score.
+- **Difficulty name and star rating** come in each play's `beatmap`, as
+  `version` and `difficulty_rating`. The star rating is without mods, as on
+  osu!'s own profile list; with mods would need an extra request per map.
 - **Hit counts** come in each play's `statistics` as `great` (300s), `ok`
   (100s), `meh` (50s) and `miss`. osu! leaves out any count that's zero, so
   a missing one means 0.
@@ -211,7 +214,7 @@ The rules (they exist so the history stays clean and in Marcel's name):
 3. **Link previews:** a title, description and image when someone pastes a
    player link into Discord or Twitter.
 4. **Check everything on a real phone.** The phone layout (cards instead of
-   the table, header-only banner, stacked stats) is built and tested in a
+   rows, header-only banner, stacked stats) is built and tested in a
    phone-sized browser, but not yet on an actual device, and the comparison
    view hasn't been looked at on a phone at all.
 5. **Friendly error pages** for restricted players and players with no
@@ -223,7 +226,7 @@ The rules (they exist so the history stays clean and in Marcel's name):
 ### Features
 
 - **Number differences in the comparison view.**
-- **Click a month in the activity chart** to filter the table to it.
+- **Click a month in the activity chart** to filter the top plays to it.
 - **Star rating per play:** no-mod first. Mod-adjusted needs extra osu!
   calls and a long cache.
 

@@ -3,7 +3,8 @@ import { modMatches, buildChips, modColors, MOD_NAMES } from './modUtils.js';
 import { formatDate } from './dateUtils.js';
 import Tooltip from './Tooltip.jsx';
 
-const COLUMNS = [
+// What the plays can be sorted by (the "PP ▾ ↓" menu)
+const SORT_FIELDS = [
   { key: 'accuracy', label: 'Accuracy' },
   { key: 'score',    label: 'Score'    },
   { key: 'combo',    label: 'Combo'    },
@@ -18,11 +19,6 @@ const TIME_FILTERS = [
   { label: '6M',       days: 180  },
   { label: '1Y',       days: 365  },
 ];
-
-function SortIcon({ direction }) {
-  if (!direction) return <span className="ml-1 text-gray-500">⇅</span>;
-  return <span className="ml-1 text-osu-pink">{direction === 'asc' ? '↑' : '↓'}</span>;
-}
 
 function sortScores(scores, key, direction) {
   if (!key) return scores;
@@ -58,7 +54,7 @@ function chipActiveClass(key) {
 }
 
 // The "lazer" tag isn't one of these: it isn't a mod, so it goes on a line
-// of its own (under the mods in the table, at the end of the hit counts on a
+// of its own (under the mods on a wide row, at the end of the hit counts on a
 // phone card), where it reads apart from them at a glance.
 function ModBadges({ mods }) {
   const shown = (mods || []).filter(mod => mod !== 'NF' && mod !== 'CL');
@@ -82,7 +78,7 @@ function accuracyColor(accuracy) {
   return '#f87171';
 }
 
-// Loads a row's cover only once it's near the screen, so a long table doesn't
+// Loads a play's cover only once it's near the screen, so a long list doesn't
 // download every map background up front.
 function useNearScreen() {
   const ref = useRef(null);
@@ -113,7 +109,7 @@ function useWideScreen(minWidth) {
   return wide;
 }
 
-// Classes and style shared by the table row and the phone card: the cover
+// Classes and style shared by the wide row and the phone card: the cover
 // behind the play, greyed outside the time filter, the pink edge bar inside an
 // active filter. A play without a cover has its content dimmed instead.
 function playStyling(score, { near, inRange, highlight, dimSelector }) {
@@ -142,10 +138,13 @@ function LazerTag() {
   );
 }
 
-// Hit counts: 300s, 100s, 50s and misses. Misses are red only when there
-// are any (the one count that marks a play as not clean); the rest stay white.
+// Hit counts: 300s, 100s, 50s and misses. Each label is in osu!'s own
+// judgement colour (300 blue, 100 green, 50 yellow, miss red): players read
+// these at a glance, so the colours carry meaning even though they share hues
+// with the accuracy and mod colours. Numbers are white; a miss count is red
+// only when there are any.
 // A cross drawn to match the labels: the "✕" character isn't in the site's
-// font, so the browser borrowed a thinner one from another font
+// font, so the browser borrowed a thinner one from another font.
 function MissIcon() {
   return (
     <svg viewBox="0 0 10 10" aria-label="misses" className="w-2 h-2 self-center" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
@@ -155,28 +154,28 @@ function MissIcon() {
 }
 
 const HIT_TYPES = [
-  { key: 'great', label: '300' },
-  { key: 'ok',    label: '100' },
-  { key: 'meh',   label: '50'  },
-  { key: 'miss',  label: <MissIcon /> },
+  { key: 'great', label: '300',         colour: '#7dd3fc' }, // sky-300
+  { key: 'ok',    label: '100',         colour: '#a3e635' }, // lime-400
+  { key: 'meh',   label: '50',          colour: '#fcd34d' }, // amber-300
+  { key: 'miss',  label: <MissIcon />,  colour: '#f87171' }, // red-400
 ];
 
 function hitClass(hits, key) {
   return key === 'miss' && hits.miss > 0 ? 'hit-miss text-red-400 font-semibold' : 'text-white';
 }
 
-// Phone card: the hit counts on a line of their own, "300 1,218  100 16  50 0
-// × 1": each label tight to its number, the same gap between every count.
-// extra: something for the right-hand end of the line (the lazer tag); the
-// line is drawn for it even without counts (a saved copy from before they
-// were added).
+// The hit counts on one line, "300 1,218  100 16  50 0  × 1": each label
+// tight to its number, the same gap between every count.
+// extra (phone card): something for the right-hand end of the line (the lazer
+// tag); the line is drawn for it even without counts (a saved copy from
+// before they were added).
 function HitLine({ hits, extra = null, className = '' }) {
   if (!hits && !extra) return null;
   return (
     <div className={`flex flex-wrap items-baseline gap-x-3 gap-y-0.5 tabular-nums text-xs ${className}`}>
       {hits && HIT_TYPES.map(t => (
         <span key={t.key} className="inline-flex items-baseline gap-1 whitespace-nowrap">
-          <span className="hit-label inline-flex text-gray-400">{t.label}</span>
+          <span className="hit-label inline-flex font-semibold" style={{ color: t.colour }}>{t.label}</span>
           <span className={hitClass(hits, t.key)}>{hits[t.key].toLocaleString()}</span>
         </span>
       ))}
@@ -187,94 +186,75 @@ function HitLine({ hits, extra = null, className = '' }) {
   );
 }
 
-// Desktop: the hit counts open on hovering (or focusing) the accuracy, which
-// they explain. Labels on top, numbers under them. Colours are set inline:
-// the row restyles grey and white text (lighter on covers, dimmed on grey
-// rows), and the tooltip sits inside the row but must read the same on all.
-function HitTooltip({ hits }) {
+// The map's star rating (nomod, as on osu!'s profile list), in a neutral chip
+function Stars({ stars }) {
+  if (stars == null) return null;
   return (
-    <span className="grid grid-cols-4 gap-x-4 gap-y-0.5 text-center tabular-nums [text-shadow:none]">
-      {HIT_TYPES.map(t => (
-        <span key={t.key} className="inline-flex justify-center" style={{ color: '#9ca3af' }}>{t.label}</span>
-      ))}
-      {HIT_TYPES.map(t => (
-        <span key={t.key} className="text-sm font-semibold" style={{ color: t.key === 'miss' && hits.miss > 0 ? '#f87171' : '#ffffff' }}>
-          {hits[t.key].toLocaleString()}
-        </span>
-      ))}
+    <span className="chip-on-cover inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-semibold leading-none bg-gray-700/40 border border-gray-500/50 text-gray-200 shrink-0">
+      ★ {stars.toFixed(2)}
     </span>
   );
 }
 
-// A score row. The map's cover sits behind it as a darkened backdrop: full
-// colour normally, greyed out when the row is outside the time filter
-// (see .score-row-cover in App.css).
-// highlight: a time filter is active and this row is inside it.
-function ScoreRow({ score, rank, inRange, highlight, onOpen }) {
+const ppText = score => (score.pp != null
+  ? <span className="text-white font-bold text-xl">{score.pp.toLocaleString()}<span className="text-gray-400 text-sm font-normal">pp</span></span>
+  : <span className="text-gray-400">—</span>);
+
+// A play on a wide screen: one card per row, laid out like osu!'s own
+// profile list. The map's cover sits behind it as a darkened backdrop (full
+// colour normally, greyed out outside the time filter; see .score-row-cover
+// in App.css).
+//   rank  Title by Artist          mods    99.50%  1,204x           700pp
+//         ★ 5.42  Insane  6 days ago  lazer   300 2,481  100 44 ...  207,201,876
+// highlight: a time filter is active and this play is inside it.
+function PlayRow({ score, rank, inRange, highlight, onOpen }) {
   const [ref, near] = useNearScreen();
   const url = score.url;
-  const { className, style } = playStyling(score, { near, inRange, highlight, dimSelector: '[&>td]:opacity-60' });
-  const accuracyChip = (
-    <span
-      className="chip-on-cover px-3 py-1 rounded text-sm font-semibold bg-black bg-opacity-20"
-      style={{ color: accuracyColor(score.accuracy) }}
-    >
-      {score.accuracy}%
-    </span>
-  );
+  const { className, style } = playStyling(score, { near, inRange, highlight, dimSelector: '[&>*]:opacity-60' });
   return (
-    <tr ref={ref} className={className} style={style} onClick={() => onOpen(url)}>
-      <td className="px-4 py-3 text-gray-400">{rank}</td>
-      {/* w-full + max-w-0: the beatmap column takes the leftover width and long
-          titles are cut off with "…" instead of wrapping onto a second line */}
-      <td className="px-4 py-3 w-full max-w-0 min-w-[10rem]">
-        <p className="text-white font-semibold">
+    <li ref={ref} className={`${className} grid grid-cols-[2rem_minmax(0,1fr)_7rem_14rem_8rem] items-center gap-x-6 px-5 py-3`} style={style} onClick={() => onOpen(url)}>
+      <span className="play-rank text-gray-400 tabular-nums">{rank}</span>
+      <div className="min-w-0">
+        <p className="truncate text-white font-semibold">
           {url
             ? <Tooltip text={<>{score.title}<br /><span className="text-gray-400">View score on osu!</span></>} focusable={false} className="max-w-full">
                 <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="min-w-0 truncate hover:underline focus:underline">{score.title}</a>
               </Tooltip>
-            : <span className="block truncate">{score.title}</span>}
+            : score.title}
+          <span className="ml-1.5 text-sm font-normal text-gray-400">by {score.artist}</span>
         </p>
-        <p className="text-sm text-gray-400 truncate">{score.artist}</p>
-      </td>
-      <td className="px-4 py-3">
-        <div className="flex flex-col items-center gap-1">
-          <ModBadges mods={score.mods} />
-          {score.is_lazer && <LazerTag />}
+        <div className="flex items-center gap-2.5 text-sm text-gray-400 min-w-0">
+          <Stars stars={score.stars} />
+          {score.version && <span className="truncate">{score.version}</span>}
+          <Tooltip text={formatDate(score.date)} className="whitespace-nowrap shrink-0">{timeAgo(score.date)}</Tooltip>
         </div>
-      </td>
-      <td className="px-4 py-3 text-center">
-        {score.hits
-          ? <Tooltip text={<HitTooltip hits={score.hits} />}>{accuracyChip}</Tooltip>
-          : accuracyChip}
-      </td>
-      <td className="px-4 py-3 text-center text-white font-semibold">
-        {score.score != null ? score.score.toLocaleString() : '—'}
-      </td>
-      <td className="px-4 py-3 text-center text-gray-400">
-        {score.combo.toLocaleString()}x
-      </td>
-      <td className="px-4 py-3 text-center">
-        {score.pp != null
-          ? <span className="text-white font-semibold">{score.pp.toLocaleString()}<span className="text-gray-400 text-xs font-normal">pp</span></span>
-          : <span className="text-gray-400">—</span>
-        }
-      </td>
-      <td className="px-4 py-3 text-center text-sm text-gray-400">
-        <Tooltip text={timeAgo(score.date)} className="whitespace-nowrap">
-          {formatDate(score.date)}
-        </Tooltip>
-      </td>
-    </tr>
+      </div>
+      <div className="flex flex-col items-center gap-1">
+        <ModBadges mods={score.mods} />
+        {score.is_lazer && <LazerTag />}
+      </div>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-baseline gap-4 tabular-nums">
+          <span className="font-semibold" style={{ color: accuracyColor(score.accuracy) }}>{score.accuracy}%</span>
+          <span className="text-white font-semibold">{score.combo.toLocaleString()}x</span>
+        </div>
+        <HitLine hits={score.hits} className="flex-nowrap" />
+      </div>
+      <div className="flex flex-col items-end">
+        {ppText(score)}
+        <span className="text-xs text-gray-400 tabular-nums">{score.score != null ? score.score.toLocaleString() : '—'}</span>
+      </div>
+    </li>
   );
 }
 
-// A play on screens too narrow for the table: three lines, nothing left out.
+// A play on a narrow screen: four lines, nothing left out.
 //   rank title ....... pp
 //   artist ........ mods
 //   acc  score  combo  date
+//   300 1,218  100 16  50 0  × 1   lazer
 // The rank sits on the title line rather than in its own column, so the
-// stats line gets the full width (a lazer play's line needs every pixel).
+// stats line gets the full width.
 function ScoreCard({ score, rank, inRange, highlight, onOpen }) {
   const [ref, near] = useNearScreen();
   const url = score.url;
@@ -284,7 +264,7 @@ function ScoreCard({ score, rank, inRange, highlight, onOpen }) {
       <div className="min-w-0">
         <div className="flex items-baseline gap-3">
           <p className="min-w-0 flex-1 truncate text-white font-semibold">
-            <span className="mr-2 text-sm font-normal text-gray-400 tabular-nums">{rank}</span>
+            <span className="play-rank mr-2 text-sm font-normal text-gray-400 tabular-nums">{rank}</span>
             {url
               ? <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="hover:underline focus:underline">{score.title}</a>
               : score.title}
@@ -317,27 +297,18 @@ function ScoreCard({ score, rank, inRange, highlight, onOpen }) {
   );
 }
 
-// Below this width the table doesn't fit (it needs about 950px), so plays
-// are shown as cards with a sort menu instead of column headers
-const TABLE_MIN_SCREEN = 1024;
+// Below this width a play's row doesn't fit, so plays are shown as the
+// narrower four-line cards instead
+const WIDE_ROWS_MIN_SCREEN = 1024;
 
-const SORT_OPTIONS = [{ key: 'pp', label: 'PP' }, ...COLUMNS.filter(col => col.key !== 'pp')];
+const SORT_OPTIONS = [{ key: 'pp', label: 'PP' }, ...SORT_FIELDS.filter(field => field.key !== 'pp')];
 
 export default function ScoresList({ scores, username }) {
-  const wide = useWideScreen(TABLE_MIN_SCREEN);
+  const wide = useWideScreen(WIDE_ROWS_MIN_SCREEN);
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState('desc');
   const [filterDays, setFilterDays] = useState(null);
   const [modFilter, setModFilter] = useState('all');
-
-  const handleSort = (key) => {
-    if (sortKey === key) {
-      setSortDir(d => d === 'desc' ? 'asc' : 'desc');
-    } else {
-      setSortKey(key);
-      setSortDir('desc');
-    }
-  };
 
   const sorted = sortScores(scores, sortKey, sortDir);
   const visible = sorted.filter(score => modMatches(score, modFilter));
@@ -368,13 +339,14 @@ export default function ScoresList({ scores, username }) {
           <h3 className={`min-w-0 truncate font-bold text-white ${wide ? 'text-xl' : 'text-lg'}`}>
             {wide ? `Top Plays for ${username}` : 'Top Plays'}
           </h3>
-          {/* No column headers on narrow screens, so sorting is a menu plus a
-              direction button. No sort chosen = top-play order, i.e. by pp. */}
-          {!wide && (
+          {/* Sorting is a menu plus a direction button (the rows have no column
+              headers). No sort chosen = top-play order, i.e. by pp. */}
+          {(
             <div className="flex shrink-0 rounded-lg border border-gray-600 bg-gray-900 text-sm font-semibold">
               {/* The visible label is just the current choice; the real menu
                   sits invisibly on top of it (a native menu would be as wide
-                  as its longest option) and opens the phone's own picker. */}
+                  as its longest option); on a phone it opens the phone's own
+                  picker. */}
               <span className="relative flex items-center gap-1.5 pl-3 pr-2.5 py-1 text-gray-200 rounded-l-lg has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-osu-purple">
                 {SORT_OPTIONS.find(opt => opt.key === (sortKey ?? 'pp')).label}
                 <span aria-hidden="true" className="text-gray-400 text-xs">▾</span>
@@ -443,10 +415,11 @@ export default function ScoresList({ scores, username }) {
         </div>
       </div>
 
-      {!wide && (
-        <ul className="scores-table">
-          {visible.map(score => (
-            <ScoreCard
+      <ul className="plays-list">
+        {visible.map(score => {
+          const Play = wide ? PlayRow : ScoreCard;
+          return (
+            <Play
               key={score.id}
               score={score}
               rank={rankOf.get(score.id)}
@@ -454,49 +427,9 @@ export default function ScoresList({ scores, username }) {
               highlight={filterDays != null && isInRange(score)}
               onOpen={handleRowClick}
             />
-          ))}
-        </ul>
-      )}
-
-      {wide && (
-        <div className="overflow-x-auto">
-          <table className="scores-table w-full">
-            <thead>
-              <tr className="bg-gray-900 border-b border-gray-700">
-                <th className="px-4 py-3 text-left text-gray-400 font-semibold">#</th>
-                <th className="px-4 py-3 text-left text-gray-400 font-semibold">Beatmap</th>
-                <th className="px-4 py-3 text-center text-gray-400 font-semibold">Mods</th>
-                {COLUMNS.map(col => {
-                  const direction = sortKey === col.key ? sortDir : null;
-                  return (
-                    <th
-                      key={col.key}
-                      aria-sort={direction ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}
-                      className="px-4 py-3 text-center text-gray-400 font-semibold"
-                    >
-                      <button type="button" onClick={() => handleSort(col.key)} className="font-semibold select-none hover:text-white transition">
-                        {col.label}<SortIcon direction={direction} />
-                      </button>
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map(score => (
-                <ScoreRow
-                  key={score.id}
-                  score={score}
-                  rank={rankOf.get(score.id)}
-                  inRange={isInRange(score)}
-                  highlight={filterDays != null && isInRange(score)}
-                  onOpen={handleRowClick}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+          );
+        })}
+      </ul>
     </div>
   );
 }

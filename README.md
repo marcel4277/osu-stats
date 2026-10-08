@@ -9,13 +9,13 @@ A player stats site for osu! — look up any player by username and get a clean 
 ## Features
 
 - **Player card** — the player's own osu! banner, with rank (and its 90-day change), pp, country rank, accuracy, play count and play time
-- **Top plays** — the player's 200 best plays with each map's cover behind its row, sortable by accuracy, score, combo, pp or date, with direct links to every score
+- **Top plays** — the player's 200 best plays, laid out like osu!'s own list: each map's cover, difficulty and star rating, accuracy, combo and hit counts (300s, 100s, 50s, misses), sortable by accuracy, score, combo, pp or date, with direct links to every score
 - **Filters** — by mod (NM, HD, HR, DT…) and by time (1M / 3M / 6M / 1Y); plays outside the time range turn grey
 - **Playstyle archetypes** — mod-based tiers (Player, Specialist, Paragon) across NM, HR, DT and HD, plus traits like HD Stacker or Acc Machine
 - **Improvement velocity** — an 18-month activity chart, last top play, peak month, and how the last 90 days compare with the player's usual pace
 - **Comparison** — two players side by side, with shared chart scales and mod rows so they line up
 - **osu!lazer support** — lazer plays show their standardised score, as on the osu! website, with a "lazer" tag
-- **Works on phones** — the table becomes one card per play, with nothing left out
+- **Works on phones** — each play becomes a compact card
 - **Visitor counter** — global site visit tracking
 
 ---

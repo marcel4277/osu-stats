@@ -26,18 +26,20 @@ body {
   background: #555;
 }
 
-/* Score row (a table row, or a card on narrow screens: li) with the map's cover behind it. The cover spans the left 60% of the
-   row and fades out to the right on an eased curve, so there is no visible
-   edge. (Rows are very wide and short, so stretching
-   it full width would show only a thin slice.)
+/* A play (a wide row, or a four-line card on narrow screens) with the map's
+   cover behind it. The cover spans the left 60% of the play and fades out to
+   the right on an eased curve, so there is no visible edge. (Rows are very
+   wide and short, so stretching it full width would show only a thin slice.)
    In-range rows show the cover in colour; rows outside the time filter show it
    in greyscale. On top is a dark overlay, --dim-top at the top of the row to
    --dim-bottom at the bottom.
-   Colour rows: 50% -> 75%, so the top of the cover stays brightest while the
-   text area is dark enough for WCAG AA (4.5:1) even over a pure-white cover. */
+   Colour plays: 60% -> 84%, so the top of the cover stays brightest while
+   every line of text is dark enough for WCAG AA (4.5:1) even over a
+   pure-white cover. (50% -> 75% was enough for the old one-line table rows;
+   the title and "by artist" sit higher in a play and measured 3.3:1.) */
 .score-row-cover {
-  --dim-top: 0.5;
-  --dim-bottom: 0.75;
+  --dim-top: 0.6;
+  --dim-bottom: 0.84;
   background-color: #111827;
   background-image:
     linear-gradient(to bottom, rgb(17 24 39 / var(--dim-top)), rgb(17 24 39 / var(--dim-bottom))),
@@ -55,38 +57,35 @@ body {
 }
 
 /* Keeping text readable on a cover: lighter secondary grey text and a solid
-   dark backing on badges / the accuracy chip / the lazer tag. */
+   dark backing on badges, the star rating and the lazer tag. */
 
 /* Colour (selected) rows: a soft drop shadow so the text lifts off the cover
    a little more, without looking heavy. */
-.score-row-cover:not(.score-row-cover-muted) > td,
-li.score-row-cover:not(.score-row-cover-muted) {
+.score-row-cover:not(.score-row-cover-muted) {
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.6), 0 0 4px rgb(0 0 0 / 0.3);
 }
 .score-row-cover .text-gray-400 {
   color: #e5e7eb; /* gray-200 */
 }
-/* Except the hit-count labels ("300", "100"...) on phone cards: lightened
-   to gray-200 they were almost as bright as their numbers. gray-300 keeps
-   them a step below and passes (5.9:1 over a pure-white cover; gray-400
-   measured 3.4:1 there). */
-li.score-row-cover .hit-label {
-  color: #d1d5db; /* gray-300 */
+/* The rank sits in the top-left corner, the brightest part of the cover:
+   gray-200 measured 4.2:1 there over a pure-white cover. */
+.score-row-cover .play-rank {
+  color: #f3f4f6; /* gray-100 */
 }
 
 /* Rows outside the time filter: text toned well down from white, and the
    coloured accents (pp, accuracy, mod badges, red miss counts) faded, so the
    selected (colour) rows stand out. */
-.scores-table .score-row-cover-muted .text-white {
+.plays-list .score-row-cover-muted .text-white {
   color: #858c98; /* between gray-400 and gray-500 */
 }
 
-.scores-table .score-row-cover-muted .text-gray-400 {
+.plays-list .score-row-cover-muted .text-gray-400 {
   color: #5b6270; /* between gray-500 and gray-600 */
 }
 
-.scores-table .score-row-cover-muted .chip-on-cover,
-.scores-table .score-row-cover-muted .hit-miss {
+.plays-list .score-row-cover-muted .chip-on-cover,
+.plays-list .score-row-cover-muted .hit-miss {
   opacity: 0.6;
 }
 
@@ -95,17 +94,10 @@ li.score-row-cover .hit-label {
   text-shadow: none;
 }
 
-/* Phone cards (li) are taller than table rows, so their title and artist sit
-   higher in the gradient, where it's lighter. A stronger gradient keeps them
-   at 4.5:1 over a pure-white cover. (Grey cards keep their own, darker one.) */
-li.score-row-cover:not(.score-row-cover-muted) {
-  --dim-top: 0.6;
-  --dim-bottom: 0.84;
-}
 
 /* Rows outside the time filter: the same cover in greyscale (luminosity blend
    onto the dark base colour), darker than the colour rows at every height
-   (70% -> 85% vs 50% -> 75%) so the selected rows stand out. */
+   (70% -> 85% vs 60% -> 84%) so the selected plays stand out. */
 .score-row-cover-muted {
   --dim-top: 0.7;
   --dim-bottom: 0.85;
@@ -114,15 +106,13 @@ li.score-row-cover:not(.score-row-cover-muted) {
 
 /* Rows inside an active time filter: a pink bar on the left edge, matching the
    selected filter chip */
-.score-row-active > td:first-child,
-li.score-row-active {
+.score-row-active {
   box-shadow: inset 3px 0 0 #ff6b9d;
 }
 
 /* Hover: an accent bar on the left instead of lightening the row, which
    would push text contrast below AA on bright covers. */
-.score-row-link:hover > td:first-child,
-li.score-row-link:hover {
+.score-row-link:hover {
   box-shadow: inset 3px 0 0 #b84ed6;
 }
 
